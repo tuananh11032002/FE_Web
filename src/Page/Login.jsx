@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Login } from '../Axios/web';
+import { login } from '../Axios/web';
 import ProductAddedMessage from '../Component/Body/ProductAddedMessage';
 import { useNavigate } from 'react-router-dom';
 import { useStateProvider } from '../StateProvider/StateProvider';
@@ -78,7 +78,7 @@ const LoginPage = () => {
    const [errol, setErrol] = useState('');
    const [username, setUsername] = useState('');
    const [password, setPassword] = useState('');
-   const [{}, dispatch] = useStateProvider();
+   const [{user}, dispatch] = useStateProvider();
    const navigate = useNavigate();
    const handleKeyPress = (e) => {
       if (e.key === 'Enter') {
@@ -88,11 +88,12 @@ const LoginPage = () => {
 
    const handleLogin = async (e) => {
       e.preventDefault();
-      const data = await Login({ password, username });
+      const data = await login({ password:password, username:username });
       if (data?.status) {
          setShowProductAdded(true);
          dispatch({ type: reducerCases.SET_USER, user: data.result });
-         localStorage.setItem('webbanbalo_user', JSON.stringify(data.result));
+         console.log("user",data.result);
+         localStorage.setItem('webbanbalo_user', JSON.stringify(data.result.token));
          setTimeout(() => {
             navigate('/');
          }, 1000);
