@@ -150,12 +150,7 @@ const END_POINT = {
    //get(id)
    export const getFile = (id) => {
      //require author
-     const token = JSON.parse(localStorage.getItem("webbanbalo_user")).token;
-     return axiosClient.get(`${END_POINT.FILE}/${id}`, {
-       headers: {
-         Authorization: token,
-       },
-     });
+     return axiosClient.get(`${END_POINT.FILE}/${id}`);
    };
  // end File
  
@@ -172,20 +167,10 @@ const END_POINT = {
      });
    };
    //update
-   export const updateOrder = (id,order) => {
+   export const updateOrder = (id,body) => {
      //require author
      const token = JSON.parse(localStorage.getItem("webbanbalo_user")).token;
-     return axiosClient.put(`${END_POINT.ORDER}/${id}`, order, {
-       headers: {
-         Authorization: token,
-       },
-     });
-   };
-   //work flow order
-   export const workFlowOrder = (order) => {
-     //require author
-     const token = JSON.parse(localStorage.getItem("webbanbalo_user")).token;
-     return axiosClient.put(`${END_POINT.ORDER}/wf`, order, {
+     return axiosClient.put(`${END_POINT.ORDER}/${id}`, body, {
        headers: {
          Authorization: token,
        },
@@ -211,6 +196,36 @@ const END_POINT = {
        },
      });
    };
+   //confirm order
+   export const confirmOrder = (id,body) => {
+      //require author
+      const token = JSON.parse(localStorage.getItem("webbanbalo_user")).token;
+      return axiosClient.put(`${END_POINT.ORDER}/cof/${id}`, body, {
+        headers: {
+          Authorization: token,
+        },
+      });
+   };
+   //finish order
+   export const finishOrder = (id) => {
+      //require author
+      const token = JSON.parse(localStorage.getItem("webbanbalo_user")).token;
+      return axiosClient.put(`${END_POINT.ORDER}/fin/${id}`, {
+        headers: {
+          Authorization: token,
+        },
+      });
+   };
+   //cancel order
+   export const cancelOrder = (id) => {
+      //require author
+      const token = JSON.parse(localStorage.getItem("webbanbalo_user")).token;
+      return axiosClient.put(`${END_POINT.ORDER}/can/${id}`, {
+        headers: {
+          Authorization: token,
+        },
+      });
+   }; 
    //get list
    export const getListOrder = (data) => {
      //require author
@@ -220,6 +235,16 @@ const END_POINT = {
          Authorization: token,
        },
      });
+   };
+   //get list by userId
+   export const getListOrderByUserId = (userId, body) => {
+      //require author
+      const token = JSON.parse(localStorage.getItem("webbanbalo_user")).token;
+      return axiosClient.post(`${END_POINT.ORDER}/list/${userId}`, body , {
+        headers: {
+          Authorization: token,
+        },
+      });
    };
    //get my list 
    export const getMyListOrder = (data) => {
@@ -350,16 +375,6 @@ const END_POINT = {
        },
      });
    };
-   //send verify code
-   export const sendVerifyCode = () => {// check by token
-     //require author
-     const token = JSON.parse(localStorage.getItem("webbanbalo_user")).token;
-     return axiosClient.get(`${END_POINT.USER}`, {
-       headers: {
-         Authorization: token,
-       },
-     });
-   };
    //login
    export const login = (data) => {
      return axiosClient.post(`${END_POINT.USER}/lg`, data );
@@ -374,8 +389,8 @@ const END_POINT = {
        },
      });
    };
-   //update avatar
-   export const addAvatar = (data) => {
+   //upload avatar
+   export const uploadAvatar = (data) => {
      //require author
      const token = JSON.parse(localStorage.getItem("webbanbalo_user")).token;
      return axiosClient.post(`${END_POINT.USER}/pro/pic`, data, {
@@ -385,20 +400,10 @@ const END_POINT = {
      } );
    };
    //get avatar
-   export const getAvatar = (file) => {
+   export const getAvatar = () => {
      //require author
      const token = JSON.parse(localStorage.getItem("webbanbalo_user")).token;    
-     return axiosClient.get(`${END_POINT.USER}/pro/pic`, file, {
-       headers: {
-         Authorization: token,
-       },
-     });
-   };
-   //validate account
-   export const validateCode = (validCode) => {
-     //require author
-     const token = JSON.parse(localStorage.getItem("webbanbalo_user")).token;
-     return axiosClient.put(`${END_POINT.USER}/${validCode}`, {
+     return axiosClient.get(`${END_POINT.USER}/pro/pic`, {
        headers: {
          Authorization: token,
        },
@@ -433,6 +438,16 @@ const END_POINT = {
          Authorization: token,
        },
      });
+   };
+   //get avatar by id
+   export const getAvatarById = (id) => {
+      //require author
+      const token = JSON.parse(localStorage.getItem("webbanbalo_user")).token;    
+      return axiosClient.get(`${END_POINT.USER}/pro/pic/${id}`, {
+        headers: {
+          Authorization: token,
+        },
+      });
    };
  
  // end User
