@@ -19,7 +19,6 @@ import ProfileAccount from './Page/ProfileAccount';
 import AddressAccount from './Page/AddressAccount';
 import OrderAccount from './Page/OrderAccount';
 import * as signalR from '@microsoft/signalr';
-import checkAndRenewToken from './Token/token';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import ProductListPage from './AdminPage/Page/ProductListPage';
 import ChatPage from './AdminPage/Page/ChatPage';
@@ -42,7 +41,6 @@ import PermissionDenied from './Component/Body/PermissionDenied ';
 function App() {
    const [isUserReady, setIsUserReady] = useState(false);
    const [{ user }, dispatch] = useStateProvider();
-
    const UserRoute = (props) => {
       console.log('props', props);
       if (user) {
@@ -59,44 +57,34 @@ function App() {
          <PermissionDenied />
       );
 
-   const fetchData = async () => {
-      const userLocal = JSON.parse(localStorage.getItem('webbanbalo_user'));
-      if (userLocal) {
-         const token = JSON.parse(
-            localStorage.getItem('webbanbalo_user')
-         ).token;
-         const renewToken = await checkAndRenewToken(token);
-         console.log(renewToken, ' renewToken');
-         if (
-            JSON.stringify(userLocal) !== JSON.stringify(user) &&
-            JSON.stringify(userLocal) !== null
-         ) {
-            dispatch({
-               type: reducerCases.SET_USER,
-               user: userLocal,
-            });
-         }
-      }
-      setIsUserReady(true);
-   };
+   // const fetchData = async () => {
+   //    const userLocal = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   //    if (userLocal) {
+   //       const token = JSON.parse(
+   //          localStorage.getItem('webbanbalo_user')
+   //       ).token;
+   //       if (
+   //          JSON.stringify(userLocal) !== JSON.stringify(user) &&
+   //          JSON.stringify(userLocal) !== null
+   //       ) {
+   //          dispatch({
+   //             type: reducerCases.SET_USER,
+   //             user: userLocal,
+   //          });
+   //       }
+   //    }
+   //    setIsUserReady(true);
+   // };
    useEffect(() => {
-      fetchData();
+      //fetchData();
+      setIsUserReady(true);
    }, [user]);
    useEffect(() => {
       let connectionHub;
       const connectToSignalRHub = async () => {
          try {
             connectionHub = new signalR.HubConnectionBuilder()
-               .withUrl('https://localhost:44301/messageHub', {
-                  accessTokenFactory: async () => {
-                     await checkAndRenewToken();
-                     const token = JSON.parse(
-                        localStorage.getItem('webbanbalo_user')
-                     ).token.accessToken;
-                     return token;
-                  },
-               })
-               .withAutomaticReconnect()
+               .withUrl('http://backend.misaproject.click/hub')
                .build();
             connectionHub.on('ReceiveLogout', () => {
                localStorage.setItem('webbanbalo_user', null);
@@ -111,7 +99,7 @@ function App() {
                });
             });
 
-            await connectionHub.start();
+            //await connectionHub.start();
 
             dispatch({
                connection: connectionHub,

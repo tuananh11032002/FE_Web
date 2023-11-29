@@ -72,13 +72,13 @@ const P = styled.p`
    }
 `;
 const LoginPage = () => {
-   var temp = null;
-   localStorage.setItem('myTempValue', JSON.stringify(temp));
-   const result = localStorage.getItem('myTempValue');
+   // var temp = null;
+   // localStorage.setItem('myTempValue', JSON.stringify(temp));
+   // const result = localStorage.getItem('myTempValue');
    const [errol, setErrol] = useState('');
    const [username, setUsername] = useState('');
    const [password, setPassword] = useState('');
-   const [{user}, dispatch] = useStateProvider();
+   const [{}, dispatch] = useStateProvider();
    const navigate = useNavigate();
    const handleKeyPress = (e) => {
       if (e.key === 'Enter') {
@@ -88,12 +88,17 @@ const LoginPage = () => {
 
    const handleLogin = async (e) => {
       e.preventDefault();
-      const data = await login({ password:password, username:username });
+      const data = await login({ password: password, username: username });
       if (data?.status) {
          setShowProductAdded(true);
-         dispatch({ type: reducerCases.SET_USER, user: data.result });
-         console.log("user",data.result);
-         localStorage.setItem('webbanbalo_user', JSON.stringify(data.result.token));
+         dispatch({
+            type: reducerCases.SET_USER,
+            user: data.result.user,
+         });
+         localStorage.setItem(
+            'webbanbalo_user',
+            JSON.stringify(data.result.token)
+         );
          setTimeout(() => {
             navigate('/');
          }, 1000);

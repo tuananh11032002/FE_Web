@@ -148,7 +148,7 @@ export const AddProduct = () => {
    };
    useEffect(() => {
       const fetchCategory = async () => {
-         console.log(category.length);
+         //console.log(category.length);
          const categoryTemp = await getCategoryApi();
          setSelectedCategory(category[1]?.id);
 

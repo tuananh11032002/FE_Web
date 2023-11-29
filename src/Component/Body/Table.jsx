@@ -77,7 +77,7 @@ const Table = () => {
             }
          } else if (count[index].quantity == 0) {
             if (user) {
-               await DeleteData(element, user.token.accessToken);
+               await DeleteData(element, user.token);
                fetchCart();
             } else {
                navigate('/');

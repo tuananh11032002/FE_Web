@@ -1,53 +1,51 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { styled } from 'styled-components';
 import { useStateProvider } from '../../StateProvider/StateProvider';
-import { getUserWithId, updateUserInfo } from '../../Axios/web';
+import {
+   uploadAvatar,
+   getProfileByToken,
+   updateUserInfo,
+} from '../../Axios/web';
 import processApiImagePath from '../../Helper/EditLinkImage';
 import { validateEmail, validatePhone } from '../../Helper/CheckInput';
 import { ToastContainer, toast } from 'react-toastify';
 import { VscLoading } from 'react-icons/vsc';
+import { reducerCases } from '../../StateProvider/reducer';
+import { now } from 'lodash';
 
 const Profile = () => {
    const [email, setEmail] = useState('ttuananh372@gmail.com');
    const [phone, setPhone] = useState('039345679');
    const [userName, setUserName] = useState('');
    const [hoTen, setHoTen] = useState('');
-
    const [selectedImage, setSelectedImage] = useState();
 
    //To show
    const [image, setImage] = useState();
    const [selectedGender, setselectedGender] = useState();
-   const [{ user }] = useStateProvider();
+   const [{ user }, dispatch] = useStateProvider();
    const [userInfor, setUserInfor] = useState({});
    const [loading, setLoading] = useState(false);
    const fetchUser = async () => {
-      const userId = JSON.parse(localStorage.getItem('webbanbalo_user')).userId;
-      const userTemp = await getUserWithId(userId);
+      const userId = user.id;
+      console.log('userid : ', userId);
+      const userTemp = await getProfileByToken();
 
       console.log('userTemp', userTemp);
       if (userTemp?.status === true) {
          setUserInfor(userTemp.result);
-         setHoTen(userTemp.result.hoTen);
-         setEmail(userTemp.result.email);
-         setPhone(userTemp.result.phone || '');
+         setHoTen(userTemp.result.name);
+         setEmail(userTemp.result.username);
+         setPhone(userTemp.result.contact || '');
          setUserName(userTemp.result.userName);
          setselectedGender(userTemp.result.gender || '');
-         setImage(userTemp.result.image);
+         setImage(await userTemp.result.image);
       }
-      const dataStorage = JSON.parse(localStorage.getItem('webbanbalo_user'));
-      if (
-         JSON.stringify(dataStorage.image) !==
-         JSON.stringify(userTemp.result.image)
-      ) {
-         const newDataStorage = {
-            ...dataStorage,
-            image: userTemp.result.image,
-         };
-         localStorage.setItem(
-            'webbanbalo_user',
-            JSON.stringify(newDataStorage)
-         );
+      if (userTemp.result.user !== user) {
+         dispatch({
+            type: reducerCases.SET_USER,
+            user: userTemp,
+         });
       }
    };
    useEffect(() => {
@@ -60,17 +58,14 @@ const Profile = () => {
       try {
          setLoading(true);
          const response = await updateUserInfo({
-            phone,
-            email,
-            hoTen,
+            name: hoTen,
+            userName: userName,
+            contact: phone,
             gender: selectedGender,
-            phone,
-            image: selectedImage,
-            id: userInfor.id,
          });
          setLoading(false);
-         if (response?.status === true) {
-            toast.info(`Thay dổi thông tin thành công`, {
+         if (response?.status) {
+            toast.info(`Thay đổi thông tin thành công`, {
                position: toast.POSITION.TOP_CENTER,
                autoClose: 1000,
             });
@@ -81,23 +76,22 @@ const Profile = () => {
                autoClose: 3000,
             });
          }
-         console.log('API response:', response);
+         console.log('API response:', response.data);
       } catch (error) {
          console.error('API error:', error);
       }
    };
 
    const handleChangeEmail = (e) => {
-      const inputEmail = e.target.value;
-      setEmail(inputEmail);
-      const isValidEmail = validateEmail(inputEmail);
+      setEmail(e.target.value);
+      return validateEmail(e.target.value);
    };
    const handleBrowseImageClick = () => {
       if (imageInputRef.current) {
          imageInputRef.current.click();
       }
    };
-   const handleImageChange = (event) => {
+   const handleImageChange = async (event) => {
       const file = event.target.files[0];
       setSelectedImage(file);
       setImage(URL.createObjectURL(file));
@@ -105,8 +99,8 @@ const Profile = () => {
    const imageInputRef = useRef();
 
    const handlePhoneNumberChange = (e) => {
-      const inputPhoneNumber = e.target.value;
-      setPhone(inputPhoneNumber);
+      setPhone(e.target.value);
+      return validatePhone(e.target.value);
    };
    return (
       <Container>
@@ -132,7 +126,7 @@ const Profile = () => {
          </div>
          <div className="content">
             <div className="user-info">
-               <div className="user-info-item">
+               {/* <div className="user-info-item">
                   <label htmlFor="username">Tên đăng nhập</label>
                   <input
                      id="username"
@@ -141,7 +135,7 @@ const Profile = () => {
                      onChange={(e) => setUserName(e.target.value)}
                      readOnly
                   />
-               </div>
+               </div> */}
                <div className="user-info-item">
                   <label htmlFor="fullname">Họ và tên</label>
                   <input
@@ -152,7 +146,7 @@ const Profile = () => {
                   />
                </div>
                <div className="user-info-item">
-                  <label htmlFor="email">Email</label>
+                  <label htmlFor="email">Tên đăng nhập</label>
                   <input
                      className="full-width-input"
                      type="text"
@@ -206,7 +200,7 @@ const Profile = () => {
                      handleBrowseImageClick();
                   }}
                >
-                  Chọn ảnh
+                  Thay đổi ảnh đại diện
                </div>
                <input
                   type="file"

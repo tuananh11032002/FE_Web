@@ -1,19 +1,18 @@
-import { RenewToken } from '../Axios/web';
-
-const checkAndRenewToken = async () => {
+const checkAndRenewToken = async (response) => {
    try {
-      const response = await RenewToken(
-         JSON.parse(localStorage.getItem('webbanbalo_user')).token
-      );
-
-      console.log('response token', response);
       if (response?.status) {
          if (response.result.success) {
-            const userTemp = JSON.parse(
-               localStorage.getItem('webbanbalo_user')
+            const UserFromLogin = JSON.parse(
+               localStorage.getItem('webbanbalo_user').user
             );
-            const userTemp1 = { ...userTemp, token: response.result.token };
-            localStorage.setItem('webbanbalo_user', JSON.stringify(userTemp1));
+            // const UserWithResetToken = {
+            //    token: response.result.resetToken,
+            //    user: UserFromLogin,
+            // };
+            localStorage.setItem(
+               'webbanbalo_user',
+               JSON.stringify(response.result.resetToken)
+            );
          }
       } else {
          console.log('error');

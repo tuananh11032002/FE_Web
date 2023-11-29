@@ -20,7 +20,6 @@ const Product = () => {
          window.scrollTo(0, 200);
          if (!category) {
             const categoryApi = await getCategoryApi();
-
             dispatch({
                type: reducerCases.SET_CATEGORY,
                category: categoryApi.result,
@@ -46,7 +45,6 @@ const Product = () => {
             if (dataProduct.result !== product) {
                dispatch({
                   type: reducerCases.SET_PRODUCT,
-
                   product: dataProduct.result,
                });
             }
