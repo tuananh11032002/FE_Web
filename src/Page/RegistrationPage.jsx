@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { AiOutlineEyeInvisible } from 'react-icons/ai';
 import { BiShow } from 'react-icons/bi';
 import styled from 'styled-components';
-import { Register } from '../Axios/web';
+import { register } from '../Axios/web';
 import { useNavigate } from 'react-router-dom';
 import { uniqueId } from 'lodash';
 import { ToastContainer, toast } from 'react-toastify';
@@ -95,7 +95,7 @@ function RegistrationPage() {
       }
       console.log(errolTemp);
       if (errolTemp.length === 0) {
-         const response = await Register({ userName, password });
+         const response = await register({ userName:userName, password:password });
          if (response?.status === true) {
             navigate('/login');
          } else {

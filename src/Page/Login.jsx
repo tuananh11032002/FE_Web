@@ -78,7 +78,7 @@ const LoginPage = () => {
    const [errol, setErrol] = useState('');
    const [username, setUsername] = useState('');
    const [password, setPassword] = useState('');
-   const [{}, dispatch] = useStateProvider();
+   const [{user}, dispatch] = useStateProvider();
    const navigate = useNavigate();
    const handleKeyPress = (e) => {
       if (e.key === 'Enter') {
@@ -89,6 +89,7 @@ const LoginPage = () => {
    const handleLogin = async (e) => {
       e.preventDefault();
       const data = await login({ password: password, username: username });
+      console.log("user", data);
       if (data?.status) {
          setShowProductAdded(true);
          dispatch({
@@ -97,7 +98,7 @@ const LoginPage = () => {
          });
          localStorage.setItem(
             'webbanbalo_user',
-            JSON.stringify(data.result.token)
+            JSON.stringify(data.result)
          );
          setTimeout(() => {
             navigate('/');

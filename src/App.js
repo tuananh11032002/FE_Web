@@ -57,26 +57,26 @@ function App() {
          <PermissionDenied />
       );
 
-   // const fetchData = async () => {
-   //    const userLocal = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   //    if (userLocal) {
-   //       const token = JSON.parse(
-   //          localStorage.getItem('webbanbalo_user')
-   //       ).token;
-   //       if (
-   //          JSON.stringify(userLocal) !== JSON.stringify(user) &&
-   //          JSON.stringify(userLocal) !== null
-   //       ) {
-   //          dispatch({
-   //             type: reducerCases.SET_USER,
-   //             user: userLocal,
-   //          });
-   //       }
-   //    }
-   //    setIsUserReady(true);
-   // };
+   const fetchData = async () => {
+      const userLocal = JSON.parse(localStorage.getItem('webbanbalo_user'));
+      if (userLocal) {
+         const token = JSON.parse(
+            localStorage.getItem('webbanbalo_user')
+         ).token;
+         if (
+            JSON.stringify(userLocal) !== JSON.stringify(user) &&
+            JSON.stringify(userLocal) !== null
+         ) {
+            dispatch({
+               type: reducerCases.SET_USER,
+               user: userLocal,
+            });
+         }
+      }
+      setIsUserReady(true);
+   };
    useEffect(() => {
-      //fetchData();
+      fetchData();
       setIsUserReady(true);
    }, [user]);
    useEffect(() => {

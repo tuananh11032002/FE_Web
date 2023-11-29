@@ -13,7 +13,7 @@ import { useStateProvider } from '../StateProvider/StateProvider';
 import { Link, useNavigate } from 'react-router-dom';
 import { reducerCases } from '../StateProvider/reducer';
 import { BsSearch } from 'react-icons/bs';
-import { DeleteProductIntoOrder, GetOrder, getProductApi } from '../Axios/web';
+import { DeleteProductIntoOrder, GetOrder, getListProduct } from '../Axios/web';
 import _ from 'lodash';
 import SearchMini from './Header/SearchMini';
 import Notification from './Body/Notification';
@@ -36,7 +36,7 @@ const Header = () => {
    const containerRef = useRef(null);
    const [heightContainer, setHeightContainer] = useState(0);
    const [isWindow, setIsWindow] = useState(window.innerWidth > 756);
-   //console.log('header');
+   console.log('header');
    //get user
    const handlerClick = () => {
       setShowCart(!showCart);
@@ -73,17 +73,10 @@ const Header = () => {
 
    const debouncedHandlerChange = _.debounce(async (keyword) => {
       if (keyword !== undefined && keyword !== '') {
-         const data = await getProductApi(
-            keyword,
-            null,
-            null,
-            null,
-            null,
-            1,
-            20
+         const data = await getListProduct(
+            {index: 5, page: 1, search: keyword}
          );
-
-         if (data?.status) setProductSearch(data.result?.product);
+         if (data?.status) setProductSearch(data.result?.productList);
       } else {
          setProductSearch([]);
       }
@@ -238,12 +231,12 @@ const Header = () => {
                            >
                               <img
                                  src={
-                                    processApiImagePath(user?.image) ||
+                                    processApiImagePath(user.user?.image) ||
                                     require('../Assets/Image/nologin.jpg')
                                  }
                                  alt=""
                               />
-                              <div>{user?.name}</div>
+                              <div>{user.user?.name}</div>
                               {showAccount && (
                                  <div className="account-child">
                                     <div
@@ -253,7 +246,7 @@ const Header = () => {
                                     >
                                        Thông tin cá nhân
                                     </div>
-                                    {user.role === 'Admin' ? (
+                                    {user.user.role === 'Admin' ? (
                                        <div
                                           onClick={() => {
                                              navigate('/admin');

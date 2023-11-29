@@ -13,6 +13,7 @@ const SearchMini = ({ dataProduct, setProductSearch, inputRef }) => {
 
   return (
     <Container>
+      {console.log("search",dataProduct)}
       {dataProduct?.map((data, index) => {
         return (
           <li
@@ -21,10 +22,10 @@ const SearchMini = ({ dataProduct, setProductSearch, inputRef }) => {
               handlerClick(data, inputRef, setProductSearch);
             }}
           >
-            <img src={processApiImagePath(data.image[0])} alt={data.name} />
+            <img src={processApiImagePath(data.mainFile)} alt={data.name} />
             <div>
               <div>{data.name}</div>
-              <div style={{ color: "red" }}>{data.price.toLocaleString()}đ</div>
+              <div style={{ color: "red" }}>{data.unitPrice.toLocaleString()}đ</div>
             </div>
           </li>
         );

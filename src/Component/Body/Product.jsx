@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useStateProvider } from '../../StateProvider/StateProvider';
-import { getProductApiWithNameCategory, getCategoryApi } from '../../Axios/web';
+import { getProductApiWithNameCategory, getCategoryApi, getListCategory, getListProduct } from '../../Axios/web';
 import { reducerCases } from '../../StateProvider/reducer';
 import { styled } from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -12,7 +12,7 @@ const Product = () => {
    const params = useParams();
    const { id } = params;
    const [{ product, category }, dispatch] = useStateProvider();
-
+   const [data, setData] = useState([]);
    const navigate = useNavigate();
    const [isValue, setIsValue] = useState(1);
    const fetchData = async () => {
@@ -40,15 +40,23 @@ const Product = () => {
             });
          }
       } else {
-         const dataProduct = await getProductApiWithNameCategory();
-         if (dataProduct?.status) {
-            if (dataProduct.result !== product) {
-               dispatch({
-                  type: reducerCases.SET_PRODUCT,
-                  product: dataProduct.result,
-               });
-            }
-         }
+         const res = await getListCategory({ index: 4, page: 1 });
+         let data1 = [];
+         data1 = await Promise.all(res.result.productCategory?.map(async (item)=>{
+            const d = {id: item.id, name: item.name};
+            const resP = await getListProduct({ index: 8, page: 1, category: item.id });
+            d.products = resP.result.productList;
+            return d;
+         }));       
+         dispatch({
+            type: reducerCases.SET_CATEGORY,
+            category: res.result.productCategory,
+         });
+         setData(data1);
+         dispatch({
+            type: reducerCases.SET_PRODUCT,
+            product: data1,
+         });  
       }
    };
    useEffect(() => {
@@ -65,6 +73,7 @@ const Product = () => {
 
    return (
       <Container>
+         {console.log("p",product)}
          {product?.map((product, index) => (
             <div key={index}>
                <div
@@ -116,8 +125,8 @@ const Product = () => {
                            <div className="product-element_image">
                               <img
                                  src={
-                                    p.image?.length > 0
-                                       ? processApiImagePath(p.image[0])
+                                    p.mainFile?.length > 0
+                                       ? processApiImagePath(p.mainFile)
                                        : null
                                  }
                                  alt=""
@@ -125,19 +134,19 @@ const Product = () => {
                            </div>
                            <div>{p.name}</div>
                            <RatingStars
-                              rating={p.ratingPoint}
+                              rating={p.rating}
                               totalRating={p.totalRating}
                            />
                            <div style={{ fontWeight: 'bold' }}>
-                              {p.priceNow.toLocaleString()}đ
+                              {p.unitPrice.toLocaleString()}đ
                            </div>
 
-                           {p.soLuong === 0 ? (
+                           {p.totalItem === 0 ? (
                               <span className="stock-label">Hết</span>
                            ) : null}
-                           {p.soLuong !== 0 ? (
+                           {p.totalItem !== 0 ? (
                               <div className="percent-discount">
-                                 -{processPrice(p.price, p.discount)}%
+                                 -{processPrice(p.unitPrice, p.discount)}%
                               </div>
                            ) : null}
                         </li>

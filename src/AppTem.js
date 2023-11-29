@@ -4,8 +4,8 @@ import { RenewToken } from './Axios/web';
 const AppTem = () => {
    const [data, setData] = useState();
    const renewToken = async () => {
-      setData(response);
-      console.log('token AppTem ', response);
+      // setData(response);
+      // console.log('token AppTem ', response);
    };
    return (
       <div>
