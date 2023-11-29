@@ -236,7 +236,7 @@ const Header = () => {
                                  }
                                  alt=""
                               />
-                              <div>{user.user?.name}</div>
+                              <div>{user.user.name?user.user.name:user.user.userName}</div>
                               {showAccount && (
                                  <div className="account-child">
                                     <div

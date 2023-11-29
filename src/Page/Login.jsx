@@ -94,7 +94,7 @@ const LoginPage = () => {
          setShowProductAdded(true);
          dispatch({
             type: reducerCases.SET_USER,
-            user: data.result.user,
+            user: data.result,
          });
          localStorage.setItem(
             'webbanbalo_user',

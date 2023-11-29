@@ -6,7 +6,7 @@ import { styled } from 'styled-components';
 import {
    AddProductIntoOrder,
    GetOrder,
-   getProductApiById,
+   getProductApiById, getProduct,getListComment,
 } from '../../Axios/web';
 import { VscLoading } from 'react-icons/vsc';
 
@@ -88,13 +88,15 @@ const ProductDetail = () => {
    };
    useEffect(() => {
       const fetchData = async () => {
-         const dataDetail = await getProductApiById(params.productId);
-         console.log('dataDetail', dataDetail);
+         const dataDetail = await getProduct(params.productId);
          if (dataDetail?.status) {
             if (productdetail !== dataDetail.result) {
+               let dataP =dataDetail.result.product;
+               const dataComment = await getListComment({index:5,page:1,productId:dataP.id});
+               dataP.reviews = dataComment.result.commentList;
                dispatch({
                   type: reducerCases.SET_PRODUCTDETAIL,
-                  productdetail: dataDetail.result,
+                  productdetail: dataP,
                });
             }
          }
@@ -131,7 +133,7 @@ const ProductDetail = () => {
             <div className="body">
                <div className="productdetail__image">
                   <img
-                     src={processApiImagePath(productdetail?.image[0]) || null}
+                     src={processApiImagePath(productdetail?.files[0]) || null}
                   />
                </div>
                <div className="productdetail__infor">
@@ -144,15 +146,23 @@ const ProductDetail = () => {
                      {productdetail?.name}
                   </div>
                   <div className="price-container">
-                     <div className="price">
-                        {productdetail?.priceNow.toLocaleString() || 0}đ
-                     </div>
-                     <div className="original-price">
-                        {productdetail?.price.toLocaleString() || 0}đ{' '}
-                     </div>
+                     {productdetail?.discount===0?
+                        <div className="price">
+                           {productdetail?.unitPrice.toLocaleString() || 0}đ
+                        </div>
+                     :  
+                        <div>
+                           <div className="price">
+                              {(productdetail?.unitPrice-productdetail?.discount).toLocaleString() || 0}đ
+                           </div>
+                           <div className="original-price">
+                              {productdetail?.unitPrice.toLocaleString() || 0}đ{' '}
+                           </div>
+                        </div>
+                     }
                      <div className="rating">
                         <RatingStars
-                           rating={productdetail?.ratingPoint || 0}
+                           rating={productdetail?.rating || 0}
                            totalRating={productdetail?.totalRating || 0}
                         />
                      </div>
@@ -166,7 +176,7 @@ const ProductDetail = () => {
                   </div>
                   <br />
                   <div>
-                     {productdetail?.description || null}
+                     {productdetail?.decription || null}
                      THÔNG TIN SẢN PHẨM: Chất liệu: Vải Polyester Canvas cao cấp
                      trượt nước Kích thước: 42cm x 32cm x 16cm Bao gồm 12 ngăn:
                      1 ngăn chống sốc, 3 ngăn lớn, 5 ngăn phụ, 2 ngăn bên hong,
@@ -190,8 +200,8 @@ const ProductDetail = () => {
                               type="number"
                               onChange={(e) => {
                                  setCount(
-                                    e.target.value > productdetail?.soLuong
-                                       ? productdetail?.soLuong
+                                    e.target.value > productdetail?.totalItem
+                                       ? productdetail?.totalItem
                                        : e.target.value
                                  );
                               }}
@@ -201,8 +211,8 @@ const ProductDetail = () => {
                            className="add"
                            onClick={() =>
                               setCount(
-                                 count + 1 > productdetail?.soLuong
-                                    ? productdetail?.soLuong
+                                 count + 1 > productdetail?.totalItem
+                                    ? productdetail?.totalItem
                                     : count + 1
                               )
                            }
@@ -212,12 +222,12 @@ const ProductDetail = () => {
                      </div>
 
                      <div className="quantity-label">
-                        {productdetail?.soLuong} sản phẩm có sẵn
+                        {productdetail?.totalItem} sản phẩm có sẵn
                      </div>
                   </div>
 
                   <div className="button-parent">
-                     {productdetail?.soLuong !== 0 ? (
+                     {productdetail?.totalItem !== 0 ? (
                         <>
                            <div
                               className="button"

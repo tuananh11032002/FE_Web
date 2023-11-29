@@ -73,7 +73,6 @@ const Product = () => {
 
    return (
       <Container>
-         {console.log("p",product)}
          {product?.map((product, index) => (
             <div key={index}>
                <div
