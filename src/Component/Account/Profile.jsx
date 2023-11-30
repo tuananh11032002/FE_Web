@@ -48,9 +48,6 @@ const Profile = () => {
             setUserName(user.userName || '');
             setName(user.name || '');
             setselectedGender(user.gender || true);
-
-            const res = await getAvatarByToken();
-            setImage(res?.status ? res?.result : '');
          }
       };
       temp();
@@ -58,12 +55,14 @@ const Profile = () => {
    const handleSaveChange = async () => {
       try {
          setLoading(true);
-         const response = await updateUserInfo({
-            name: Name,
-            userName: userName,
-            contact: phone,
-            gender: selectedGender,
-         });
+         const response = await updateUserInfo(
+            JSON.stringify({
+               name: Name,
+               userName: userName,
+               contact: phone,
+               gender: selectedGender,
+            })
+         );
          setLoading(false);
          if (response?.status) {
             toast.info(`Thay đổi thông tin thành công`, {
@@ -183,17 +182,18 @@ const Profile = () => {
                      onChange={(e) => setselectedGender(e.target.value)}
                   >
                      <option value="">Chọn giới tính </option>
-                     <option value="Male">Nam </option>
-                     <option value="Female">Nữ </option>
+                     <option value="true">Nam </option>
+                     <option value="false">Nữ </option>
                   </select>
                </div>
             </div>
 
             <div className="update-image">
                <div className="image">
-                  {image ? (
-                     <img src={processApiImagePath(image)} alt="Selected" />
-                  ) : null}
+                  <img
+                     src={`http://backend.misaproject.click/api/user/pro/pic/${user.id}`}
+                     alt="Selected"
+                  />
                </div>
                <div
                   className="button"

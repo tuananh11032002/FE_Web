@@ -435,7 +435,7 @@ export const deleteAccount = (id) => {
 //get account by token
 export const getProfileByToken = async () => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const token = localStorage.getItem('webbanbalo_user');
    console.log('token: ', token);
    const res = await axiosClient.get(`${END_POINT.USER}/pro`, {
       headers: {
@@ -460,7 +460,7 @@ export const getAvatarByToken = () => {
    //require author
    return axiosClient.get(`${END_POINT.USER}/pro/pic`, {
       headers: {
-         Authorization: JSON.parse(localStorage.getItem('webbanbalo_user')),
+         Authorization: localStorage.getItem('webbanbalo_user'),
       },
    });
 };
@@ -808,7 +808,7 @@ export const getUserWithId = (userId) => {
 export const updateUserInfo = async (infor) => {
    const res = await axiosClient.put(`${END_POINT.USER}`, infor, {
       headers: {
-         'Content-Type': 'multipart/form-data',
+         'Content-Type': 'application/json',
          Authorization: JSON.parse(localStorage.getItem('webbanbalo_user')),
       },
    });
