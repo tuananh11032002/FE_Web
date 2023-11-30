@@ -13,7 +13,7 @@ import { useStateProvider } from '../StateProvider/StateProvider';
 import { Link, useNavigate } from 'react-router-dom';
 import { reducerCases } from '../StateProvider/reducer';
 import { BsSearch } from 'react-icons/bs';
-import { DeleteProductIntoOrder, GetOrder, getProductApi } from '../Axios/web';
+import { DeleteProductIntoOrder, getOrder, getProductApi } from '../Axios/web';
 import _ from 'lodash';
 import SearchMini from './Header/SearchMini';
 import Notification from './Body/Notification';
@@ -47,11 +47,11 @@ const Header = () => {
    const mouseOver = () => {
       setIsNotification(true);
    };
-   const handleLogout = () => {
+   const handleLogout = async () => {
       dispatch({ type: reducerCases.SET_USER, user: null });
       dispatch({ type: reducerCases.SET_CART, cart: null });
-
-      localStorage.setItem('webbanbalo_user', 'null');
+      console.log('resetToken', '');
+      await localStorage.setItem('webbanbalo_user', '');
       navigate('/');
    };
    const handleAccountMouseOver = () => {
@@ -72,7 +72,7 @@ const Header = () => {
    };
 
    const debouncedHandlerChange = _.debounce(async (keyword) => {
-      if (keyword !== undefined && keyword !== '') {
+      if (keyword != undefined && keyword != '') {
          const data = await getProductApi(
             keyword,
             null,
@@ -111,24 +111,27 @@ const Header = () => {
       };
    }, []);
 
-   useEffect(() => {
-      const fetchCart = async () => {
-         if (user) {
-            const orderAPi = await GetOrder();
-            console.log(orderAPi?.result, 'result');
-            if (orderAPi?.status === true) {
-               if (JSON.stringify(orderAPi.result) !== JSON.stringify(cart)) {
-                  dispatch({
-                     type: reducerCases.SET_CART,
-                     cart: orderAPi.result,
-                  });
-               }
+   const fetchCart = async () => {
+      if (user) {
+         const orderAPi = await getOrder(user.newOrderId);
+         //console.log(orderAPi?.result, 'result');
+         if (orderAPi?.status === true) {
+            if (
+               JSON.stringify(orderAPi.result.data.order.detail) !==
+               JSON.stringify(cart)
+            ) {
+               dispatch({
+                  type: reducerCases.SET_CART,
+                  cart: orderAPi.result.data.order.detail,
+               });
             }
-         } else {
          }
-      };
+      } else {
+      }
+   };
+
+   useEffect(() => {
       fetchCart();
-      //console.log('fetchCart');
    }, [cart]);
 
    useEffect(() => {

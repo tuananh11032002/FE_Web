@@ -5,7 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 import {
    AddProductIntoOrder,
-   GetOrder,
+   getOrder,
    getProductApiById,
 } from '../../Axios/web';
 import { VscLoading } from 'react-icons/vsc';
@@ -53,13 +53,12 @@ const ProductDetail = () => {
                Quantity: count,
             });
          }
-
-         const dataApi = await GetOrder();
+         const dataApi = await getOrder(user.newOrderId);
          if (dataApi.status) {
             if (JSON.stringify(dataApi.result) !== JSON.stringify(cart)) {
                dispatch({
                   type: reducerCases.SET_CART,
-                  cart: dataApi.result,
+                  cart: dataApi.result.data.order.detail,
                });
             }
          }

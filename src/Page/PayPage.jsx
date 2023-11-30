@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { styled } from 'styled-components';
 import { useStateProvider } from '../StateProvider/StateProvider';
 import { reducerCases } from '../StateProvider/reducer';
-import { GetOrder, getCoupon } from '../Axios/web';
+import { getOrder, getCoupon } from '../Axios/web';
 import { Link, useNavigate } from 'react-router-dom';
 import processApiImagePath from '../Helper/EditLinkImage';
 import PaymentInfo from './PaymentInfo';
@@ -111,7 +111,7 @@ const PayPage = () => {
    useEffect(() => {
       const fetchCart = async () => {
          if (user) {
-            const orderAPi = await GetOrder();
+            const orderAPi = await getOrder(user.newOrderId);
             if (orderAPi?.status) {
                console.log(orderAPi.result);
                setOrder(orderAPi.result);
@@ -122,7 +122,7 @@ const PayPage = () => {
                ) {
                   dispatch({
                      type: reducerCases.SET_CART,
-                     cart: orderAPi.result,
+                     cart: orderAPi.result.data.order.detail,
                   });
                }
             }
@@ -158,12 +158,12 @@ const PayPage = () => {
          console.error('Lỗi phân tích cú pháp JSON:', error);
       }
    }, []);
-   useEffect(() => {
-      localStorage.setItem(
-         'webbanbalo-shippingInfor',
-         JSON.stringify(customerInfor)
-      );
-   }, [customerInfor]);
+   // useEffect(() => {
+   //    await localStorage.setItem(
+   //       'webbanbalo-shippingInfor',
+   //       JSON.stringify(customerInfor)
+   //    );
+   // }, [customerInfor]);
    return (
       <Container>
          <ToastContainer />
