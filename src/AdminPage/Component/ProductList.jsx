@@ -15,77 +15,18 @@ import Pagination from './Pagination';
 import { useNavigate } from 'react-router-dom';
 import { AdminContext } from '../Admin';
 import {
-   ChangeStockApi,
    deleteProductApi,
    getCategoryApi,
    getProductApi,
-   getSalesRevenue,
+   getSalesRevenue, getListCategory, getListProduct,
 } from '../../Axios/web';
 import processApiImagePath from '../../Helper/EditLinkImage';
 
 const ProductList = () => {
    const { closeMenu } = useContext(AdminContext);
 
-   const [data, setData] = useState([
-      {
-         title: 'Air Jordan is a line of basketball shoes produced by Nike',
-         name: 'xxxx',
-         image: [
-            'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/ecommerce-images/product-9.png',
-         ],
-         categoryName: 'Shoes',
-         price: '$125',
-         soluong: 110,
-         stock: true,
-         status: 'publish',
-         action: 'none',
-      },
-      {
-         title: 'Air Jordan is a line of basketball shoes produced by Nike',
-
-         name: 'xxxx',
-         image: [
-            'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/ecommerce-images/product-9.png',
-         ],
-         categoryName: 'Shoes',
-         price: '$125',
-         soluong: 110,
-         stock: true,
-         status: 'publish',
-         action: 'none',
-      },
-      {
-         title: 'Air Jordan is a line of basketball shoes produced by Nike',
-
-         name: 'xxxx',
-         image: [
-            'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/ecommerce-images/product-9.png',
-         ],
-         categoryName: 'Shoes',
-         price: '$125',
-         soluong: 110,
-         stock: true,
-         status: 'Scheduled',
-         action: 'none',
-      },
-      {
-         title: 'Air Jordan is a line of basketball shoes produced by Nike',
-
-         name: 'xxxx',
-         image: [
-            'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/ecommerce-images/product-9.png',
-         ],
-         categoryName: 'Shoes',
-         price: '$125',
-         soluong: 110,
-         stock: true,
-         status: 'Inactive',
-         action: 'none',
-      },
-   ]);
+   const [data, setData] = useState([]);
    const [selectAll, setSelectAll] = useState(false);
-
-   const [checkStock, setCheckStock] = useState(data.map((item) => item.stock));
 
    const [checkboxes, setCheckboxes] = useState(Array(data.length).fill(false));
    const [valueSearch, setValueSearch] = useState('');
@@ -95,7 +36,6 @@ const ProductList = () => {
    const [currentIndex, setCurrentIndex] = useState(null);
    const [selectCategory, setSelectCategory] = useState(null);
    const [selectStatus, setSelectStatus] = useState('');
-   const [selectStock, setSelectStock] = useState('');
    const [pageNow, setPageNow] = useState(1);
 
    const [totalProduct, setTotalProduct] = useState(100);
@@ -122,35 +62,24 @@ const ProductList = () => {
       setContentDetailProduct(product);
       setOpenDetailProduct(true);
    };
-   const handleToggle = async (index, productId) => {
-      const newCheckStock = [...checkStock];
 
-      newCheckStock[index] = !newCheckStock[index];
-
-      const data = await ChangeStockApi(newCheckStock[index], productId);
-      setCheckStock(newCheckStock);
-   };
-
-   useEffect(() => {
-      setCheckStock(data.map((item) => item.stock));
-   }, [data]);
    useEffect(() => {
       const fetchProduct = async () => {
-         const dataProduct = await getProductApi(
-            valueSearch,
-            null,
-            selectCategory,
-            selectStock,
-            selectStatus,
-            pageNow,
-            selectedValue
+         const dataProduct = await getListProduct(
+            {index: selectedValue,
+            page: pageNow,
+            sortBy: null,
+            desc: true,
+            search: valueSearch,
+            category:selectCategory}
+            //selectStatus
          );
 
          if (dataProduct?.status === true) {
-            const { product, totalProduct } = dataProduct.result;
-            if (JSON.stringify(data) !== JSON.stringify(product)) {
-               setData(product);
-               setTotalProduct(totalProduct);
+            const { productList, totalItemCount } = dataProduct.result;
+            if (JSON.stringify(data) !== JSON.stringify(productList)) {
+               setData(productList);
+               setTotalProduct(totalItemCount);
             }
          }
       };
@@ -159,7 +88,6 @@ const ProductList = () => {
       data,
       pageNow,
       selectedValue,
-      selectStock,
       selectCategory,
       selectStatus,
       valueSearch,
@@ -183,21 +111,21 @@ const ProductList = () => {
       },
    });
    useEffect(() => {
-      const fetchCategory = async () => {
-         const data = await getCategoryApi();
+      const fetchCategory = async () => {//combobox
+         const data = await getListCategory({index:4,page:1});
          if (data?.status === true) {
-            setCategory(data.result);
+            setCategory(data.result.productCategory);
          }
       };
       fetchCategory();
-      const fetchVenue = async () => {
-         const data = await getSalesRevenue();
-         console.log(data, 'venue');
-         if (data?.status) {
-            setVenue(data.result);
-         }
-      };
-      fetchVenue();
+      // const fetchVenue = async () => {//chua co api
+      //    const data = await getSalesRevenue();
+      //    console.log(data, 'venue');
+      //    if (data?.status) {
+      //       setVenue(data.result);
+      //    }
+      // };
+      // fetchVenue();
    }, []);
    return (
       <>
@@ -224,52 +152,34 @@ const ProductList = () => {
                               <td className="td-flex">
                                  <img
                                     src={processApiImagePath(
-                                       contentDetailProduct.image[0]
+                                       contentDetailProduct.mainFile
                                     )}
                                     alt=""
                                  />
                                  <div>
                                     <div>{contentDetailProduct.name}</div>
-                                    <div>{contentDetailProduct.title}</div>
+                                    <div>{contentDetailProduct.code}</div>
                                  </div>
                               </td>
                            </tr>
                            <tr>
                               <td>Category</td>
-                              <td>{contentDetailProduct.categoryName}</td>
-                           </tr>
-                           <tr>
-                              <td>Stock</td>
-                              <td>
-                                 <label className="toggle-label">
-                                    <input
-                                       type="checkbox"
-                                       checked={checkStock[currentIndex]}
-                                       onChange={() => {
-                                          handleToggle(
-                                             currentIndex,
-                                             contentDetailProduct.id
-                                          );
-                                       }}
-                                    />
-                                    <span className="toggle-slider"></span>
-                                 </label>
-                              </td>
+                              <td>{contentDetailProduct.category?.map((cate)=>(cate.name+","))}</td>
                            </tr>
                            <tr>
                               <td>Price</td>
-                              <td>{contentDetailProduct.price}</td>
+                              <td>{contentDetailProduct.unitPrice}</td>
                            </tr>
                            <tr>
                               <td>QTY</td>
-                              <td>{contentDetailProduct.soluong}</td>
+                              <td>{contentDetailProduct.totalItem}</td>
                            </tr>
                            <tr>
                               <td>Status</td>
                               <td
-                                 className={contentDetailProduct.status?.toLowerCase()}
+                                 className={contentDetailProduct.active===true?("Active").toLowerCase():("Inactive").toLowerCase()}
                               >
-                                 <span> {contentDetailProduct.status}</span>
+                                 <span> {contentDetailProduct.active===true?"Active":"Inactive"}</span>
                               </td>
                            </tr>
                            <tr>
@@ -364,8 +274,7 @@ const ProductList = () => {
                         }}
                      >
                         <option value="">Status</option>
-                        <option value="Scheduled">Scheduled</option>
-                        <option value="Publish">Publish</option>
+                        <option value="Active">Active</option>
                         <option value="Inactive">Inactive</option>
                      </select>
                   </div>
@@ -384,21 +293,6 @@ const ProductList = () => {
                               {cat.name}
                            </option>
                         ))}
-                     </select>
-                  </div>
-                  <div className="product_stock">
-                     <select
-                        value={selectStock}
-                        onChange={(e) => {
-                           setSelectStock(e.target.value);
-                           setPageNow(1);
-                        }}
-                     >
-                        <option value="" defaultValue>
-                           Stock
-                        </option>
-                        <option value="Out">Out of Stock</option>
-                        <option value="In">In Stock</option>
                      </select>
                   </div>
                </div>
@@ -455,7 +349,6 @@ const ProductList = () => {
                            <th colSpan="3">PRODUCT</th>
                            <th>CATEGORY</th>
 
-                           <th>STOCK</th>
                            <th>PRICE</th>
                            <th>QTY</th>
                            <th>STATUS</th>
@@ -487,7 +380,7 @@ const ProductList = () => {
                                  <div className="td-flex">
                                     <img
                                        src={processApiImagePath(
-                                          product?.image[0]
+                                          product?.mainFile
                                        )}
                                        alt=""
                                        width="40px"
@@ -495,27 +388,15 @@ const ProductList = () => {
                                     />
                                     <div>
                                        <div>{product.name}</div>
-                                       <div>{product.title}</div>
+                                       <div>{product.code}</div>
                                     </div>
                                  </div>
                               </td>
-                              <td>{product.categoryName}</td>
-                              <td>
-                                 <label className="toggle-label">
-                                    <input
-                                       type="checkbox"
-                                       checked={checkStock[index]}
-                                       onChange={() => {
-                                          handleToggle(index, product.id);
-                                       }}
-                                    />
-                                    <span className="toggle-slider"></span>
-                                 </label>
-                              </td>
-                              <td>{product.price.toLocaleString()}đ</td>
-                              <td>{product.soluong}</td>
-                              <td className={product.status.toLowerCase()}>
-                                 <span>{product.status}</span>
+                              <td>{product.category?.map((cate)=>(cate.name+","))}</td>
+                              <td>{product.unitPrice?.toLocaleString()}đ</td>
+                              <td>{product.totalItem}</td>
+                              <td className={product.active===true?("Active").toLowerCase():("Inactive").toLowerCase()}>
+                                 <span>{product.active===true?"Active":"Inactive"}</span>
                               </td>
                            </tr>
                         ))}

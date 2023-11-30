@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { AiOutlinePlus } from 'react-icons/ai';
-
+import Pagination from "./Pagination";
 import styled from 'styled-components';
 import { AddCategory } from './AddCategory';
 import { AdminContext } from '../Admin';
-import { deleteCategoryApi, getCategoryApiForAdmin } from '../../Axios/web';
+import { deleteCategoryApi, getCategoryApiForAdmin,getListCategory } from '../../Axios/web';
 import { RiDeleteBin3Line } from 'react-icons/ri';
 import { FiEdit2 } from 'react-icons/fi';
 import processApiImagePath from '../../Helper/EditLinkImage';
@@ -15,56 +15,11 @@ const CategoryList = () => {
    const [categoryId, setCategoryId] = useState(null);
    const [selectedValue, setSelectedValue] = useState('7');
    const [isOpenAddCategory, setIsOpenAddCategory] = useState(false);
-   const [data, setData] = useState([
-      {
-         id: 1,
-         name: 'xxxx',
-         image: 'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/ecommerce-images/product-5.png',
-         category: 'Accessories',
-         totalProduct: 4186,
-         totalEarning: '$7912.99',
-         action: 'none',
-      },
-      {
-         id: 1,
-         name: 'xxxx',
-         image: 'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/ecommerce-images/product-5.png',
-         category: 'Accessories',
-         totalProduct: 4186,
-         totalEarning: '$7912.99',
-         action: 'none',
-      },
-      {
-         id: 1,
-         name: 'xxxx',
-         image: 'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/ecommerce-images/product-5.png',
-         category: 'Accessories',
-         totalProduct: 4186,
-         totalEarning: '$7912.99',
-         action: 'none',
-      },
-      {
-         id: 1,
-         name: 'xxxx',
-         image: 'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/ecommerce-images/product-5.png',
-         category: 'Accessories',
-         totalProduct: 4186,
-         totalEarning: '$7912.99',
-         action: 'none',
-      },
-      {
-         id: 1,
-         name: 'xxxx',
-         image: 'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/ecommerce-images/product-5.png',
-         category: 'Accessories',
-         totalProduct: 4186,
-         totalEarning: '$7912.99',
-         action: 'none',
-      },
-   ]);
+   const [data, setData] = useState([]);
    const [search, setSearch] = useState('');
    const [selectAll, setSelectAll] = useState(false);
-
+   const [page, setPage] = useState(1);
+   const [totalItem, setTotalItem] = useState();
    const [checkboxes, setCheckboxes] = useState(Array(data.length).fill(false));
    const messageBoxRef = useRef();
 
@@ -89,18 +44,18 @@ const CategoryList = () => {
       setCategoryId(categoryId);
    };
    const fetchCategory = async () => {
-      const response = await getCategoryApiForAdmin(search);
-      console.log(response, 'respnse');
+      const response = await getListCategory({index:selectedValue, page:page});
       if (response?.status === true) {
-         if (JSON.stringify(data) !== JSON.stringify(response.result)) {
+         if (JSON.stringify(data) !== JSON.stringify(response.result.productCategory)) {
             console.log('response.result', response.result);
-            setData(response.result);
+            setData(response.result.productCategory);
+            setTotalItem(response.result.totalItemCount);
          }
       }
    };
    useEffect(() => {
       fetchCategory();
-   }, [search]);
+   }, [search,page, selectedValue]);
    return (
       <Container>
          <ConfirmationDialog
@@ -166,7 +121,6 @@ const CategoryList = () => {
                         </th>
                         <th>CATEGORY</th>
                         <th>IMAGE</th>
-                        <th>IMAGE REPLACE</th>
 
                         <th>TOTAL PRODUCT</th>
 
@@ -189,22 +143,9 @@ const CategoryList = () => {
                               <div className="td-flex">
                                  <img
                                     src={
-                                       processApiImagePath(category.image) ||
-                                       category.image
+                                       processApiImagePath(category.icon) ||
+                                       category.icon
                                     }
-                                    alt=""
-                                    width="40px"
-                                    height="40px"
-                                 />
-                                 <div>{category.category}</div>
-                              </div>
-                           </td>
-                           <td>
-                              <div className="td-flex">
-                                 <img
-                                    src={processApiImagePath(
-                                       category.imageReplace
-                                    )}
                                     alt=""
                                     width="40px"
                                     height="40px"
@@ -214,7 +155,7 @@ const CategoryList = () => {
                            </td>
                            <td>{category.totalProduct} products</td>
 
-                           <td>{category.totalEarning.toLocaleString()}đ</td>
+                           <td>{category.totalProfit.toLocaleString()}đ</td>
 
                            <td className="td-action">
                               <FiEdit2
@@ -235,6 +176,14 @@ const CategoryList = () => {
                </table>
             </div>
          </div>
+         <Pagination
+            obj={{
+               pageNow: page,
+               size: selectedValue,
+               totalProduct: totalItem,
+            }}
+            setPageNow={setPage}
+         />
       </Container>
    );
 };

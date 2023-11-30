@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { MdClose } from 'react-icons/md';
 import styled from 'styled-components';
 import {
-   createCategoryApi,
-   getCategoryApiById,
-   putCategory,
+   createCategoryApi,addCategory,
+   getCategoryApiById,updateCategory,
+   putCategory,getCategory
 } from '../../Axios/web';
 import processApiImagePath from '../../Helper/EditLinkImage';
 import { VscLoading } from 'react-icons/vsc';
@@ -42,7 +42,7 @@ export const AddCategory = ({
       }));
    };
    const fetchCategoryById = async () => {
-      const data = await getCategoryApiById(categoryId);
+      const data = await getCategory(categoryId);
       if (data?.status) {
          if (JSON.stringify(data.result) !== JSON.stringify(category)) {
             setCategory(data.result);
@@ -60,11 +60,11 @@ export const AddCategory = ({
       setLoading(true);
       let data;
       if (categoryId === null) {
-         data = await createCategoryApi(formData);
+         data = await addCategory(formData);
          console.log('data', data);
       } else {
          formData.append('category.Id', category.id);
-         data = await putCategory(formData);
+         data = await updateCategory(formData);
          console.log('data', data);
       }
 
