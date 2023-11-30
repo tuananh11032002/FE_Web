@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Image from './Image';
-import { getCategoryApi } from '../../Axios/web';
+import { getListCategory } from '../../Axios/web';
 import { useStateProvider } from '../../StateProvider/StateProvider';
 import { reducerCases } from '../../StateProvider/reducer';
 const Controller = () => {
@@ -9,12 +9,12 @@ const Controller = () => {
    const [data, setData] = useState([]);
    useEffect(() => {
       const fetchData = async () => {
-         const data = await getCategoryApi();
+         const data = await getListCategory({index:4,page:1});
          if (data?.status) {
-            if (JSON.stringify(data.result) != JSON.stringify(category)) {
+            if (JSON.stringify(data.result.productCategory) != JSON.stringify(category)) {
                dispatch({
                   type: reducerCases.SET_CATEGORY,
-                  category: data.result,
+                  category: data.result.productCategory,
                });
             }
          }
@@ -24,11 +24,11 @@ const Controller = () => {
 
    return (
       <Container>
-         {category?.map(({ image, imageReplace, name, id }, index) => (
+         {category?.map(({ icon, imageReplace, name, id }, index) => (
             <div className="image" key={index}>
                <Image
                   id_image={id}
-                  src={image}
+                  src={icon}
                   message={name}
                   replace={imageReplace}
                   key={index}
