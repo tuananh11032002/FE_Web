@@ -5,8 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 import {
    AddProductIntoOrder,
-   GetOrder,
-   getProductApiById,
+   getOrder,
    getProduct,
    getListComment,
 } from '../../Axios/web';

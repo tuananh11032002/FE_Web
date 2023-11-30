@@ -13,7 +13,7 @@ import { useStateProvider } from '../StateProvider/StateProvider';
 import { Link, useNavigate } from 'react-router-dom';
 import { reducerCases } from '../StateProvider/reducer';
 import { BsSearch } from 'react-icons/bs';
-import { DeleteProductIntoOrder, GetOrder, getListProduct } from '../Axios/web';
+import { DeleteProductIntoOrder, getOrder, getListProduct } from '../Axios/web';
 import _ from 'lodash';
 import SearchMini from './Header/SearchMini';
 import Notification from './Body/Notification';
@@ -241,11 +241,7 @@ const Header = () => {
                                  }
                                  alt=""
                               />
-                              <div>
-                                 {user.user.name
-                                    ? user.user.name
-                                    : user.user.userName}
-                              </div>
+                              <div>{user.name ? user.name : user.userName}</div>
                               {showAccount && (
                                  <div className="account-child">
                                     <div
@@ -255,7 +251,7 @@ const Header = () => {
                                     >
                                        Thông tin cá nhân
                                     </div>
-                                    {user.user.role === 'Admin' ? (
+                                    {user.role === 'Admin' ? (
                                        <div
                                           onClick={() => {
                                              navigate('/admin');

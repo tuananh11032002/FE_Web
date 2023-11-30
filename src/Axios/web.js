@@ -191,7 +191,7 @@ export const getOrder = async (id) => {
    //require author
    const res = await axiosClient.get(`${END_POINT.ORDER}/${id}`, {
       headers: {
-         Authorization: JSON.parse(localStorage.getItem('webbanbalo_user')),
+         Authorization: localStorage.getItem('webbanbalo_user'),
       },
    });
    await checkAndRenewToken(res);
@@ -435,7 +435,8 @@ export const deleteAccount = (id) => {
 //get account by token
 export const getProfileByToken = async () => {
    //require author
-   const token = await localStorage.getItem('webbanbalo_user');
+   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   console.log('token: ', token);
    const res = await axiosClient.get(`${END_POINT.USER}/pro`, {
       headers: {
          Authorization: token,

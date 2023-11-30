@@ -73,7 +73,7 @@ function App() {
       setIsUserReady(true);
    };
    useEffect(() => {
-      fetchData();
+      //fetchData();
       setIsUserReady(true);
    }, [user]);
    useEffect(() => {

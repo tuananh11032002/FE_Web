@@ -1,12 +1,18 @@
 const checkAndRenewToken = async (response) => {
    try {
       if (response?.status) {
-         if (response?.result?.resetToken ? true : false) {
-            console.log('API', response.URL);
-            console.log('resetToken', response.result.resetToken);
-            await localStorage.setItem(
+         if (response.result) {
+            const dataLocal = JSON.parse(
+               localStorage.getItem('webbanbalo_user')
+            );
+
+            localStorage.setItem(
                'webbanbalo_user',
-               JSON.stringify(response.result.resetToken)
+               response?.result?.resetToken
+               // JSON.stringify({
+               //    ...dataLocal,
+               //    token: response.result.resetToken,
+               // })
             );
          }
       } else {

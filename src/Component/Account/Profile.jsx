@@ -20,7 +20,7 @@ const Profile = () => {
    const [phone, setPhone] = useState('');
    const [userName, setUserName] = useState('');
    const [Name, setName] = useState('');
-   const [selectedGender, setselectedGender] = useState(false);
+   const [selectedGender, setselectedGender] = useState(true);
    const [image, setImage] = useState();
    const [loading, setLoading] = useState(false);
 
@@ -28,26 +28,32 @@ const Profile = () => {
       const userId = user.id;
       console.log('userid : ', userId);
       const res = await getProfileByToken();
-      let userTemp;
-
       console.log('res user profile', res);
-      if (res?.status === true) {
-         userTemp = res?.result?.data?.user;
-         setPhone(userTemp?.contact || '');
-         setUserName(userTemp?.userName);
-         setName(userTemp?.name);
-         setselectedGender(userTemp?.gender || '');
-         //setImage(await getAvatarByToken()?.result);
-      }
-      if (userTemp != user) {
+      if (res?.status) {
+         // setPhone(userTemp?.contact || '');
+         // setUserName(userTemp?.userName);
+         // setName(userTemp?.name);
+         // setselectedGender(userTemp?.gender || '');
+         // //setImage(await getAvatarByToken()?.result);
          dispatch({
             type: reducerCases.SET_USER,
-            user: userTemp,
+            user: res?.result?.data?.user,
          });
       }
    };
    useEffect(() => {
-      fetchUser();
+      const temp = async () => {
+         if (user) {
+            setPhone(user.contact || '');
+            setUserName(user.userName || '');
+            setName(user.name || '');
+            setselectedGender(user.gender || true);
+
+            const res = await getAvatarByToken();
+            setImage(res?.status ? res?.result : '');
+         }
+      };
+      temp();
    }, [user]);
    const handleSaveChange = async () => {
       try {
