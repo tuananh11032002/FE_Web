@@ -12,37 +12,45 @@ const Product = () => {
    const params = useParams();
    const { id } = params;
    const [{ product, category }, dispatch] = useStateProvider();
-   const [data, setData] = useState([]);
+   
    const navigate = useNavigate();
-   const [isValue, setIsValue] = useState(1);
+   const [isValue, setIsValue] = useState(null);
+   
    const fetchData = async () => {
       if (id !== undefined) {
          window.scrollTo(0, 200);
          if (!category) {
-            const categoryApi = await getCategoryApi();
+            const res = await getListCategory({ index: 4, page: 1 });
             dispatch({
                type: reducerCases.SET_CATEGORY,
-               category: categoryApi.result,
+               category: res.result.productCategory,
             });
          }
-
-         const dataProduct = await getProductApiWithNameCategory(
-            id,
-            '',
-            isValue,
-            15,
-            1
-         );
-         if (dataProduct.result !== product) {
+         let sortBy=isValue, desc=true;
+         if(sortBy!=null){
+            let sortValue = await sortBy.split(',');
+            sortBy = sortValue[0];
+            desc = parseInt(sortValue[1]) === 1? true : false;
+         }
+         let data = [];
+         await category.forEach(async (item)=>{
+            if(item.id === id){
+               const d = {id: item.id, name: item.name};            
+               const resP = await getListProduct({ index: 10, page: 1, sortBy: sortBy, desc: desc, category: id });
+               d.products = resP.result.productList;
+               data.push(d);
+            }
+         });
+         if (data !== product) {
             dispatch({
                type: reducerCases.SET_PRODUCT,
-               product: dataProduct.result,
+               product: data,
             });
          }
       } else {
          const res = await getListCategory({ index: 4, page: 1 });
-         let data1 = [];
-         data1 = await Promise.all(res.result.productCategory?.map(async (item)=>{
+         let data = [];
+         data = await Promise.all(res.result.productCategory?.map(async (item)=>{
             const d = {id: item.id, name: item.name};
             const resP = await getListProduct({ index: 8, page: 1, category: item.id });
             d.products = resP.result.productList;
@@ -52,10 +60,9 @@ const Product = () => {
             type: reducerCases.SET_CATEGORY,
             category: res.result.productCategory,
          });
-         setData(data1);
          dispatch({
             type: reducerCases.SET_PRODUCT,
-            product: data1,
+            product: data,
          });  
       }
    };
@@ -90,6 +97,7 @@ const Product = () => {
                   {!params.id || params.id == null ? (
                      <hr style={{ flex: 1 }} />
                   ) : (
+                     
                      <span>
                         Sắp xếp theo:
                         <select
@@ -99,11 +107,11 @@ const Product = () => {
                               setIsValue(e.target.value);
                            }}
                         >
-                           <option value="popularity" selected>
-                              Sản phẩm bán chạy
+                           <option value="null" selected>
+                              ---
                            </option>
-                           <option value="priceasc">Giá từ thấp tới cao</option>
-                           <option value="pricedesc">
+                           <option value="UnitPrice,1">Giá từ thấp tới cao</option>
+                           <option value="UnitPrice,0">
                               Giá từ cao tới thấp
                            </option>
                         </select>

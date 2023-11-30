@@ -11,10 +11,11 @@ function RegistrationPage() {
    const [userName, setUserName] = useState('');
    const [password, setPassword] = useState('');
    const [confirmPassword, setConfirmPassword] = useState('');
-   const [gender, setGender] = useState('');
+   const [name, setName] = useState('');
    const [passwordStrength, setPasswordStrength] = useState('Yếu');
    const [showPassword, setShowPassword] = useState(false);
    const [showLabel, setShowLabel] = useState(false);
+   const [showLabel1, setShowLabel1] = useState(false);
    const [errol, setErrol] = useState([]);
    const navigate = useNavigate();
    const inputRef = useRef(null);
@@ -39,7 +40,14 @@ function RegistrationPage() {
          setShowLabel(false);
       }
    };
-
+   const handleInputChange1 = (event) => {
+      setName(event.target.value);
+      if (event.target.value === '') {
+         setShowLabel1(true);
+      } else {
+         setShowLabel1(false);
+      }
+   };
    const handlePasswordChange = (event) => {
       const newPassword = event.target.value;
       setPassword(newPassword);
@@ -93,9 +101,12 @@ function RegistrationPage() {
       if (userName === '') {
          errolTemp.push(<div key={uniqueId}>Không để trống user name</div>);
       }
+      if (name === '') {
+         errolTemp.push(<div key={uniqueId}>Không để trống tên</div>);
+      }
       console.log(errolTemp);
       if (errolTemp.length === 0) {
-         const response = await register({ userName:userName, password:password });
+         const response = await register({ userName:userName, password:password, name: name });
          if (response?.status === true) {
             navigate('/login');
          } else {
@@ -170,15 +181,15 @@ function RegistrationPage() {
                </div>
             </div>
             <div className="form-group">
-               <label>Giới tính</label>
-               <select
-                  value={gender}
-                  onChange={(e) => setGender(e.target.value)}
-               >
-                  <option value="">Chọn giới tính</option>
-                  <option value="Male">Nam</option>
-                  <option value="Female">Nữ</option>
-               </select>
+               <label>Tên</label>
+               <input
+                  type="text"
+                  value={name}
+                  onChange={handleInputChange1}
+               />
+               {showLabel1 ? (
+                  <div style={{ color: 'red' }}>Phải nhập tên</div>
+               ) : null}
             </div>
             <button onClick={handleRegistration}>Đăng ký</button>
             <div className="errol">{errol.map((p) => p)}</div>
