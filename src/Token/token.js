@@ -8,11 +8,11 @@ const checkAndRenewToken = async (response) => {
 
             localStorage.setItem(
                'webbanbalo_user',
-               response?.result?.resetToken
-               // JSON.stringify({
-               //    ...dataLocal,
-               //    token: response.result.resetToken,
-               // })
+               //response?.result?.resetToken
+               JSON.stringify({
+                  ...dataLocal,
+                  token: response.result.resetToken,
+               })
             );
          }
       } else {

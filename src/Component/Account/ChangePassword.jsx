@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { ChangePasswordApi } from '../../Axios/web';
+import { updateUserInfo } from '../../Axios/web';
 import { ToastContainer, toast } from 'react-toastify';
+import { useStateProvider } from '../../StateProvider/StateProvider';
 
 const ChangePassword = () => {
-   const [oldPassword, setOldPassword] = useState('');
+   //const [oldPassword, setOldPassword] = useState('');
    const [newPassword, setNewPassword] = useState('');
    const [confirmPassword, setConfirmPassword] = useState('');
+   const [{ user }] = useStateProvider();
    const [message, setMessage] = useState('');
 
    const handleChange = (e) => {
       const { name, value } = e.target;
 
-      if (name === 'oldPassword') {
-         setOldPassword(value);
-      } else if (name === 'newPassword') {
+      // if (name === 'oldPassword') {
+      //    setOldPassword(value);
+      // } else
+      if (name === 'newPassword') {
          setNewPassword(value);
       } else if (name === 'confirmPassword') {
          setConfirmPassword(value);
@@ -25,20 +28,23 @@ const ChangePassword = () => {
       e.preventDefault();
 
       // Kiểm tra xác nhận mật khẩu mới
-      console.log(oldPassword, 'oldPassword');
-      console.log(confirmPassword, 'confirmPassword');
+      // console.log(oldPassword, 'oldPassword');
+      // console.log(confirmPassword, 'confirmPassword');
 
-      if (JSON.stringify(oldPassword) !== JSON.stringify(confirmPassword)) {
+      if (JSON.stringify(newPassword) !== JSON.stringify(confirmPassword)) {
          setMessage('Mật khẩu mới và xác nhận mật khẩu không khớp');
          return;
       }
 
-      const data = await ChangePasswordApi({
-         password: oldPassword,
-         rePassword: confirmPassword,
-         newPassword: newPassword,
+      const data = await updateUserInfo({
+         name: user.name,
+         userName: user.userName,
+         password: newPassword,
+         contact: user.contact,
+         gender: user.gender,
+         birthday: user.birthday,
       });
-      if (data?.status === true) {
+      if (data?.status) {
          toast.info(`Thay dổi thông tin thành công`, {
             position: toast.POSITION.TOP_CENTER,
             autoClose: 1000,
@@ -57,7 +63,7 @@ const ChangePassword = () => {
          <ToastContainer />
          <h2>Đổi mật khẩu</h2>
          <form onSubmit={handleSubmit}>
-            <div>
+            {/* <div>
                <label htmlFor="oldPassword">Mật khẩu cũ:</label>
                <input
                   type="password"
@@ -66,17 +72,7 @@ const ChangePassword = () => {
                   value={oldPassword}
                   onChange={handleChange}
                />
-            </div>
-            <div>
-               <label htmlFor="confirmPassword">Xác nhận mật khẩu cũ:</label>
-               <input
-                  type="password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={confirmPassword}
-                  onChange={handleChange}
-               />
-            </div>
+            </div> */}
             <div>
                <label htmlFor="newPassword">Mật khẩu mới:</label>
                <input
@@ -87,7 +83,16 @@ const ChangePassword = () => {
                   onChange={handleChange}
                />
             </div>
-
+            <div>
+               <label htmlFor="confirmPassword">Xác nhận mật khẩu mới:</label>
+               <input
+                  type="password"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  value={confirmPassword}
+                  onChange={handleChange}
+               />
+            </div>
             <button type="submit">Đổi mật khẩu</button>
          </form>
          {message && <p>{message}</p>}

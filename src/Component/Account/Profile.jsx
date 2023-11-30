@@ -4,7 +4,6 @@ import { useStateProvider } from '../../StateProvider/StateProvider';
 import {
    uploadAvatar,
    getProfileByToken,
-   getAvatarByToken,
    updateUserInfo,
 } from '../../Axios/web';
 import processApiImagePath from '../../Helper/EditLinkImage';
@@ -25,8 +24,8 @@ const Profile = () => {
    const [loading, setLoading] = useState(false);
 
    const fetchUser = async () => {
-      const userId = user.id;
-      console.log('userid : ', userId);
+      // const userId = user.id;
+      // console.log('userid : ', userId);
       const res = await getProfileByToken();
       console.log('res user profile', res);
       if (res?.status) {
@@ -61,6 +60,7 @@ const Profile = () => {
                userName: userName,
                contact: phone,
                gender: selectedGender,
+               birthday: '',
             })
          );
          setLoading(false);
@@ -86,15 +86,35 @@ const Profile = () => {
       setUserName(e.target.value);
       return validateEmail(e.target.value);
    };
-   const handleBrowseImageClick = () => {
-      if (imageInputRef.current) {
-         imageInputRef.current.click();
+   const handleBrowseImageClick = async () => {
+      let formData = new FormData();
+
+      formData.append('file', image.file);
+      const data = await uploadAvatar(formData);
+      if (data?.status) {
+         toast.info(`Thay dổi avatar thành công`, {
+            position: toast.POSITION.TOP_CENTER,
+            autoClose: 1000,
+         });
+      } else {
+         toast.error(`${data?.result}`, {
+            position: toast.POSITION.TOP_CENTER,
+            autoClose: 3000,
+         });
       }
    };
    const handleImageChange = async (event) => {
       const file = event.target.files[0];
-      setImage(file);
-      setImage(URL.createObjectURL(file));
+      console.log(file);
+      try {
+         setImage({
+            file: file,
+            URL: URL.createObjectURL(file),
+         });
+      } catch {
+         setImage();
+      }
+      //setImage(URL.createObjectURL(file));
    };
    const imageInputRef = useRef();
 
@@ -189,11 +209,22 @@ const Profile = () => {
             </div>
 
             <div className="update-image">
-               <div className="image">
-                  <img
-                     src={`http://backend.misaproject.click/api/user/pro/pic/${user.id}`}
-                     alt="Selected"
-                  />
+               <div
+                  className="image"
+                  onClick={() => {
+                     if (imageInputRef.current) {
+                        imageInputRef.current.click();
+                     }
+                  }}
+               >
+                  {image ? (
+                     <img src={image.URL} alt="Selected" />
+                  ) : (
+                     <img
+                        src={`http://backend.misaproject.click/api/user/pro/pic/${user.id}`}
+                        alt="Selected"
+                     />
+                  )}
                </div>
                <div
                   className="button"

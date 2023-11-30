@@ -99,7 +99,9 @@ const LoginPage = () => {
          console.log('resetToken', data.result.token);
          await localStorage.setItem(
             'webbanbalo_user',
-            JSON.stringify(data.result.token)
+            JSON.stringify({
+               token: data.result.token,
+            })
          );
          setTimeout(() => {
             navigate('/');

@@ -15,33 +15,40 @@ const END_POINT = {
 //add
 export const addAddress = async (address) => {
    //require author
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
    const res = await axiosClient.post(`${END_POINT.ADDRESS}`, address, {
       headers: {
-         Authorization: JSON.parse(localStorage.getItem('webbanbalo_user')),
+         'Content-Type': 'application/json',
+         Authorization: token,
       },
    });
    await checkAndRenewToken(res);
    return res;
 };
 //update
-export const updateAddress = (address) => {
+export const updateAddress = async (address) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   return axiosClient.put(`${END_POINT.ADDRESS}`, address, {
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = await axiosClient.put(`${END_POINT.ADDRESS}`, address, {
       headers: {
+         'Content-Type': 'application/json',
          Authorization: token,
       },
    });
+   await checkAndRenewToken(res);
+   return res;
 };
 //delete
-export const deleteAddress = (id) => {
+export const deleteAddress = async (id) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   return axiosClient.delete(`${END_POINT.ADDRESS}/${id}`, {
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = await axiosClient.delete(`${END_POINT.ADDRESS}/${id}`, {
       headers: {
          Authorization: token,
       },
    });
+   await checkAndRenewToken(res);
+   return res;
 };
 //get(id)
 export const getAddress = (id) => {
@@ -369,9 +376,10 @@ export const register = (data) => {
 //update profile
 export const updateProfile = async (data) => {
    //require author
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
    const res = await axiosClient.put(`${END_POINT.USER}`, data, {
       headers: {
-         Authorization: JSON.parse(localStorage.getItem('webbanbalo_user')),
+         Authorization: token,
       },
    });
    await checkAndRenewToken(res);
@@ -384,7 +392,7 @@ export const login = (data) => {
 //List account
 export const getListAccount = (data) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
    return axiosClient.post(`${END_POINT.USER}/list`, data, {
       headers: {
          Authorization: token,
@@ -394,9 +402,10 @@ export const getListAccount = (data) => {
 //upload avatar
 export const uploadAvatar = async (file) => {
    //require author
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
    const res = await axiosClient.post(`${END_POINT.USER}/pro/pic`, file, {
       headers: {
-         Authorization: JSON.parse(localStorage.getItem('webbanbalo_user')),
+         Authorization: token,
       },
    });
    await checkAndRenewToken(res);
@@ -435,8 +444,7 @@ export const deleteAccount = (id) => {
 //get account by token
 export const getProfileByToken = async () => {
    //require author
-   const token = localStorage.getItem('webbanbalo_user');
-   console.log('token: ', token);
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
    const res = await axiosClient.get(`${END_POINT.USER}/pro`, {
       headers: {
          Authorization: token,
@@ -806,10 +814,11 @@ export const getUserWithId = (userId) => {
    return axiosClient.get(`${END_POINT.USER}/${userId}`);
 };
 export const updateUserInfo = async (infor) => {
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
    const res = await axiosClient.put(`${END_POINT.USER}`, infor, {
       headers: {
          'Content-Type': 'application/json',
-         Authorization: JSON.parse(localStorage.getItem('webbanbalo_user')),
+         Authorization: token,
       },
    });
    await checkAndRenewToken(res);
