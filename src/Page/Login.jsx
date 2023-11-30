@@ -96,7 +96,8 @@ const LoginPage = () => {
             type: reducerCases.SET_USER,
             user: data.result,
          });
-         localStorage.setItem(
+         console.log('resetToken', data.result.token);
+         await localStorage.setItem(
             'webbanbalo_user',
             JSON.stringify(data.result)
          );

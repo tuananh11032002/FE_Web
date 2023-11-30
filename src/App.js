@@ -19,7 +19,6 @@ import ProfileAccount from './Page/ProfileAccount';
 import AddressAccount from './Page/AddressAccount';
 import OrderAccount from './Page/OrderAccount';
 import * as signalR from '@microsoft/signalr';
-import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import ProductListPage from './AdminPage/Page/ProductListPage';
 import ChatPage from './AdminPage/Page/ChatPage';
 import CategoryListPage from './AdminPage/Page/CategoryListPage';
@@ -34,15 +33,13 @@ import AccountDetailPage from './AdminPage/Page/AccountDetailPage';
 import RegistrationPage from './Page/RegistrationPage';
 import PaymentInfo from './Page/PaymentInfo';
 import PasswordAccount from './Page/PasswordAccount';
-import Rating from './Component/Rating';
-import { RenewToken } from './Axios/web';
 import PermissionDenied from './Component/Body/PermissionDenied ';
 
 function App() {
    const [isUserReady, setIsUserReady] = useState(false);
    const [{ user }, dispatch] = useStateProvider();
    const UserRoute = (props) => {
-      console.log('props', props);
+      //console.log('props', props);
       if (user) {
          return props.children;
       } else {
@@ -86,11 +83,6 @@ function App() {
             connectionHub = new signalR.HubConnectionBuilder()
                .withUrl('http://backend.misaproject.click/hub')
                .build();
-            connectionHub.on('ReceiveLogout', () => {
-               localStorage.setItem('webbanbalo_user', null);
-               dispatch({ type: reducerCases.SET_USER, user: null });
-               dispatch({ type: reducerCases.SET_CART, cart: null });
-            });
             connectionHub.onclose(() => {
                console.log('SignalR connection closed');
                dispatch({
@@ -99,7 +91,7 @@ function App() {
                });
             });
 
-            //await connectionHub.start();
+            await connectionHub.start();
 
             dispatch({
                connection: connectionHub,

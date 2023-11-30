@@ -4,7 +4,7 @@ import { useStateProvider } from '../../StateProvider/StateProvider';
 import {
    AddProductIntoOrder,
    DeleteProductIntoOrder,
-   GetOrder,
+   getOrder,
 } from '../../Axios/web';
 import { reducerCases } from '../../StateProvider/reducer';
 import { Link, useNavigate } from 'react-router-dom';
@@ -50,10 +50,13 @@ const Table = () => {
    };
    const fetchCart = async () => {
       if (user) {
-         const data = await GetOrder();
+         const data = await getOrder(user.newOrderId);
          console.log(data, 'data');
          if (data?.status)
-            dispatch({ type: reducerCases.SET_CART, cart: data.result });
+            dispatch({
+               type: reducerCases.SET_CART,
+               cart: data.result.data.order.detail,
+            });
       } else {
          navigate('/');
       }

@@ -4,6 +4,7 @@ import { useStateProvider } from '../../StateProvider/StateProvider';
 import {
    uploadAvatar,
    getProfileByToken,
+   getAvatarByToken,
    updateUserInfo,
 } from '../../Axios/web';
 import processApiImagePath from '../../Helper/EditLinkImage';
@@ -11,37 +12,34 @@ import { validateEmail, validatePhone } from '../../Helper/CheckInput';
 import { ToastContainer, toast } from 'react-toastify';
 import { VscLoading } from 'react-icons/vsc';
 import { reducerCases } from '../../StateProvider/reducer';
-import { now } from 'lodash';
 
 const Profile = () => {
-   const [email, setEmail] = useState('ttuananh372@gmail.com');
-   const [phone, setPhone] = useState('039345679');
-   const [userName, setUserName] = useState('');
-   const [hoTen, setHoTen] = useState('');
-   const [selectedImage, setSelectedImage] = useState();
+   const [{ user }, dispatch] = useStateProvider();
 
    //To show
+   const [phone, setPhone] = useState('');
+   const [userName, setUserName] = useState('');
+   const [Name, setName] = useState('');
+   const [selectedGender, setselectedGender] = useState(false);
    const [image, setImage] = useState();
-   const [selectedGender, setselectedGender] = useState();
-   const [{ user }, dispatch] = useStateProvider();
-   const [userInfor, setUserInfor] = useState({});
    const [loading, setLoading] = useState(false);
+
    const fetchUser = async () => {
       const userId = user.id;
       console.log('userid : ', userId);
-      const userTemp = await getProfileByToken();
+      const res = await getProfileByToken();
+      let userTemp;
 
-      console.log('userTemp', userTemp);
-      if (userTemp?.status === true) {
-         setUserInfor(userTemp.result);
-         setHoTen(userTemp.result.name);
-         setEmail(userTemp.result.username);
-         setPhone(userTemp.result.contact || '');
-         setUserName(userTemp.result.userName);
-         setselectedGender(userTemp.result.gender || '');
-         setImage(await userTemp.result.image);
+      console.log('res user profile', res);
+      if (res?.status === true) {
+         userTemp = res?.result?.data?.user;
+         setPhone(userTemp?.contact || '');
+         setUserName(userTemp?.userName);
+         setName(userTemp?.name);
+         setselectedGender(userTemp?.gender || '');
+         //setImage(await getAvatarByToken()?.result);
       }
-      if (userTemp.result.user !== user) {
+      if (userTemp != user) {
          dispatch({
             type: reducerCases.SET_USER,
             user: userTemp,
@@ -49,16 +47,13 @@ const Profile = () => {
       }
    };
    useEffect(() => {
-      if (user) {
-         fetchUser();
-      }
-   }, []);
-
+      fetchUser();
+   }, [user]);
    const handleSaveChange = async () => {
       try {
          setLoading(true);
          const response = await updateUserInfo({
-            name: hoTen,
+            name: Name,
             userName: userName,
             contact: phone,
             gender: selectedGender,
@@ -82,8 +77,8 @@ const Profile = () => {
       }
    };
 
-   const handleChangeEmail = (e) => {
-      setEmail(e.target.value);
+   const handleChangeUsername = (e) => {
+      setUserName(e.target.value);
       return validateEmail(e.target.value);
    };
    const handleBrowseImageClick = () => {
@@ -93,7 +88,7 @@ const Profile = () => {
    };
    const handleImageChange = async (event) => {
       const file = event.target.files[0];
-      setSelectedImage(file);
+      setImage(file);
       setImage(URL.createObjectURL(file));
    };
    const imageInputRef = useRef();
@@ -141,19 +136,19 @@ const Profile = () => {
                   <input
                      id="fullname"
                      className="full-width-input"
-                     value={hoTen}
-                     onChange={(e) => setHoTen(e.target.value)}
+                     value={Name}
+                     onChange={(e) => setName(e.target.value)}
                   />
                </div>
                <div className="user-info-item">
-                  <label htmlFor="email">Tên đăng nhập</label>
+                  <label htmlFor="username">Tên đăng nhập</label>
                   <input
                      className="full-width-input"
                      type="text"
-                     value={email}
-                     onChange={(e) => handleChangeEmail(e)}
+                     value={userName}
+                     onChange={(e) => handleChangeUsername(e)}
                   />
-                  {validateEmail(email) ? (
+                  {validateEmail(userName) ? (
                      <p style={{ color: 'green' }}>Email hợp lệ.</p>
                   ) : (
                      <p style={{ color: 'red' }}>Email không hợp lệ.</p>
@@ -200,7 +195,7 @@ const Profile = () => {
                      handleBrowseImageClick();
                   }}
                >
-                  Thay đổi ảnh đại diện
+                  Lưu
                </div>
                <input
                   type="file"

@@ -47,11 +47,11 @@ const Header = () => {
    const mouseOver = () => {
       setIsNotification(true);
    };
-   const handleLogout = () => {
+   const handleLogout = async () => {
       dispatch({ type: reducerCases.SET_USER, user: null });
       dispatch({ type: reducerCases.SET_CART, cart: null });
-
-      localStorage.setItem('webbanbalo_user', 'null');
+      console.log('resetToken', '');
+      await localStorage.setItem('webbanbalo_user', '');
       navigate('/');
    };
    const handleAccountMouseOver = () => {
@@ -73,9 +73,11 @@ const Header = () => {
 
    const debouncedHandlerChange = _.debounce(async (keyword) => {
       if (keyword !== undefined && keyword !== '') {
-         const data = await getListProduct(
-            {index: 5, page: 1, search: keyword}
-         );
+         const data = await getListProduct({
+            index: 5,
+            page: 1,
+            search: keyword,
+         });
          if (data?.status) setProductSearch(data.result?.productList);
       } else {
          setProductSearch([]);
@@ -104,24 +106,27 @@ const Header = () => {
       };
    }, []);
 
-   useEffect(() => {
-      const fetchCart = async () => {
-         if (user) {
-            const orderAPi = await GetOrder();
-            console.log(orderAPi?.result, 'result');
-            if (orderAPi?.status === true) {
-               if (JSON.stringify(orderAPi.result) !== JSON.stringify(cart)) {
-                  dispatch({
-                     type: reducerCases.SET_CART,
-                     cart: orderAPi.result,
-                  });
-               }
+   const fetchCart = async () => {
+      if (user) {
+         const orderAPi = await getOrder(user.newOrderId);
+         //console.log(orderAPi?.result, 'result');
+         if (orderAPi?.status === true) {
+            if (
+               JSON.stringify(orderAPi.result.data.order.detail) !==
+               JSON.stringify(cart)
+            ) {
+               dispatch({
+                  type: reducerCases.SET_CART,
+                  cart: orderAPi.result.data.order.detail,
+               });
             }
-         } else {
          }
-      };
+      } else {
+      }
+   };
+
+   useEffect(() => {
       fetchCart();
-      //console.log('fetchCart');
    }, [cart]);
 
    useEffect(() => {
@@ -236,7 +241,11 @@ const Header = () => {
                                  }
                                  alt=""
                               />
-                              <div>{user.user.name?user.user.name:user.user.userName}</div>
+                              <div>
+                                 {user.user.name
+                                    ? user.user.name
+                                    : user.user.userName}
+                              </div>
                               {showAccount && (
                                  <div className="account-child">
                                     <div

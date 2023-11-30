@@ -6,7 +6,9 @@ import { styled } from 'styled-components';
 import {
    AddProductIntoOrder,
    GetOrder,
-   getProductApiById, getProduct,getListComment,
+   getProductApiById,
+   getProduct,
+   getListComment,
 } from '../../Axios/web';
 import { VscLoading } from 'react-icons/vsc';
 
@@ -53,13 +55,12 @@ const ProductDetail = () => {
                Quantity: count,
             });
          }
-
-         const dataApi = await GetOrder();
+         const dataApi = await getOrder(user.newOrderId);
          if (dataApi.status) {
             if (JSON.stringify(dataApi.result) !== JSON.stringify(cart)) {
                dispatch({
                   type: reducerCases.SET_CART,
-                  cart: dataApi.result,
+                  cart: dataApi.result.data.order.detail,
                });
             }
          }
@@ -91,8 +92,12 @@ const ProductDetail = () => {
          const dataDetail = await getProduct(params.productId);
          if (dataDetail?.status) {
             if (productdetail !== dataDetail.result) {
-               let dataP =dataDetail.result.product;
-               const dataComment = await getListComment({index:5,page:1,productId:dataP.id});
+               let dataP = dataDetail.result.product;
+               const dataComment = await getListComment({
+                  index: 5,
+                  page: 1,
+                  productId: dataP.id,
+               });
                dataP.reviews = dataComment.result.commentList;
                dispatch({
                   type: reducerCases.SET_PRODUCTDETAIL,
@@ -146,20 +151,24 @@ const ProductDetail = () => {
                      {productdetail?.name}
                   </div>
                   <div className="price-container">
-                     {productdetail?.discount===0?
+                     {productdetail?.discount === 0 ? (
                         <div className="price">
                            {productdetail?.unitPrice.toLocaleString() || 0}đ
                         </div>
-                     :  
+                     ) : (
                         <div>
                            <div className="price">
-                              {(productdetail?.unitPrice-productdetail?.discount).toLocaleString() || 0}đ
+                              {(
+                                 productdetail?.unitPrice -
+                                 productdetail?.discount
+                              ).toLocaleString() || 0}
+                              đ
                            </div>
                            <div className="original-price">
                               {productdetail?.unitPrice.toLocaleString() || 0}đ{' '}
                            </div>
                         </div>
-                     }
+                     )}
                      <div className="rating">
                         <RatingStars
                            rating={productdetail?.rating || 0}

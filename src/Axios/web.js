@@ -1,6 +1,5 @@
 import axiosClient from './axiosClient';
 import checkAndRenewToken from '../Token/token';
-import { useStateProvider } from '../StateProvider/StateProvider';
 
 const END_POINT = {
    ADDRESS: 'address',
@@ -14,14 +13,15 @@ const END_POINT = {
 };
 // Address
 //add
-export const addAddress = (address) => {
+export const addAddress = async (address) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   return axiosClient.post(`${END_POINT.ADDRESS}`, address, {
+   const res = await axiosClient.post(`${END_POINT.ADDRESS}`, address, {
       headers: {
-         Authorization: token,
+         Authorization: JSON.parse(localStorage.getItem('webbanbalo_user')),
       },
    });
+   await checkAndRenewToken(res);
+   return res;
 };
 //update
 export const updateAddress = (address) => {
@@ -187,14 +187,15 @@ export const deleteOrder = (id) => {
    });
 };
 //get(id) order information
-export const getOrder = (id) => {
+export const getOrder = async (id) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   return axiosClient.get(`${END_POINT.ORDER}/${id}`, {
+   const res = await axiosClient.get(`${END_POINT.ORDER}/${id}`, {
       headers: {
-         Authorization: token,
+         Authorization: JSON.parse(localStorage.getItem('webbanbalo_user')),
       },
    });
+   await checkAndRenewToken(res);
+   return res;
 };
 //confirm order
 export const confirmOrder = (id, body) => {
@@ -366,14 +367,15 @@ export const register = (data) => {
    return axiosClient.post(`${END_POINT.USER}`, data);
 };
 //update profile
-export const updateProfile = (data) => {
+export const updateProfile = async (data) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   return axiosClient.put(`${END_POINT.USER}`, data, {
+   const res = await axiosClient.put(`${END_POINT.USER}`, data, {
       headers: {
-         Authorization: token,
+         Authorization: JSON.parse(localStorage.getItem('webbanbalo_user')),
       },
    });
+   await checkAndRenewToken(res);
+   return res;
 };
 //login
 export const login = (data) => {
@@ -431,22 +433,33 @@ export const deleteAccount = (id) => {
    });
 };
 //get account by token
-export const getProfileByToken = () => {
+export const getProfileByToken = async () => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   return axiosClient.get(`${END_POINT.USER}/pro`, {
+   const token = await localStorage.getItem('webbanbalo_user');
+   const res = await axiosClient.get(`${END_POINT.USER}/pro`, {
       headers: {
          Authorization: token,
       },
    });
+   await checkAndRenewToken(res);
+   return res;
 };
 //get avatar by id
 export const getAvatarById = (id) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
    return axiosClient.get(`${END_POINT.USER}/pro/pic/${id}`, {
       headers: {
-         Authorization: token,
+         Authorization: JSON.parse(localStorage.getItem('webbanbalo_user')),
+      },
+   });
+};
+
+//get avatar by id
+export const getAvatarByToken = () => {
+   //require author
+   return axiosClient.get(`${END_POINT.USER}/pro/pic`, {
+      headers: {
+         Authorization: JSON.parse(localStorage.getItem('webbanbalo_user')),
       },
    });
 };
@@ -610,25 +623,25 @@ export const GetOrderAdminApi = async (search, pageIndex, pageSize) => {
       throw error;
    }
 };
-export const GetOrder = async () => {
-   try {
-      const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
+// export const GetOrder = async () => {
+//    try {
+//       const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
 
-      const response = await axiosClient.get(`${END_POINT.ORDER}/orderNow`, {
-         headers: {
-            Authorization: token,
-         },
-      });
-      await checkAndRenewToken(response);
-      return response;
-   } catch (error) {
-      console.error(
-         'Lỗi trong quá trình kiểm tra và cấp mới token hoặc cuộc gọi axios:',
-         error
-      );
-      throw error;
-   }
-};
+//       const response = await axiosClient.get(`${END_POINT.ORDER}/orderNow`, {
+//          headers: {
+//             Authorization: token,
+//          },
+//       });
+//       await checkAndRenewToken(response);
+//       return response;
+//    } catch (error) {
+//       console.error(
+//          'Lỗi trong quá trình kiểm tra và cấp mới token hoặc cuộc gọi axios:',
+//          error
+//       );
+//       throw error;
+//    }
+// };
 export const ConfirmOrder = async (order) => {
    try {
       const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
