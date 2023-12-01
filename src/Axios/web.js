@@ -75,14 +75,16 @@ export const getListAddress = (data) => {
 
 // Chat
 //add
-export const addChat = (chat) => {
+export const addChat = async (chat) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   return axiosClient.post(`${END_POINT.CHAT}`, chat, {
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = await axiosClient.post(`${END_POINT.CHAT}`, chat, {
       headers: {
          Authorization: token,
       },
    });
+   await checkAndRenewToken(res);
+   return res;
 };
 //get list group
 export const getListGroup = (data) => {
@@ -118,14 +120,16 @@ export const getMessageByMyGroup = (data) => {
 
 // Comment
 //add
-export const addComment = (comment) => {
+export const addComment = async (comment) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   return axiosClient.post(`${END_POINT.COMMENT}`, comment, {
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = await axiosClient.post(`${END_POINT.COMMENT}`, comment, {
       headers: {
          Authorization: token,
       },
    });
+   await checkAndRenewToken(res);
+   return res;
 };
 //get list
 export const getListComment = (data) => {

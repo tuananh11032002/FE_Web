@@ -5,6 +5,9 @@ class SignalRConnection {
    constructor() {
       this.connection = null;
    }
+   async GetConnection() {
+      return this.connection;
+   }
    async Disconnect() {
       if (this.connection != null) {
          this.connection.stop();
@@ -13,30 +16,32 @@ class SignalRConnection {
       }
    }
    async startConnection() {
-      this.connection = new signalR.HubConnectionBuilder()
-         .withUrl('http://backend.misaproject.click/hub', {
-            accessTokenFactory: async () => {
-               const { token } = JSON.parse(
-                  localStorage.getItem('webbanbalo_user')
-               );
-               return token;
-            },
-         })
-         .withAutomaticReconnect()
-         .build();
+      if (this.connection == null) {
+         this.connection = new signalR.HubConnectionBuilder()
+            .withUrl('http://backend.misaproject.click/hub', {
+               accessTokenFactory: async () => {
+                  const { token } = JSON.parse(
+                     localStorage.getItem('webbanbalo_user')
+                  );
+                  return token;
+               },
+            })
+            .withAutomaticReconnect()
+            .build();
 
-      try {
-         this.connection.onclose(async () => {
-            console.log('Closed');
-         });
-         this.connection.on('OnConnected', () => {
-            console.log('Connected');
-         });
-         await this.connection.start();
+         try {
+            this.connection.onclose(async () => {
+               console.log('Closed');
+            });
+            this.connection.on('OnConnected', () => {
+               console.log('Connected');
+            });
+            await this.connection.start();
 
-         console.log('connection status', this.connection.state);
-      } catch (error) {
-         console.error('Error connecting to SignalR hub:', error);
+            console.log('connection status', this.connection.state);
+         } catch (error) {
+            console.error('Error connecting to SignalR hub:', error);
+         }
       }
    }
 }

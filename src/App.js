@@ -19,7 +19,7 @@ import ProfileAccount from './Page/ProfileAccount';
 import AddressAccount from './Page/AddressAccount';
 import OrderAccount from './Page/OrderAccount';
 //import * as signalR from '@microsoft/signalr';
-import connection from './Hub/connection';
+import Hub from './Hub/connection';
 import ProductListPage from './AdminPage/Page/ProductListPage';
 import ChatPage from './AdminPage/Page/ChatPage';
 import CategoryListPage from './AdminPage/Page/CategoryListPage';
@@ -39,8 +39,7 @@ import { ToastContainer, toast } from 'react-toastify';
 
 function App() {
    const [isUserReady, setIsUserReady] = useState(false);
-   const [{ user }, dispatch] = useStateProvider();
-   let connectionHub = null;
+   const [{ user, connection }, dispatch] = useStateProvider();
    const UserRoute = (props) => {
       //console.log('props', props);
       if (user) {
@@ -61,14 +60,19 @@ function App() {
    }, [user]);
    useEffect(() => {
       if (user) {
-         connection.startConnection();
+         Hub.startConnection();
+         const temp = Hub.GetConnection();
+         dispatch({
+            connection: temp,
+            type: reducerCases.SET_CONNECTIONHUB,
+         });
       }
       if (!user) {
-         connection.Disconnect();
+         Hub.Disconnect();
       }
       return () => {
          if (!user) {
-            connection.Disconnect();
+            Hub.Disconnect();
          }
       };
    }, [user]);
