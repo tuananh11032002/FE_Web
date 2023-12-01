@@ -192,11 +192,11 @@ function App() {
                      }
                   />
                   <Route
-                     path="/account/order"
+                     path="/account/order/:id"
                      element={
-                        <UserRoute>
-                           <OrderAccount />
-                        </UserRoute>
+                        // <UserRoute>
+                        <OrderAccount />
+                        // </UserRoute>
                      }
                   />
 
