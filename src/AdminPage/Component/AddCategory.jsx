@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { MdClose } from 'react-icons/md';
 import styled from 'styled-components';
 import {
-   createCategoryApi,addCategory,
-   getCategoryApiById,updateCategory,
-   putCategory,getCategory
+   addCategory,
+   updateCategory,
+   getCategory,
+   addFile
 } from '../../Axios/web';
 import processApiImagePath from '../../Helper/EditLinkImage';
 import { VscLoading } from 'react-icons/vsc';
@@ -16,54 +17,59 @@ export const AddCategory = ({
    setCategoryId,
    categoryId,
 }) => {
-   const [category, setCategory] = useState({ name: '', title: '' });
+   const [category, setCategory] = useState({ name: ''});
    const [loading, setLoading] = useState(false);
+   const [file, setFile] = useState();
+   const [url, setUrl] = useState();
    const handleChange = (e) => {
       const { name, value } = e.target;
       setCategory({ ...category, [name]: value });
    };
    useEffect(() => {
       if (categoryId !== null) {
-         console.log('fetch');
+         console.log("fetch");
          fetchCategoryById();
       }
    }, []);
    const handleChangeImage = (e) => {
-      let temp;
-      if (e.target.name === 'image') {
-         temp = 'imageShow';
-      } else {
-         temp = 'imageReplaceShow';
-      }
-      setCategory((pre) => ({
-         ...pre,
-         [e.target.name]: URL.createObjectURL(e.target.files[0]),
-         [temp]: e.target.files[0],
-      }));
+      const file = e.target.files[0];
+      console.log("icon", file);
+      setFile(file);
+      setUrl(URL.createObjectURL(file));
    };
    const fetchCategoryById = async () => {
       const data = await getCategory(categoryId);
       if (data?.status) {
-         if (JSON.stringify(data.result) !== JSON.stringify(category)) {
-            setCategory(data.result);
+         if (JSON.stringify(data.result.productCategory) !== JSON.stringify(category)) {
+            setCategory(data.result.productCategory);
          }
       }
+      
    };
    const handleSubmit = async (e) => {
       e.preventDefault();
-      const formData = new FormData();
-      formData.append('category.Name', category.name);
-      formData.append('category.Image', category.imageShow);
-      formData.append('category.ImageReplace', category.imageReplaceShow);
-      formData.append('category.Title', category.title);
-
+      const formData = {};
+      formData.name = category.name;
+      formData.icon = category.icon;
+      formData.active = category.active;
+      if(file){
+         let fD = new FormData();
+         fD.append('files', file);
+         const res = await addFile(fD);
+         console.log("idFile:",res);
+         formData.icon = res.result.data?.data[0].id;
+      }
+      console.log("fD",formData);
       setLoading(true);
       let data;
       if (categoryId === null) {
+         formData.active = true;
          data = await addCategory(formData);
          console.log('data', data);
       } else {
-         formData.append('category.Id', category.id);
+         console.log('idCate', category.id);
+         console.log('idCate1', categoryId);
+         formData.id= category.id;
          data = await updateCategory(formData);
          console.log('data', data);
       }
@@ -102,35 +108,13 @@ export const AddCategory = ({
                value={category?.name}
                onChange={handleChange}
             />
-            <input
-               type="text"
-               placeholder="Title"
-               name="title"
-               value={category.title}
-               onChange={handleChange}
-            />
             <div className="input-container">
                <input type="file" name="image" onChange={handleChangeImage} />
-
-               <img
-                  src={processApiImagePath(category.image) || category.image}
+               {file?<img src={url}/>
+               :<img
+                  src={processApiImagePath(category.icon) || category.icon}
                   alt=""
-               />
-            </div>
-            <div className="input-container">
-               <input
-                  type="file"
-                  name="imageReplace"
-                  onChange={handleChangeImage}
-               />
-
-               <img
-                  src={
-                     processApiImagePath(category.imageReplace) ||
-                     category.imageReplace
-                  }
-                  alt=""
-               />
+               />}
             </div>
 
             <div className="select-wrapper">

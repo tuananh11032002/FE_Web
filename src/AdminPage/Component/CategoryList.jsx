@@ -4,7 +4,7 @@ import Pagination from "./Pagination";
 import styled from 'styled-components';
 import { AddCategory } from './AddCategory';
 import { AdminContext } from '../Admin';
-import { deleteCategoryApi, getCategoryApiForAdmin,getListCategory } from '../../Axios/web';
+import { deleteCategory,getListCategory } from '../../Axios/web';
 import { RiDeleteBin3Line } from 'react-icons/ri';
 import { FiEdit2 } from 'react-icons/fi';
 import processApiImagePath from '../../Helper/EditLinkImage';
@@ -24,7 +24,7 @@ const CategoryList = () => {
    const messageBoxRef = useRef();
 
    const handleYes = async () => {
-      await deleteCategoryApi(categoryId);
+      await deleteCategory(categoryId);
       fetchCategory();
    };
 
@@ -55,7 +55,7 @@ const CategoryList = () => {
    };
    useEffect(() => {
       fetchCategory();
-   }, [search,page, selectedValue]);
+   }, [search,page, selectedValue, isOpenAddCategory]);
    return (
       <Container>
          <ConfirmationDialog

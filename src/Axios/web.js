@@ -137,9 +137,10 @@ export const getListComment = (data) => {
 //add
 export const addFile = async (files) => {
    //require author
+   const {token} = JSON.parse(localStorage.getItem('webbanbalo_user'));
    const res = await axiosClient.post(`${END_POINT.FILE}`, files, {
       headers: {
-         Authorization: JSON.parse(localStorage.getItem('webbanbalo_user')),
+         Authorization: token,
       },
    });
    await checkAndRenewToken(res);
@@ -324,34 +325,40 @@ export const getListProductForAdmin = (data) => {
 
 // ProductCategory
 //add
-export const addCategory = (category) => {
+export const addCategory = async (category) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   return axiosClient.post(`${END_POINT.CATEGORY}`, category, {
+   const {token} = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = axiosClient.post(`${END_POINT.CATEGORY}`, category, {
       headers: {
          Authorization: token,
       },
    });
+   await checkAndRenewToken(res);
+   return res;
 };
 //update
-export const updateCategory = (category) => {
+export const updateCategory = async (category) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   return axiosClient.put(`${END_POINT.CATEGORY}`, category, {
+   const {token} = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = axiosClient.put(`${END_POINT.CATEGORY}`, category, {
       headers: {
          Authorization: token,
       },
    });
+   await checkAndRenewToken(res);
+   return res;
 };
 //delete
-export const deleteCategory = (id) => {
+export const deleteCategory = async (id) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   return axiosClient.delete(`${END_POINT.CATEGORY}/${id}`, {
+   const {token} = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = axiosClient.delete(`${END_POINT.CATEGORY}/${id}`, {
       headers: {
          Authorization: token,
       },
    });
+   await checkAndRenewToken(res);
+   return res;
 };
 //get(id)
 export const getCategory = (id) => {
