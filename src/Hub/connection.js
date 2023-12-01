@@ -5,9 +5,6 @@ class SignalRConnection {
    constructor() {
       this.connection = null;
    }
-   async GetConnection() {
-      return this.connection;
-   }
    async Disconnect() {
       if (this.connection != null) {
          this.connection.stop();
@@ -33,6 +30,8 @@ class SignalRConnection {
             this.connection.onclose(async () => {
                console.log('Closed');
             });
+
+            console.log('SignalRConnection : ', this.connection);
             this.connection.on('OnConnected', () => {
                console.log('Connected');
             });

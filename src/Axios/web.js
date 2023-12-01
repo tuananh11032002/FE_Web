@@ -87,34 +87,40 @@ export const addChat = async (chat) => {
    return res;
 };
 //get list group
-export const getListGroup = (data) => {
+export const getListGroup = async (data) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   return axiosClient.post(`${END_POINT.CHAT}/list`, data, {
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = await axiosClient.post(`${END_POINT.CHAT}/list`, data, {
       headers: {
          Authorization: token,
       },
    });
+   await checkAndRenewToken(res);
+   return res;
 };
 //get message by group
-export const getMessageByGroup = (data) => {
+export const getMessageByGroup = async (data) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   return axiosClient.post(`${END_POINT.CHAT}/message`, data, {
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = await axiosClient.post(`${END_POINT.CHAT}/message`, data, {
       headers: {
          Authorization: token,
       },
    });
+   await checkAndRenewToken(res);
+   return res;
 };
 //get message by my group
-export const getMessageByMyGroup = (data) => {
+export const getMessageByMyGroup = async (data) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   return axiosClient.post(`${END_POINT.CHAT}/mine`, data, {
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = await axiosClient.post(`${END_POINT.CHAT}/mine`, data, {
       headers: {
          Authorization: token,
       },
    });
+   await checkAndRenewToken(res);
+   return res;
 };
 // end Chat
 
@@ -141,7 +147,7 @@ export const getListComment = (data) => {
 //add
 export const addFile = async (files) => {
    //require author
-   const {token} = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
    const res = await axiosClient.post(`${END_POINT.FILE}`, files, {
       headers: {
          Authorization: token,
@@ -331,7 +337,7 @@ export const getListProductForAdmin = (data) => {
 //add
 export const addCategory = async (category) => {
    //require author
-   const {token} = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
    const res = axiosClient.post(`${END_POINT.CATEGORY}`, category, {
       headers: {
          Authorization: token,
@@ -343,7 +349,7 @@ export const addCategory = async (category) => {
 //update
 export const updateCategory = async (category) => {
    //require author
-   const {token} = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
    const res = axiosClient.put(`${END_POINT.CATEGORY}`, category, {
       headers: {
          Authorization: token,
@@ -355,7 +361,7 @@ export const updateCategory = async (category) => {
 //delete
 export const deleteCategory = async (id) => {
    //require author
-   const {token} = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
    const res = axiosClient.delete(`${END_POINT.CATEGORY}/${id}`, {
       headers: {
          Authorization: token,

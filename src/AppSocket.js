@@ -1,27 +1,35 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import styled from 'styled-components';
 import { useStateProvider } from './StateProvider/StateProvider';
-import { getMessageWithUserId, getUserMessage } from './Axios/web';
+import {
+   getMessageByMyGroup,
+   getMessageByGroup,
+   getListGroup,
+   addChat,
+} from './Axios/web';
 import { FcHome } from 'react-icons/fc';
 import { useNavigate } from 'react-router-dom';
 import { AdminContext } from './AdminPage/Admin';
-import processApiImagePath from './Helper/EditLinkImage';
+
 function App() {
    const [messages, setMessages] = useState([]);
    const [newMessage, setNewMessage] = useState('');
-   const [user, setUser] = useState([]);
+   const [userList, setUserList] = useState([]);
    const [selectedUser, setSelectedUser] = useState(null);
+   const [isOpenUser, setIsOpenUser] = useState(false);
 
    const messageListRef = useRef(null);
    const inputRef = useRef(null);
    const navigate = useNavigate();
-   const [{ connection }] = useStateProvider();
+   const [{ connection, user }] = useStateProvider();
    const [dataContext, setDataContext] = useState({
       closeMenu: null,
       occupy: null,
    });
 
    const contextTemp = useContext(AdminContext);
+
+   //UI
    useEffect(() => {
       if (contextTemp) {
          setDataContext({
@@ -34,23 +42,70 @@ function App() {
    //get user message
    useEffect(() => {
       const getUser = async () => {
-         const response = await getUserMessage();
-         console.log('response', response);
-         if (response?.status) {
-            if (JSON.stringify(response.result) != JSON.stringify(user)) {
-               setUser(response.result);
+         if (user.role === 'Admin') {
+            const response = await getListGroup({
+               page: 1,
+               index: 1000,
+            });
+            if (response?.status) {
+               setUserList(response.result.data.rooms);
+               response.result.data.rooms.map((item) => {
+                  connection.invoke('Join', item.id);
+               });
+               if (response.result?.data.rooms.length > 0) {
+                  setSelectedUser(response.result.data.rooms[0]);
+               }
             }
-            if (response.result?.length > 0) {
-               setSelectedUser(response.result[0]);
-            }
+         } else {
+            connection.invoke('Join', user.id);
+            setSelectedUser({
+               id: user.id,
+               name: user.name,
+               message: null,
+            });
          }
       };
       getUser();
    }, [user]);
+
    //get message with userid
    useEffect(() => {
+      const getMessage = async () => {
+         if (user.role === 'Admin') {
+            if (selectedUser) {
+               const a = {
+                  id: selectedUser.id,
+                  index: 10,
+                  page: 1,
+               };
+               const response = await getMessageByGroup(a);
+               if (response?.status) {
+                  setMessages(
+                     response?.result?.data?.chatline.map((item) => ({
+                        sendedUser: item.sendedUser,
+                        content: item.description,
+                     }))
+                  );
+               }
+            }
+         } else {
+            const response = await getMessageByMyGroup({
+               index: 10,
+               page: 1,
+            });
+            if (response?.status) {
+               setMessages(
+                  response?.result?.data?.chatline.map((item) => ({
+                     sendedUser: item.sendedUser,
+                     content: item.description,
+                  }))
+               );
+            }
+         }
+      };
       getMessage();
    }, [selectedUser]);
+
    //scroll
    useEffect(() => {
       if (messageListRef.current) {
@@ -64,55 +119,42 @@ function App() {
       console.log('cone', connection);
 
       if (connection) {
-         connection.on('ErrorMessage', (message) => {
-            setMessages((pre) => [...pre, message]);
-            setNewMessage('');
-         });
-
-         connection.on('ReceiveMessage', (message) => {
-            const messageJSON = JSON.parse(message);
-            console.log('tin nhan nhan duoc ', messageJSON);
-            setMessages((pre) => [
-               ...pre,
-               {
-                  content: messageJSON.Content,
-
-                  receiverUserId: messageJSON.ReceiverUserId,
-
-                  senderUserId: messageJSON.SenderUserId,
-
-                  timestamp: messageJSON.Timestamp,
-               },
-            ]);
-
-            setNewMessage('');
+         connection.on('Received', (Receive) => {
+            console.log('Received :', Receive);
+            console.log('selectedUser :', selectedUser);
+            if (
+               user.role !== 'Admin' ||
+               Receive.message.groupid === selectedUser.id
+            ) {
+               setMessages((pre) => [Receive.message.value, ...pre]);
+            }
          });
       }
 
       return () => {
          if (connection) {
-            connection.off('ReceiveMessage');
+            connection.off('Received');
          }
       };
    }, [connection]);
 
-   const getMessage = async () => {
-      if (selectedUser) {
-         const response = await getMessageWithUserId(selectedUser.userId);
-         if (response?.status) {
-            if (JSON.stringify(response.result) != JSON.stringify(messages)) {
-               setMessages(response.result);
-            }
-         }
-      }
-   };
    const handleInputChange = (e) => {
       setNewMessage(e.target.value);
    };
 
-   const handleSubmit = () => {
+   const handleSubmit = async () => {
       if (newMessage.trim() !== '') {
-         connection.invoke('SendMessage', selectedUser.userId, newMessage);
+         const sendmess = {
+            groupid: user.role === 'Admin' ? selectedUser.id : user.id,
+            value: { sendedUser: user.id, content: newMessage },
+         };
+         setNewMessage('');
+         setMessages((pre) => [sendmess.value, ...pre]);
+         connection.invoke('SendToGroup', sendmess, selectedUser.id);
+         const res = await addChat({
+            userId: sendmess.groupid,
+            description: sendmess.value.content,
+         });
       }
       if (inputRef.current) {
          inputRef.current.focus();
@@ -176,8 +218,11 @@ function App() {
       }
    }
 
-   const handleUserClick = (user) => {
-      setSelectedUser(user);
+   const handleUserClick = async (userclick) => {
+      console.log('selectedUser 1 :', selectedUser);
+      console.log('userclick :', userclick);
+      await setSelectedUser(userclick);
+      console.log('selectedUser 2 :', selectedUser);
       if (isPhone && isOpenUser) {
          setIsOpenUser(false);
       }
@@ -195,47 +240,50 @@ function App() {
          window.removeEventListener('resize', handleResize);
       };
    }, []);
-   const [isOpenUser, setIsOpenUser] = useState(false);
 
    return (
       <>
          <Container height={dataContext.occupy}>
-            <div className={`user ${isOpenUser ? 'show-user' : null}`}>
-               {user?.map((user, index) => {
-                  return (
-                     <div
-                        className={`user-single ${
-                           selectedUser?.userId == user.userId ? 'selected' : ''
-                        }`}
-                        key={index}
-                        onClick={() => {
-                           handleUserClick(user);
-                        }}
-                     >
-                        <img
-                           src={
-                              processApiImagePath(user.image) ||
-                              require('./Assets/Image/account.png')
+            {user.role === 'Admin' && (
+               <div className={`user ${isOpenUser ? 'show-user' : null}`}>
+                  {userList?.map((usertemp, index) => {
+                     return (
+                        <div
+                           className={`user-single ${
+                              selectedUser?.Id == usertemp.Id ? 'selected' : ''
+                           }`}
+                           key={index}
+                           onClick={() => {
+                              handleUserClick(usertemp);
+                           }}
+                           style={
+                              usertemp.id == selectedUser.id
+                                 ? { backgroundColor: '#808080' }
+                                 : { backgroundColor: '#DCDCDC' }
                            }
-                           alt="Account Image"
-                           width="48px"
-                           height="48px"
-                        />
-                        <div>
-                           <div className="userName">{user.userName}</div>
-                           <div className="lastMessageTime">
-                              {calculateTimeDifference(
-                                 user.lastMessageSentTimeString
-                              )}
-                           </div>
-                           <div className="lastMessage">
-                              {user.lastMessageContent}
+                        >
+                           <img
+                              src={`http://backend.misaproject.click/api/user/pro/pic/${usertemp.id}`}
+                              alt="Account Image"
+                              width="48px"
+                              height="48px"
+                           />
+                           <div>
+                              <div className="userName">{usertemp.name}</div>
+                              <div className="lastMessageTime">
+                                 {calculateTimeDifference(
+                                    usertemp?.message?.createdDate
+                                 )}
+                              </div>
+                              <div className="lastMessage">
+                                 {usertemp?.message?.description}
+                              </div>
                            </div>
                         </div>
-                     </div>
-                  );
-               })}
-            </div>
+                     );
+                  })}
+               </div>
+            )}
 
             <div className="chat-box">
                <div className="action">
@@ -260,11 +308,7 @@ function App() {
                      <div
                         key={index}
                         className={`message ${
-                           message.senderUserId ==
-                           JSON.parse(localStorage.getItem('webbanbalo_user'))
-                              .userId
-                              ? 'you'
-                              : 'other'
+                           message.sendedUser == user.id ? 'you' : 'other'
                         }`}
                      >
                         {message.content}

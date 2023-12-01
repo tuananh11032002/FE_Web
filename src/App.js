@@ -61,9 +61,8 @@ function App() {
    useEffect(() => {
       if (user) {
          Hub.startConnection();
-         const temp = Hub.GetConnection();
          dispatch({
-            connection: temp,
+            connection: Hub.connection,
             type: reducerCases.SET_CONNECTIONHUB,
          });
       }
@@ -159,11 +158,11 @@ function App() {
                      }
                   />
                   <Route
-                     path="/account/order/:id"
+                     path="/account/order"
                      element={
-                        // <UserRoute>
-                        <OrderAccount />
-                        // </UserRoute>
+                        <UserRoute>
+                           <OrderAccount />
+                        </UserRoute>
                      }
                   />
 
