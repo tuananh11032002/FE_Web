@@ -196,9 +196,10 @@ export const deleteOrder = (id) => {
 //get(id) order information
 export const getOrder = async (id) => {
    //require author
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
    const res = await axiosClient.get(`${END_POINT.ORDER}/${id}`, {
       headers: {
-         Authorization: localStorage.getItem('webbanbalo_user'),
+         Authorization: token,
       },
    });
    await checkAndRenewToken(res);
@@ -245,24 +246,28 @@ export const getListOrder = (data) => {
    });
 };
 //get list by userId
-export const getListOrderByUserId = (userId, body) => {
+export const getListOrderByUserId = async (userId, body) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
    return axiosClient.post(`${END_POINT.ORDER}/list/${userId}`, body, {
       headers: {
+         'Content-Type': 'application/json',
          Authorization: token,
       },
    });
 };
 //get my list
-export const getMyListOrder = (data) => {
+export const getMyListOrder = async (data) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   return axiosClient.post(`${END_POINT.ORDER}/listmine`, data, {
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = await axiosClient.post(`${END_POINT.ORDER}/listmine`, data, {
       headers: {
+         'Content-Type': 'application/json',
          Authorization: token,
       },
    });
+   await checkAndRenewToken(res);
+   return res;
 };
 // end Order
 

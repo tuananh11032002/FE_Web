@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { CancelOrder, GetOrderDone } from '../../Axios/web';
+import { CancelOrder, getMyListOrder } from '../../Axios/web';
 import processApiImagePath from '../../Helper/EditLinkImage';
 import Pagination from '../../AdminPage/Component/Pagination';
 import { useNavigate } from 'react-router-dom';
@@ -9,78 +9,24 @@ import ConfirmationDialog from '../../Sharing/MessageBox';
 
 const OrderPage = () => {
    const navigate = useNavigate();
-   const [data, setData] = useState([
-      {
-         orderId: '12345',
-         customerName: 'Nguyễn Văn A',
-         orderDate: '2023-09-10',
-         totalAmount: 2500,
-         orderStatus: 'Hoàn thành',
-         feeShip: 0,
-         grandTotal: 0,
-         shippingAddress: '123 Đường ABC, Quận XYZ, Thành phố HCM',
-         product: [
-            {
-               id: '789',
-               name: 'Sản phẩm A',
-               quantity: 2,
-               price: 50.0,
-               image: 'https://down-vn.img.susercontent.com/file/a7fe67a8837d5c1b9d2858fe13d8d66b_tn',
-            },
-            {
-               id: '456',
-               name: 'Sản phẩm B',
-               quantity: 3,
-               price: 30.0,
-               image: 'https://down-vn.img.susercontent.com/file/a7fe67a8837d5c1b9d2858fe13d8d66b_tn',
-            },
-            {
-               id: '789',
-               name: 'Sản phẩm C',
-               quantity: 1,
-               price: 70.0,
-               image: 'https://down-vn.img.susercontent.com/file/a7fe67a8837d5c1b9d2858fe13d8d66b_tn',
-            },
-         ],
-      },
-      {
-         orderId: '12345',
-         customerName: 'Nguyễn Văn A',
-         orderDate: '2023-09-10',
-         totalAmount: 250.0,
-         orderStatus: 'Hoàn thành',
-         feeShip: 0,
-         grandTotal: 0,
-         shippingAddress: '123 Đường ABC, Quận XYZ, Thành phố HCM',
-         product: [
-            {
-               id: '789',
-               name: 'Sản phẩm A',
-               quantity: 2,
-               price: 50.0,
-               image: 'https://down-vn.img.susercontent.com/file/a7fe67a8837d5c1b9d2858fe13d8d66b_tn',
-            },
-            {
-               id: '456',
-               name: 'Sản phẩm B',
-               quantity: 3,
-               price: 30.0,
-               image: 'https://down-vn.img.susercontent.com/file/a7fe67a8837d5c1b9d2858fe13d8d66b_tn',
-            },
-            {
-               id: '789',
-               name: 'Sản phẩm C',
-               quantity: 1,
-               price: 70.0,
-               image: 'https://down-vn.img.susercontent.com/file/a7fe67a8837d5c1b9d2858fe13d8d66b_tn',
-            },
-         ],
-      },
-   ]);
+   // const [data, setData] = useState([
+   //    {
+   //       orderId: '12345',
+   //       customerName: 'Nguyễn Văn A',
+   //       orderDate: '2023-09-10',
+   //       totalAmount: 2500,
+   //       orderStatus: 'Hoàn thành',
+   //       feeShip: 0,
+   //       grandTotal: 0,
+   //       shippingAddress: '123 Đường ABC, Quận XYZ, Thành phố HCM',
+   //    },
+   // ]);
+   const [data, setData] = useState();
    const [pageNow, setPageNow] = useState(1);
-   const [status, setStatus] = useState('');
+   const [status, setStatus] = useState(0);
    const [activeItem, setActiveItem] = useState(0);
-   const [totalOrder, setTotalOrder] = useState(100);
+   const [totalOrder, setTotalOrder] = useState(0);
+   const [totalPage, setTotalPage] = useState(5);
    const [isOpenRating, setIsOpenRating] = useState(false);
    const [productEdit, setProductEdit] = useState({ orderId: null });
    const [orderIdEdit, setOrderIdEdit] = useState();
@@ -111,19 +57,48 @@ const OrderPage = () => {
       }
    };
    const fetchData = async () => {
-      const dataApi = await GetOrderDone({ status, pageNow, pageSize: 3 });
+      const dataApi = await getMyListOrder(
+         JSON.stringify({
+            index: 5,
+            page: pageNow,
+            status: status == 0 ? null : status,
+         })
+      );
       if (dataApi?.status === true) {
-         if (JSON.stringify(dataApi.result.data) !== JSON.stringify(data)) {
-            setData(dataApi.result.data);
-            setTotalOrder(dataApi.result.totalOrder);
-         }
+         const Index = dataApi?.result?.data?.orderList?.filter(
+            (i) => i.status === 0
+         );
+         setData(
+            Index.map((i) => ({
+               orderId: i.id,
+               customerName: i.user.name,
+               orderDate: i.createdDate,
+               totalAmount: i.totalPrice,
+               orderStatus:
+                  i.status === 0
+                     ? 'Khởi tạo'
+                     : i.status === 1
+                     ? 'Chờ thanh toán'
+                     : i.status === 2
+                     ? 'Đang giao'
+                     : i.status === 3
+                     ? 'Hoàn thành'
+                     : i.status === 4
+                     ? 'Đã hủy'
+                     : 'Lỗi trạng thái',
+               feeShip: 0,
+               grandTotal: i.totalPrice - i.discount,
+               discount: i.discount,
+               shippingAddress: i.address,
+            }))
+         );
+         setTotalOrder(dataApi?.result?.data?.totalItemCount);
+         setTotalPage(dataApi?.result?.data?.totalItemPage);
       }
-      console.log(dataApi, 'data');
    };
    useEffect(() => {
       fetchData();
    }, [pageNow, status]);
-   console.log('data', data);
    return (
       <Container>
          <ConfirmationDialog
@@ -178,7 +153,7 @@ const OrderPage = () => {
                Đã hủy
             </div>
          </div>
-         {data.map((da, index) => {
+         {data?.map((da, index) => {
             return (
                <div className="order-child" key={index}>
                   <div className="header">
@@ -186,7 +161,7 @@ const OrderPage = () => {
                      <div>Tình trạng đơn hàng: {da.orderStatus}</div>
                   </div>
                   <div className="body">
-                     {da.product.map((item, index2) => {
+                     {/* {da.product.map((item, index2) => {
                         return (
                            <div className="review">
                               <div className="item" key={index2}>
@@ -225,7 +200,7 @@ const OrderPage = () => {
                               ) : null}
                            </div>
                         );
-                     })}
+                     })} */}
                   </div>
                   <div className="footer">
                      <div>
@@ -245,12 +220,12 @@ const OrderPage = () => {
                                  {da?.totalAmount.toLocaleString()}đ
                               </div>
                            </div>
-                           <div className="price-total">
+                           {/* <div className="price-total">
                               <div>Phí vận chuyển:</div>
                               <div className="price-label">
                                  {da?.feeShip.toLocaleString()}đ
                               </div>
-                           </div>
+                           </div> */}
                            <div className="price-total">
                               <div>Giảm giá:</div>
                               <div className="price-label">
@@ -281,7 +256,7 @@ const OrderPage = () => {
             );
          })}
          <Pagination
-            obj={{ totalProduct: totalOrder, pageNow, size: 3 }}
+            obj={{ totalProduct: totalOrder, pageNow, size: totalPage }}
             setPageNow={setPageNow}
          />
       </Container>
