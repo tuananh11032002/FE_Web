@@ -18,7 +18,8 @@ import { reducerCases } from './StateProvider/reducer';
 import ProfileAccount from './Page/ProfileAccount';
 import AddressAccount from './Page/AddressAccount';
 import OrderAccount from './Page/OrderAccount';
-import * as signalR from '@microsoft/signalr';
+//import * as signalR from '@microsoft/signalr';
+import connection from './Hub/connection';
 import ProductListPage from './AdminPage/Page/ProductListPage';
 import ChatPage from './AdminPage/Page/ChatPage';
 import CategoryListPage from './AdminPage/Page/CategoryListPage';
@@ -34,10 +35,12 @@ import RegistrationPage from './Page/RegistrationPage';
 import PaymentInfo from './Page/PaymentInfo';
 import PasswordAccount from './Page/PasswordAccount';
 import PermissionDenied from './Component/Body/PermissionDenied ';
+import { ToastContainer, toast } from 'react-toastify';
 
 function App() {
    const [isUserReady, setIsUserReady] = useState(false);
    const [{ user }, dispatch] = useStateProvider();
+   let connectionHub = null;
    const UserRoute = (props) => {
       //console.log('props', props);
       if (user) {
@@ -53,66 +56,26 @@ function App() {
       ) : (
          <PermissionDenied />
       );
-
-   const fetchData = async () => {
-      const userLocal = JSON.parse(localStorage.getItem('webbanbalo_user'));
-      if (userLocal) {
-         const token = JSON.parse(
-            localStorage.getItem('webbanbalo_user')
-         ).token;
-         if (
-            JSON.stringify(userLocal) !== JSON.stringify(user) &&
-            JSON.stringify(userLocal) !== null
-         ) {
-            dispatch({
-               type: reducerCases.SET_USER,
-               user: userLocal,
-            });
-         }
-      }
-      setIsUserReady(true);
-   };
    useEffect(() => {
-      //fetchData();
       setIsUserReady(true);
    }, [user]);
    useEffect(() => {
-      let connectionHub;
-      const connectToSignalRHub = async () => {
-         try {
-            connectionHub = new signalR.HubConnectionBuilder()
-               .withUrl('http://backend.misaproject.click/hub')
-               .build();
-            connectionHub.onclose(() => {
-               console.log('SignalR connection closed');
-               dispatch({
-                  connection: connectionHub,
-                  type: reducerCases.SET_CONNECTIONHUB,
-               });
-            });
-
-            await connectionHub.start();
-
-            dispatch({
-               connection: connectionHub,
-               type: reducerCases.SET_CONNECTIONHUB,
-            });
-
-            console.log('Connected to SignalR hub');
-         } catch (error) {
-            console.error('Error connecting to SignalR hub:', error);
-         }
-      };
-
-      if (user) connectToSignalRHub();
-
+      if (user) {
+         connection.startConnection();
+      }
+      if (!user) {
+         connection.Disconnect();
+      }
       return () => {
-         if (user) connectionHub.stop();
+         if (!user) {
+            connection.Disconnect();
+         }
       };
    }, [user]);
 
    return (
       <Container>
+         <ToastContainer />
          {isUserReady ? (
             <>
                <Routes>

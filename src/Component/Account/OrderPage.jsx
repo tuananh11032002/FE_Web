@@ -256,7 +256,7 @@ const OrderPage = () => {
             );
          })}
          <Pagination
-            obj={{ totalProduct: totalOrder, pageNow, size: totalPage }}
+            obj={{ totalProduct: totalOrder, pageNow, size: 3 }}
             setPageNow={setPageNow}
          />
       </Container>
