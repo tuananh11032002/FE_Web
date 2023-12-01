@@ -236,7 +236,7 @@ const Header = () => {
                            >
                               <img
                                  src={
-                                    processApiImagePath(user.user?.image) ||
+                                    `http://backend.misaproject.click/api/user/pro/pic/${user.id}` ||
                                     require('../Assets/Image/nologin.jpg')
                                  }
                                  alt=""
