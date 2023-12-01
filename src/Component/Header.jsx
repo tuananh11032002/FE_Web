@@ -36,7 +36,7 @@ const Header = () => {
    const containerRef = useRef(null);
    const [heightContainer, setHeightContainer] = useState(0);
    const [isWindow, setIsWindow] = useState(window.innerWidth > 756);
-   console.log('header');
+   //console.log('header');
    //get user
    const handlerClick = () => {
       setShowCart(!showCart);
