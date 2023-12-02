@@ -10,6 +10,7 @@ import {
 import { FcHome } from 'react-icons/fc';
 import { useNavigate } from 'react-router-dom';
 import { AdminContext } from './AdminPage/Admin';
+import { ToastContainer, toast } from 'react-toastify';
 
 function App() {
    const [messages, setMessages] = useState([]);
@@ -43,17 +44,20 @@ function App() {
    useEffect(() => {
       const getUser = async () => {
          if (user.role === 'Admin') {
+            connection.invoke('Join', 'Admin');
             const response = await getListGroup({
                page: 1,
                index: 1000,
             });
             if (response?.status) {
-               setUserList(response.result.data.rooms);
-               response.result.data.rooms.map((item) => {
-                  connection.invoke('Join', item.id);
-               });
-               if (response.result?.data.rooms.length > 0) {
-                  setSelectedUser(response.result.data.rooms[0]);
+               const temp = [...response.result.data.rooms].sort(
+                  (a, b) =>
+                     new Date(b?.message?.createdDate ?? '1000-1-1') -
+                     new Date(a?.message?.createdDate ?? '1000-1-1')
+               );
+               setUserList(temp);
+               if (temp.length > 0) {
+                  setSelectedUser(temp[0]);
                }
             }
          } else {
@@ -66,6 +70,15 @@ function App() {
          }
       };
       getUser();
+      return () => {
+         if (connection) {
+            if (user.role === 'Admin') {
+               connection.invoke('Leave', 'Admin');
+            } else {
+               connection.invoke('Leave', user.id);
+            }
+         }
+      };
    }, [user]);
 
    //get message with userid
@@ -73,12 +86,11 @@ function App() {
       const getMessage = async () => {
          if (user.role === 'Admin') {
             if (selectedUser) {
-               const a = {
+               const response = await getMessageByGroup({
                   id: selectedUser.id,
-                  index: 10,
+                  index: 10000,
                   page: 1,
-               };
-               const response = await getMessageByGroup(a);
+               });
                if (response?.status) {
                   setMessages(
                      response?.result?.data?.chatline.map((item) => ({
@@ -90,7 +102,7 @@ function App() {
             }
          } else {
             const response = await getMessageByMyGroup({
-               index: 10,
+               index: 10000,
                page: 1,
             });
             if (response?.status) {
@@ -116,17 +128,36 @@ function App() {
    //connect server hub
    useEffect(() => {
       // Đăng ký lắng nghe sự kiện từ Hub
-      console.log('cone', connection);
+      //console.log('cone', connection);
 
       if (connection) {
-         connection.on('Received', (Receive) => {
+         connection.on('Received', async (Receive) => {
             console.log('Received :', Receive);
             console.log('selectedUser :', selectedUser);
             if (
                user.role !== 'Admin' ||
-               Receive.message.groupid === selectedUser.id
+               Receive?.message?.value?.sendedUser === selectedUser?.id
             ) {
-               setMessages((pre) => [Receive.message.value, ...pre]);
+               console.log('abc');
+               setMessages((pre) => [...pre, Receive.message.value]);
+            } else if (user.role === 'Admin') {
+               const response = await getListGroup({
+                  page: 1,
+                  index: 10000,
+               });
+               if (response?.status) {
+                  const temp = [...response.result.data.rooms].sort(
+                     (a, b) =>
+                        new Date(b?.message?.createdDate ?? '1000-1-1') -
+                        new Date(a?.message?.createdDate ?? '1000-1-1')
+                  );
+                  setUserList(temp);
+                  if (temp.length > 0) {
+                     setSelectedUser(
+                        temp.find((item) => item.id === selectedUser?.id)
+                     );
+                  }
+               }
             }
          });
       }
@@ -144,17 +175,25 @@ function App() {
 
    const handleSubmit = async () => {
       if (newMessage.trim() !== '') {
-         const sendmess = {
-            groupid: user.role === 'Admin' ? selectedUser.id : user.id,
-            value: { sendedUser: user.id, content: newMessage },
-         };
-         setNewMessage('');
-         setMessages((pre) => [sendmess.value, ...pre]);
-         connection.invoke('SendToGroup', sendmess, selectedUser.id);
          const res = await addChat({
-            userId: sendmess.groupid,
-            description: sendmess.value.content,
+            userId: user.role === 'Admin' ? selectedUser.id : user.id,
+            description: newMessage,
          });
+         if (res?.status) {
+            const sendmess = {
+               type: user.role === 'Admin' ? 1 : 0,
+               groupid: user.role === 'Admin' ? selectedUser.id : 'Admin',
+               value: { sendedUser: user.id, content: newMessage },
+            };
+            setNewMessage('');
+            setMessages((pre) => [...pre, sendmess.value]);
+            connection.invoke('SendToGroup', sendmess, sendmess.groupid);
+         } else {
+            toast.info(res?.result, {
+               position: toast.POSITION.TOP_CENTER,
+               autoClose: 1000,
+            });
+         }
       }
       if (inputRef.current) {
          inputRef.current.focus();
@@ -167,25 +206,29 @@ function App() {
    };
    function calculateTimeDifference(lastMessageSentTimeString) {
       // Kiểm tra xem chuỗi có đúng định dạng không
-      const dateRegex = /^(\d{2}:\d{2}:\d{2} \d{2}\/\d{2}\/\d{4})$/;
-      if (!dateRegex.test(lastMessageSentTimeString)) {
-         return 'Invalid date format';
-      }
+      // const dateRegex = /^(\d{2}:\d{2}:\d{2} \d{2}\/\d{2}\/\d{4})$/;
+      // if (!dateRegex.test(lastMessageSentTimeString)) {
+      //    return 'Invalid date format';
+      // }
 
-      // Tách thông tin thời gian và ngày
-      const [time, date] = lastMessageSentTimeString.split(' ');
-      const [hours, minutes, seconds] = time.split(':');
-      const [day, month, year] = date.split('/');
+      // // Tách thông tin thời gian và ngày
+      // const [time, date] = lastMessageSentTimeString.split(' ');
+      // const [hours, minutes, seconds] = time.split(':');
+      // const [day, month, year] = date.split('/');
 
       // Tạo đối tượng Date
-      const lastMessageSentTime = new Date(
-         year,
-         month - 1,
-         day,
-         hours,
-         minutes,
-         seconds
-      );
+      // const lastMessageSentTime = new Date(
+      //    year,
+      //    month - 1,
+      //    day,
+      //    hours,
+      //    minutes,
+      //    seconds
+      // );
+      if (!lastMessageSentTimeString) {
+         return ``;
+      }
+      const lastMessageSentTime = new Date(lastMessageSentTimeString);
       const currentTime = new Date();
 
       const timeDifferenceInSeconds = Math.floor(
@@ -193,12 +236,10 @@ function App() {
       );
 
       if (timeDifferenceInSeconds < 60) {
-         return `${timeDifferenceInSeconds} minute${
-            timeDifferenceInSeconds > 1 ? 's' : ''
-         } ago`;
+         return `${timeDifferenceInSeconds}m ago`;
       } else if (timeDifferenceInSeconds < 3600) {
          const minutes = Math.floor(timeDifferenceInSeconds / 60);
-         return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+         return `${minutes}m ago`;
       } else if (timeDifferenceInSeconds < 86400) {
          const hours = Math.floor(timeDifferenceInSeconds / 3600);
          const remainingMinutes = Math.floor(
@@ -206,11 +247,9 @@ function App() {
          );
 
          if (remainingMinutes === 0) {
-            return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+            return `${hours}h ago`;
          } else {
-            return `${hours} hour${
-               hours > 1 ? 's' : ''
-            } ${remainingMinutes} minute${remainingMinutes > 1 ? 's' : ''} ago`;
+            return `${hours}h${remainingMinutes} ago`;
          }
       } else {
          const days = Math.floor(timeDifferenceInSeconds / 86400);
@@ -243,6 +282,7 @@ function App() {
 
    return (
       <>
+         <ToastContainer />
          <Container height={dataContext.occupy}>
             {user.role === 'Admin' && (
                <div className={`user ${isOpenUser ? 'show-user' : null}`}>
@@ -257,7 +297,7 @@ function App() {
                               handleUserClick(usertemp);
                            }}
                            style={
-                              usertemp.id == selectedUser.id
+                              usertemp.id === selectedUser.id
                                  ? { backgroundColor: '#808080' }
                                  : { backgroundColor: '#DCDCDC' }
                            }
@@ -303,7 +343,11 @@ function App() {
                      }}
                   />
                </div>
-               <div className="message-list" ref={messageListRef}>
+               <div
+                  className="message-list"
+                  ref={messageListRef}
+                  style={{ backgroundColor: '#EEEEEE' }}
+               >
                   {messages?.map((message, index) => (
                      <div
                         key={index}
@@ -359,6 +403,7 @@ const Container = styled.div`
          transition: background-color 0.2s; /* Hiệu ứng màu nền */
          width: 100%;
          border-radius: 5px;
+         user-select: none;
       }
 
       .user-single:hover {
