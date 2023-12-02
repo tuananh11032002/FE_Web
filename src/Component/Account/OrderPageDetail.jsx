@@ -86,10 +86,9 @@ const OrderPageDetail = () => {
          });
       }
    };
-   fetchData();
-   // useEffect(() => {
-   //    fetchData();
-   // }, [id]);
+   useEffect(() => {
+      fetchData();
+   }, [id]);
 
    return (
       <Container>
