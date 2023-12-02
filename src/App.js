@@ -17,7 +17,7 @@ import { useEffect, useState } from 'react';
 import { reducerCases } from './StateProvider/reducer';
 import ProfileAccount from './Page/ProfileAccount';
 import AddressAccount from './Page/AddressAccount';
-import OrderAccount from './Page/OrderAccount';
+import { OrderAccount, OrderDetail } from './Page/OrderAccount';
 //import * as signalR from '@microsoft/signalr';
 import Hub from './Hub/connection';
 import ProductListPage from './AdminPage/Page/ProductListPage';
@@ -159,9 +159,18 @@ function App() {
                   />
                   <Route
                      path="/account/order"
+                     exact
                      element={
                         <UserRoute>
                            <OrderAccount />
+                        </UserRoute>
+                     }
+                  />
+                  <Route
+                     path="/account/order/:id"
+                     element={
+                        <UserRoute>
+                           <OrderDetail />
                         </UserRoute>
                      }
                   />

@@ -9,18 +9,6 @@ import ConfirmationDialog from '../../Sharing/MessageBox';
 
 const OrderPage = () => {
    const navigate = useNavigate();
-   // const [data, setData] = useState([
-   //    {
-   //       orderId: '12345',
-   //       customerName: 'Nguyễn Văn A',
-   //       orderDate: '2023-09-10',
-   //       totalAmount: 2500,
-   //       orderStatus: 'Hoàn thành',
-   //       feeShip: 0,
-   //       grandTotal: 0,
-   //       shippingAddress: '123 Đường ABC, Quận XYZ, Thành phố HCM',
-   //    },
-   // ]);
    const [data, setData] = useState();
    const [pageNow, setPageNow] = useState(1);
    const [status, setStatus] = useState(0);
@@ -64,7 +52,7 @@ const OrderPage = () => {
             status: status == 0 ? null : status,
          })
       );
-      if (dataApi?.status === true) {
+      if (dataApi?.status) {
          const Index = dataApi?.result?.data?.orderList?.filter(
             (i) => i.status === 0
          );
@@ -155,52 +143,16 @@ const OrderPage = () => {
          </div>
          {data?.map((da, index) => {
             return (
-               <div className="order-child" key={index}>
+               <div
+                  className="order-child"
+                  key={index}
+                  onClick={() => {
+                     navigate(`/account/order/${da.orderId}`);
+                  }}
+               >
                   <div className="header">
-                     <div>Mã số đơn hàng: #{da.orderId}</div>
+                     <div>Mã số đơn hàng: {da.orderId}</div>
                      <div>Tình trạng đơn hàng: {da.orderStatus}</div>
-                  </div>
-                  <div className="body">
-                     {/* {da.product.map((item, index2) => {
-                        return (
-                           <div className="review">
-                              <div className="item" key={index2}>
-                                 <img
-                                    src={processApiImagePath(item.image)}
-                                    alt=""
-                                 />
-                                 <div>
-                                    <span>{item.name}</span>
-                                    <span>Số lượng {item.quantity}</span>
-                                    <span>
-                                       Giá tiền {item.price.toLocaleString()} đ
-                                    </span>
-                                 </div>
-                              </div>
-                              {da.orderStatus === 'Delivered' &&
-                              item.isReview === false ? (
-                                 <button
-                                    className="product-review"
-                                    onClick={() =>
-                                       handleRating(item, da.orderId)
-                                    }
-                                 >
-                                    Đánh giá
-                                 </button>
-                              ) : null}
-
-                              {isOpenRating ? (
-                                 <Rating
-                                    product={{
-                                       ...productEdit,
-                                    }}
-                                    onClose={() => setIsOpenRating(false)}
-                                    onLoad={() => fetchData()}
-                                 />
-                              ) : null}
-                           </div>
-                        );
-                     })} */}
                   </div>
                   <div className="footer">
                      <div>
@@ -217,25 +169,25 @@ const OrderPage = () => {
                            <div className="price-total">
                               <div>Tổng tiền: </div>
                               <div className="price-label">
-                                 {da?.totalAmount.toLocaleString()}đ
+                                 {da?.totalAmount.toLocaleString()} vnđ
                               </div>
                            </div>
                            {/* <div className="price-total">
                               <div>Phí vận chuyển:</div>
                               <div className="price-label">
-                                 {da?.feeShip.toLocaleString()}đ
+                                 {da?.feeShip.toLocaleString()} vnđ
                               </div>
                            </div> */}
                            <div className="price-total">
                               <div>Giảm giá:</div>
                               <div className="price-label">
-                                 {da?.discount?.toLocaleString()}đ
+                                 {da?.discount?.toLocaleString()} vnđ
                               </div>
                            </div>
                            <div className="price-total">
                               <div>Thành tiền: </div>
                               <div className="price-label">
-                                 {da?.grandTotal.toLocaleString()}đ
+                                 {da?.grandTotal.toLocaleString()} vnđ
                               </div>
                            </div>
                         </div>
@@ -290,6 +242,7 @@ const Container = styled.div`
       margin-bottom: 20px;
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      user-select: none;
       .header {
          display: flex;
          justify-content: space-between;
