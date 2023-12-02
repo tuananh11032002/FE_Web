@@ -96,6 +96,7 @@ const OrderPageDetail = () => {
                               Tổng tiền: {item.totalPrice.toLocaleString()} vnđ
                            </div>
                         </div>
+                        
                      </div>
                   );
                })}
