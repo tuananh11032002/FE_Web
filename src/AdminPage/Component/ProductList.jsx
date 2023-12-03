@@ -15,10 +15,7 @@ import Pagination from './Pagination';
 import { useNavigate } from 'react-router-dom';
 import { AdminContext } from '../Admin';
 import {
-   deleteProductApi,
-   getCategoryApi,
-   getProductApi,
-   getSalesRevenue, getListCategory, getListProduct,
+   deleteProduct, getListCategory, getListProduct,
 } from '../../Axios/web';
 import processApiImagePath from '../../Helper/EditLinkImage';
 
@@ -35,7 +32,7 @@ const ProductList = () => {
    const [contentDetailProduct, setContentDetailProduct] = useState(null);
    const [currentIndex, setCurrentIndex] = useState(null);
    const [selectCategory, setSelectCategory] = useState(null);
-   const [selectStatus, setSelectStatus] = useState('');
+   const [selectStatus, setSelectStatus] = useState("null");
    const [pageNow, setPageNow] = useState(1);
 
    const [totalProduct, setTotalProduct] = useState(100);
@@ -46,7 +43,7 @@ const ProductList = () => {
       setCheckboxes(Array(data.length).fill(!selectAll));
    };
    const handleDelete = async (productId) => {
-      const data = await deleteProductApi(productId);
+      const data = await deleteProduct(productId);
       if (data?.status) {
          setData([]);
          setOpenDetailProduct(false);
@@ -66,13 +63,14 @@ const ProductList = () => {
    useEffect(() => {
       const fetchProduct = async () => {
          const dataProduct = await getListProduct(
-            {index: selectedValue,
+            {index: parseInt(selectedValue),
             page: pageNow,
             sortBy: null,
             desc: true,
             search: valueSearch,
-            category:selectCategory}
-            //selectStatus
+            category:selectCategory==="null"?null:selectCategory,
+            active: selectStatus==="null"?null:selectStatus==="Active"?true:false
+            }
          );
 
          if (dataProduct?.status === true) {
@@ -273,7 +271,7 @@ const ProductList = () => {
                            setPageNow(1);
                         }}
                      >
-                        <option value="">Status</option>
+                        <option value="null">Status</option>
                         <option value="Active">Active</option>
                         <option value="Inactive">Inactive</option>
                      </select>
@@ -287,7 +285,7 @@ const ProductList = () => {
                            setSelectCategory(e.target.value);
                         }}
                      >
-                        <option value="">Category</option>
+                        <option value="null">Category</option>
                         {category?.map((cat, index) => (
                            <option value={cat.id} key={index}>
                               {cat.name}
