@@ -13,12 +13,6 @@ import { AdminContext } from './AdminPage/Admin';
 import { ToastContainer, toast } from 'react-toastify';
 
 function App() {
-   const [messages, setMessages] = useState([]);
-   const [newMessage, setNewMessage] = useState('');
-   const [userList, setUserList] = useState([]);
-   const [selectedUser, setSelectedUser] = useState(null);
-   const [isOpenUser, setIsOpenUser] = useState(false);
-
    const messageListRef = useRef(null);
    const inputRef = useRef(null);
    const navigate = useNavigate();
@@ -27,6 +21,11 @@ function App() {
       closeMenu: null,
       occupy: null,
    });
+   const [messages, setMessages] = useState([]);
+   const [newMessage, setNewMessage] = useState('');
+   const [userList, setUserList] = useState([]);
+   const [selectedUser, setselectedUser] = useState();
+   const [isOpenUser, setIsOpenUser] = useState(false);
 
    const contextTemp = useContext(AdminContext);
 
@@ -57,12 +56,12 @@ function App() {
                );
                setUserList(temp);
                if (temp.length > 0) {
-                  setSelectedUser(temp[0]);
+                  setselectedUser(temp[0]);
                }
             }
          } else {
             connection.invoke('Join', user.id);
-            setSelectedUser({
+            setselectedUser({
                id: user.id,
                name: user.name,
                message: null,
@@ -124,21 +123,17 @@ function App() {
          messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
       }
    }, [messages]);
-
    //connect server hub
    useEffect(() => {
       // Đăng ký lắng nghe sự kiện từ Hub
-      //console.log('cone', connection);
 
       if (connection) {
          connection.on('Received', async (Receive) => {
-            console.log('Received :', Receive);
             console.log('selectedUser :', selectedUser);
             if (
                user.role !== 'Admin' ||
                Receive?.message?.value?.sendedUser === selectedUser?.id
             ) {
-               console.log('abc');
                setMessages((pre) => [...pre, Receive.message.value]);
             } else if (user.role === 'Admin') {
                const response = await getListGroup({
@@ -153,7 +148,7 @@ function App() {
                   );
                   setUserList(temp);
                   if (temp.length > 0) {
-                     setSelectedUser(
+                     setselectedUser(
                         temp.find((item) => item.id === selectedUser?.id)
                      );
                   }
@@ -258,10 +253,7 @@ function App() {
    }
 
    const handleUserClick = async (userclick) => {
-      console.log('selectedUser 1 :', selectedUser);
-      console.log('userclick :', userclick);
-      await setSelectedUser(userclick);
-      console.log('selectedUser 2 :', selectedUser);
+      setselectedUser(userclick);
       if (isPhone && isOpenUser) {
          setIsOpenUser(false);
       }
@@ -297,7 +289,7 @@ function App() {
                               handleUserClick(usertemp);
                            }}
                            style={
-                              usertemp.id === selectedUser.id
+                              usertemp?.id === selectedUser?.id
                                  ? { backgroundColor: '#808080' }
                                  : { backgroundColor: '#DCDCDC' }
                            }

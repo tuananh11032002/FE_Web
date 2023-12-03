@@ -59,19 +59,20 @@ function App() {
       setIsUserReady(true);
    }, [user]);
    useEffect(() => {
-      if (user) {
+      if (!connection) {
          Hub.startConnection();
          dispatch({
             connection: Hub.connection,
             type: reducerCases.SET_CONNECTIONHUB,
          });
       }
-      if (!user) {
-         Hub.Disconnect();
-      }
       return () => {
-         if (!user) {
+         if (connection) {
             Hub.Disconnect();
+            dispatch({
+               connection: null,
+               type: reducerCases.SET_CONNECTIONHUB,
+            });
          }
       };
    }, [user]);

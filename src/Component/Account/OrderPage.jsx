@@ -1,10 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { CancelOrder, getMyListOrder } from '../../Axios/web';
-import processApiImagePath from '../../Helper/EditLinkImage';
 import Pagination from '../../AdminPage/Component/Pagination';
 import { useNavigate } from 'react-router-dom';
-import Rating from '../Rating';
 import ConfirmationDialog from '../../Sharing/MessageBox';
 
 const OrderPage = () => {
@@ -13,10 +11,7 @@ const OrderPage = () => {
    const [pageNow, setPageNow] = useState(1);
    const [status, setStatus] = useState(0);
    const [activeItem, setActiveItem] = useState(0);
-   const [totalOrder, setTotalOrder] = useState(0);
    const [totalPage, setTotalPage] = useState(5);
-   const [isOpenRating, setIsOpenRating] = useState(false);
-   const [productEdit, setProductEdit] = useState({ orderId: null });
    const [orderIdEdit, setOrderIdEdit] = useState();
    const messageBoxRef = useRef();
 
@@ -34,10 +29,6 @@ const OrderPage = () => {
    const handleItemClick = (index) => {
       setActiveItem(index);
    };
-   const handleRating = async (item, orderId) => {
-      setIsOpenRating(true);
-      setProductEdit({ ...item, orderId: orderId });
-   };
    const handleCancelOrder = async () => {
       const data = await CancelOrder(orderIdEdit);
       if (data?.status) {
@@ -54,7 +45,7 @@ const OrderPage = () => {
       );
       if (dataApi?.status) {
          const Index = dataApi?.result?.data?.orderList?.filter(
-            (i) => i.status === 0
+            (i) => i.status !== 0
          );
          setData(
             Index.map((i) => ({
@@ -62,6 +53,7 @@ const OrderPage = () => {
                customerName: i.user.name,
                orderDate: i.createdDate,
                totalAmount: i.totalPrice,
+               methodPayment: i.methodPayment,
                orderStatus:
                   i.status === 0
                      ? 'Khởi tạo'
@@ -80,7 +72,6 @@ const OrderPage = () => {
                shippingAddress: i.address,
             }))
          );
-         setTotalOrder(dataApi?.result?.data?.totalItemCount);
          setTotalPage(dataApi?.result?.data?.totalItemPage);
       }
    };
@@ -99,7 +90,7 @@ const OrderPage = () => {
                className={`nav-item ${activeItem === 0 ? 'active' : ''}`}
                onClick={() => {
                   handleItemClick(0);
-                  setStatus('');
+                  setStatus(null);
                }}
             >
                Tất cả
@@ -108,7 +99,7 @@ const OrderPage = () => {
                className={`nav-item ${activeItem === 1 ? 'active' : ''}`}
                onClick={() => {
                   handleItemClick(1);
-                  setStatus('Paid');
+                  setStatus(1);
                }}
             >
                Chờ thanh toán
@@ -117,7 +108,7 @@ const OrderPage = () => {
                className={`nav-item ${activeItem === 2 ? 'active' : ''}`}
                onClick={() => {
                   handleItemClick(2);
-                  setStatus('Dispatched');
+                  setStatus(2);
                }}
             >
                Đang giao
@@ -126,7 +117,7 @@ const OrderPage = () => {
                className={`nav-item ${activeItem === 3 ? 'active' : ''}`}
                onClick={() => {
                   handleItemClick(3);
-                  setStatus('Delivered');
+                  setStatus(3);
                }}
             >
                Hoàn thành
@@ -135,7 +126,7 @@ const OrderPage = () => {
                className={`nav-item ${activeItem === 4 ? 'active' : ''}`}
                onClick={() => {
                   handleItemClick(4);
-                  setStatus('Cancelled');
+                  setStatus(4);
                }}
             >
                Đã hủy
@@ -159,9 +150,7 @@ const OrderPage = () => {
                         <p>Địa chỉ giao hàng: {da?.shippingAddress}</p>
                         <p>
                            Phương thức thanh toán:
-                           {da?.paymentMethod === 'Momo'
-                              ? 'VNPAY'
-                              : da?.paymentMethod}
+                           {da?.methodPayment}
                         </p>
                      </div>
                      <div>
@@ -172,12 +161,6 @@ const OrderPage = () => {
                                  {da?.totalAmount.toLocaleString()} vnđ
                               </div>
                            </div>
-                           {/* <div className="price-total">
-                              <div>Phí vận chuyển:</div>
-                              <div className="price-label">
-                                 {da?.feeShip.toLocaleString()} vnđ
-                              </div>
-                           </div> */}
                            <div className="price-total">
                               <div>Giảm giá:</div>
                               <div className="price-label">
@@ -208,7 +191,7 @@ const OrderPage = () => {
             );
          })}
          <Pagination
-            obj={{ totalProduct: totalOrder, pageNow, size: 3 }}
+            obj={{ pageNow, size: totalPage }}
             setPageNow={setPageNow}
          />
       </Container>

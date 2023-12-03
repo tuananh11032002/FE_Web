@@ -22,14 +22,16 @@ import ReviewList from './ReviewList';
 import RatingStars from './RatingStar';
 
 const ProductDetail = () => {
-   const [{ productdetail, cart, user }, dispatch] = useStateProvider();
+   const [{ productdetail, cart, user, connection }, dispatch] =
+      useStateProvider();
    const navigate = useNavigate();
-   const params = useParams();
+   const { productId } = useParams();
    const { pathname } = useLocation();
 
    const [count, setCount] = useState(1);
    const [isAdd, setIsAdd] = useState(true);
    const [loading, setLoading] = useState(false);
+   const [productReview, setProductReview] = useState([]);
 
    useEffect(() => {
       window.scrollTo(0, 0);
@@ -45,12 +47,12 @@ const ProductDetail = () => {
          setLoading(true);
          if (datafilter?.length > 0) {
             response = await AddProductIntoOrder({
-               ProdductId: params.productId,
+               ProdductId: productId,
                Quantity: datafilter[0].quantity + count,
             });
          } else {
             response = await AddProductIntoOrder({
-               ProdductId: params.productId,
+               ProdductId: productId,
                Quantity: count,
             });
          }
@@ -88,7 +90,14 @@ const ProductDetail = () => {
    };
    useEffect(() => {
       const fetchData = async () => {
-         const dataDetail = await getProduct(params.productId);
+         if (connection) {
+            connection.on('Received', async (Receive) => {
+               setProductReview((pre) => [Receive.message, ...pre]);
+            });
+
+            connection.invoke('Join', productId);
+         }
+         const dataDetail = await getProduct(productId);
          if (dataDetail?.status) {
             if (productdetail !== dataDetail.result) {
                let dataP = dataDetail.result.product;
@@ -97,7 +106,9 @@ const ProductDetail = () => {
                   page: 1,
                   productId: dataP.id,
                });
-               dataP.reviews = dataComment.result.commentList;
+               if (dataComment?.status) {
+                  setProductReview(dataComment.result.commentList);
+               }
                dispatch({
                   type: reducerCases.SET_PRODUCTDETAIL,
                   productdetail: dataP,
@@ -106,28 +117,12 @@ const ProductDetail = () => {
          }
       };
       fetchData();
-   }, [params.productId, isAdd]);
-
-   const productReviews = [
-      {
-         username: 'John Doe',
-         rating: 4.5,
-         content: 'Sản phẩm tốt, đáng giá tiền!',
-         date: '2023-11-15',
-      },
-      {
-         username: 'Jane Smith',
-         rating: 5,
-         content: 'Tuyệt vời! Tôi rất hài lòng với sản phẩm này.',
-         date: '2023-11-14',
-      },
-      {
-         username: 'Alice Johnson',
-         rating: 3.5,
-         content: 'Khá ổn, nhưng có thể cải thiện thêm.',
-         date: '2023-11-13',
-      },
-   ];
+      return () => {
+         if (connection) {
+            connection.off('Received');
+         }
+      };
+   }, [productId, isAdd]);
 
    return (
       <div>
@@ -152,7 +147,7 @@ const ProductDetail = () => {
                   <div className="price-container">
                      {productdetail?.discount === 0 ? (
                         <div className="price">
-                           {productdetail?.unitPrice.toLocaleString() || 0}đ
+                           {productdetail?.unitPrice.toLocaleString() || 0} vnđ
                         </div>
                      ) : (
                         <div>
@@ -164,7 +159,8 @@ const ProductDetail = () => {
                               đ
                            </div>
                            <div className="original-price">
-                              {productdetail?.unitPrice.toLocaleString() || 0}đ{' '}
+                              {productdetail?.unitPrice.toLocaleString() || 0}{' '}
+                              vnđ
                            </div>
                         </div>
                      )}
@@ -183,14 +179,15 @@ const ProductDetail = () => {
                      sàng giúp bạn tự tin gói gọn nhiều món đồ cần mang theo.
                   </div>
                   <br />
-                  <div>
-                     {productdetail?.decription || null}
-                     THÔNG TIN SẢN PHẨM: Chất liệu: Vải Polyester Canvas cao cấp
+                  <label>
+                     THÔNG TIN SẢN PHẨM:{' '}
+                     {productdetail?.decription ||
+                        `Chất liệu: Vải Polyester Canvas cao cấp
                      trượt nước Kích thước: 42cm x 32cm x 16cm Bao gồm 12 ngăn:
                      1 ngăn chống sốc, 3 ngăn lớn, 5 ngăn phụ, 2 ngăn bên hong,
                      1 ngăn phụ phía sau Ngăn chống sốc đựng vừa laptop 15.6
-                     inch
-                  </div>
+                     inch`}
+                  </label>
 
                   <div className="quantity-container">
                      <span className="quantity-label">Số lượng:</span>
@@ -273,7 +270,7 @@ const ProductDetail = () => {
                </div>
             </div>
          </Container>
-         <ReviewList reviews={productdetail?.reviews} />
+         <ReviewList reviews={productReview} />
          <div>
             <Footer />
          </div>

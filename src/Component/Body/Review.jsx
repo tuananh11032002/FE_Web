@@ -8,7 +8,7 @@ const StarIcon = styled.span`
 `;
 
 const Review = ({ review }) => {
-   const { name, description, rating, createdDate } = review;
+   const { description, rating, createdDate, user } = review;
 
    const stars = Array.from({ length: rating }, (_, index) => (
       <StarIcon key={index}>&#9733;</StarIcon>
@@ -17,7 +17,8 @@ const Review = ({ review }) => {
    return (
       <Container>
          <div className="user-info">
-            <strong>{name?name:"Chưa cập nhập tên"}</strong> - {ProcessDate(createdDate)}
+            <strong>{user?.name ? user?.name : 'Chưa cập nhập tên'}</strong> -{' '}
+            {ProcessDate(createdDate)}
          </div>
          <div className="rating">Rating: {stars}</div>
          <div className="content">{description}</div>

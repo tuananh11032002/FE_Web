@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { IoMdClose } from 'react-icons/io';
 import processApiImagePath from '../Helper/EditLinkImage';
-import { InsertReview } from '../Axios/web';
+import { addComment } from '../Axios/web';
 import { useStateProvider } from '../StateProvider/StateProvider';
 import { toast, ToastContainer } from 'react-toastify';
 const Rating = ({ product, onClose, onLoad }) => {
-   const [{ user }] = useStateProvider();
+   const [{ user, connection }] = useStateProvider();
    const [rating, setRating] = useState(1);
    const [comment, setComment] = useState('');
    const [isCommentValid, setIsCommentValid] = useState(true);
@@ -22,30 +22,28 @@ const Rating = ({ product, onClose, onLoad }) => {
    };
 
    const handleCommentSubmit = async () => {
-      // const userId = parseInt(user.id);
-      // console.log(user.id);
-      console.log({
-         comment,
-         rating,
+      const data = await addComment({
          productId: product.id,
-         userId: user.userId,
-         orderId: product.orderId,
-         userName: user.displayName,
-      });
-
-      const data = await InsertReview({
-         comment,
-         rating,
-         productId: product.id,
-         userId: user.userId,
-         orderId: product.orderId,
-         userName: user.displayName,
+         rating: rating,
+         description: comment,
       });
       if (data.status) {
-         toast.info('Bình luận thành công', {
+         toast.info('Thêm phản hồi thành công', {
             position: toast.POSITION.TOP_CENTER,
             autoClose: 1000,
          });
+         const sendmess = {
+            user: {
+               id: user.id,
+               name: user.name,
+            },
+            createdDate: new Date(),
+            rating: rating,
+            description: comment,
+         };
+         if (connection) {
+            connection.invoke('SendToGroup', sendmess, product?.id);
+         }
          setComment('');
          setIsCommentValid(true);
          onClose();
@@ -58,7 +56,6 @@ const Rating = ({ product, onClose, onLoad }) => {
       }
       // console.log(data);
    };
-   console.log(user, 'product');
    return (
       <Container>
          <ToastContainer />
