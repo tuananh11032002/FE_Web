@@ -6,12 +6,14 @@ import { useStateProvider } from '../../StateProvider/StateProvider';
 import { reducerCases } from '../../StateProvider/reducer';
 const Controller = () => {
    const [{ category }, dispatch] = useStateProvider();
-   const [data, setData] = useState([]);
    useEffect(() => {
       const fetchData = async () => {
-         const data = await getListCategory({index:4,page:1});
+         const data = await getListCategory({ index: 4, page: 1 });
          if (data?.status) {
-            if (JSON.stringify(data.result.productCategory) != JSON.stringify(category)) {
+            if (
+               JSON.stringify(data.result.productCategory) !=
+               JSON.stringify(category)
+            ) {
                dispatch({
                   type: reducerCases.SET_CATEGORY,
                   category: data.result.productCategory,

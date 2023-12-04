@@ -13,7 +13,12 @@ import { useStateProvider } from '../StateProvider/StateProvider';
 import { Link, useNavigate } from 'react-router-dom';
 import { reducerCases } from '../StateProvider/reducer';
 import { BsSearch } from 'react-icons/bs';
-import { DeleteProductIntoOrder, getOrder, getListProduct } from '../Axios/web';
+import {
+   DeleteProductIntoOrder,
+   addOrder,
+   getOrder,
+   getListProduct,
+} from '../Axios/web';
 import _ from 'lodash';
 import SearchMini from './Header/SearchMini';
 import Notification from './Body/Notification';
@@ -38,14 +43,20 @@ const Header = () => {
    const [isWindow, setIsWindow] = useState(window.innerWidth > 756);
    //console.log('header');
    //get user
-   const handlerClick = () => {
-      setShowCart(!showCart);
-   };
-   const mouseLeave = () => {
+   // const handlerClick = () => {
+   //    setShowCart(!showCart);
+   // };
+   const NotificationMouseLeave = () => {
       setIsNotification(false);
    };
-   const mouseOver = () => {
+   const NotificationMouseOver = () => {
       setIsNotification(true);
+   };
+   const CartMouseLeave = () => {
+      setShowCart(false);
+   };
+   const CartMouseOver = () => {
+      setShowCart(true);
    };
    const handleLogout = async () => {
       dispatch({ type: reducerCases.SET_USER, user: null });
@@ -106,26 +117,38 @@ const Header = () => {
       };
    }, []);
 
-   const fetchCart = async () => {
-      if (user) {
-         const orderAPi = await getOrder(user.newOrderId);
-         //console.log(orderAPi?.result, 'result');
-         if (orderAPi?.status === true) {
-            if (
-               JSON.stringify(orderAPi.result.data.order.detail) !==
-               JSON.stringify(cart)
-            ) {
-               dispatch({
-                  type: reducerCases.SET_CART,
-                  cart: orderAPi.result.data.order.detail,
-               });
-            }
-         }
-      } else {
-      }
-   };
-
    useEffect(() => {
+      const fetchCart = async () => {
+         if (user) {
+            if (user.newOrderId != null) {
+               const orderAPi = await getOrder(user.newOrderId);
+               if (orderAPi?.status) {
+                  if (
+                     JSON.stringify(cart) !==
+                     JSON.stringify(orderAPi?.result?.data?.order)
+                  ) {
+                     dispatch({
+                        type: reducerCases.SET_CART,
+                        cart: orderAPi?.result?.data?.order,
+                     });
+                  }
+               }
+            } else {
+               const orderAPi = await addOrder({});
+               if (orderAPi?.status) {
+                  const temp = {
+                     ...user,
+                     newOrderId: orderAPi?.result?.data?.id,
+                  };
+                  dispatch({
+                     type: reducerCases.SET_USER,
+                     user: temp,
+                  });
+               }
+            }
+         } else {
+         }
+      };
       fetchCart();
    }, [cart]);
 
@@ -136,7 +159,7 @@ const Header = () => {
             setHeightContainer(containerHeight);
          }
       }
-   }, []);
+   }, [cart]);
 
    useEffect(() => {
       const handleResize = () => {
@@ -192,34 +215,44 @@ const Header = () => {
                   </div>
                   <div
                      className="cart container_nobo-item4 details-child"
+                     onMouseOver={CartMouseOver}
+                     onMouseLeave={CartMouseLeave}
                      ref={vdRef}
                   >
-                     <AiOutlineShoppingCart onClick={() => handlerClick()} />
+                     {/* <AiOutlineShoppingCart onClick={() => handlerClick()} /> */}
+
                      <span className="cart-count">
                         {loading ? (
                            <FaSpinner className="loading-icon" />
                         ) : (
-                           cart?.productOrder?.length || 0
+                           cart?.length || 0
                         )}
                      </span>
-                     {showCart ? (
-                        isWindow ? (
+                     <AiOutlineShoppingCart />
+                     {
+                        showCart && (
                            <CartTablet
-                              cart={cart}
+                              //cart={cart}
                               onClose={() => setShowCart(false)}
                            />
-                        ) : (
-                           <CartPhone
-                              cart={cart}
-                              onClose={() => setShowCart(false)}
-                           />
-                        )
-                     ) : null}
+                        ) //    isWindow ? (
+                        //       <CartTablet
+                        //          cart={cart}
+                        //          onClose={() => setShowCart(false)}
+                        //       />
+                        //    ) : (
+                        //       <CartPhone
+                        //          cart={cart}
+                        //          onClose={() => setShowCart(false)}
+                        //       />
+                        //    )
+                        // )
+                     }
                   </div>
                   <div
                      className="details-child notification"
-                     onMouseOver={mouseOver}
-                     onMouseLeave={mouseLeave}
+                     onMouseOver={NotificationMouseOver}
+                     onMouseLeave={NotificationMouseLeave}
                   >
                      <div className="notification-count">1</div>
 

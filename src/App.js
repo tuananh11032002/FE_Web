@@ -59,6 +59,7 @@ function App() {
       setIsUserReady(true);
    }, [user]);
    useEffect(() => {
+      console.log('abc');
       if (!connection) {
          Hub.startConnection();
          dispatch({
@@ -75,7 +76,7 @@ function App() {
             });
          }
       };
-   }, [user]);
+   }, []);
 
    return (
       <Container>
@@ -186,7 +187,7 @@ function App() {
                   />
 
                   <Route
-                     path="/chat"
+                     path="/chat/:id"
                      element={
                         <UserRoute>
                            <Slide child={<WebSocket />} />

@@ -175,14 +175,16 @@ export const getFile = (id) => {
 
 // Order
 //add
-export const addOrder = (order) => {
+export const addOrder = async (order) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   return axiosClient.post(`${END_POINT.ORDER}`, order, {
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = await axiosClient.post(`${END_POINT.ORDER}`, order, {
       headers: {
          Authorization: token,
       },
    });
+   await checkAndRenewToken(res);
+   return res;
 };
 //update
 export const updateOrder = (id, body) => {

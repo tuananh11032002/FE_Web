@@ -22,7 +22,7 @@ const OrderPageDetail = () => {
                price: item.unitPrice,
                quantity: item.itemCount,
                totalPrice: item.totalPrice,
-               image: `http://backend.misaproject.click/api/file/${item.mainFile}`,
+               image: process.env.REACT_APP_URL_IMG + item.mainFile,
             }))
          );
          setOrderInfo({

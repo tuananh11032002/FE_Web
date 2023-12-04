@@ -41,15 +41,12 @@ const Profile = () => {
       }
    };
    useEffect(() => {
-      const temp = async () => {
-         if (user) {
-            setPhone(user.contact || '');
-            setUserName(user.userName || '');
-            setName(user.name || '');
-            setselectedGender(user.gender || true);
-         }
-      };
-      temp();
+      if (user) {
+         setPhone(user.contact || '');
+         setUserName(user.userName || '');
+         setName(user.name || '');
+         setselectedGender(user.gender || true);
+      }
    }, [user]);
    const handleSaveChange = async () => {
       try {

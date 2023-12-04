@@ -8,7 +8,7 @@ import {
    addChat,
 } from './Axios/web';
 import { FcHome } from 'react-icons/fc';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { AdminContext } from './AdminPage/Admin';
 import { ToastContainer, toast } from 'react-toastify';
 
@@ -16,6 +16,7 @@ function App() {
    const messageListRef = useRef(null);
    const inputRef = useRef(null);
    const navigate = useNavigate();
+   const { id } = useParams();
    const [{ connection, user }] = useStateProvider();
    const [dataContext, setDataContext] = useState({
       closeMenu: null,
@@ -24,7 +25,7 @@ function App() {
    const [messages, setMessages] = useState([]);
    const [newMessage, setNewMessage] = useState('');
    const [userList, setUserList] = useState([]);
-   const [selectedUser, setselectedUser] = useState();
+   //const [selectedUser, setselectedUser] = useState();
    const [isOpenUser, setIsOpenUser] = useState(false);
 
    const contextTemp = useContext(AdminContext);
@@ -55,17 +56,12 @@ function App() {
                      new Date(a?.message?.createdDate ?? '1000-1-1')
                );
                setUserList(temp);
-               if (temp.length > 0) {
-                  setselectedUser(temp[0]);
+               if (!id) {
+                  navigate(`/chat/${temp[0]?.id}`);
                }
             }
          } else {
             connection.invoke('Join', user.id);
-            setselectedUser({
-               id: user.id,
-               name: user.name,
-               message: null,
-            });
          }
       };
       getUser();
@@ -84,9 +80,9 @@ function App() {
    useEffect(() => {
       const getMessage = async () => {
          if (user.role === 'Admin') {
-            if (selectedUser) {
+            if (id) {
                const response = await getMessageByGroup({
-                  id: selectedUser.id,
+                  id: id,
                   index: 10000,
                   page: 1,
                });
@@ -115,7 +111,7 @@ function App() {
          }
       };
       getMessage();
-   }, [selectedUser]);
+   }, []);
 
    //scroll
    useEffect(() => {
@@ -124,35 +120,39 @@ function App() {
       }
    }, [messages]);
    //connect server hub
+
    useEffect(() => {
       // Đăng ký lắng nghe sự kiện từ Hub
 
       if (connection) {
-         connection.on('Received', async (Receive) => {
-            console.log('selectedUser :', selectedUser);
+         connection.on('Received', (Receive) => {
+            console.log('selectedUser :', id);
             if (
                user.role !== 'Admin' ||
-               Receive?.message?.value?.sendedUser === selectedUser?.id
+               Receive?.message?.value?.sendedUser == id
             ) {
                setMessages((pre) => [...pre, Receive.message.value]);
             } else if (user.role === 'Admin') {
-               const response = await getListGroup({
-                  page: 1,
-                  index: 10000,
-               });
-               if (response?.status) {
-                  const temp = [...response.result.data.rooms].sort(
-                     (a, b) =>
-                        new Date(b?.message?.createdDate ?? '1000-1-1') -
-                        new Date(a?.message?.createdDate ?? '1000-1-1')
-                  );
-                  setUserList(temp);
-                  if (temp.length > 0) {
-                     setselectedUser(
-                        temp.find((item) => item.id === selectedUser?.id)
+               const temp = async () => {
+                  const response = await getListGroup({
+                     page: 1,
+                     index: 10000,
+                  });
+                  if (response?.status) {
+                     const temp = [...response.result.data.rooms].sort(
+                        (a, b) =>
+                           new Date(b?.message?.createdDate ?? '1000-1-1') -
+                           new Date(a?.message?.createdDate ?? '1000-1-1')
                      );
+                     setUserList(temp);
+                     // if (temp.length > 0) {
+                     //    setselectedUser(
+                     //       temp.find((item) => item.id === selectedUser?.id)
+                     //    );
+                     // }
                   }
-               }
+               };
+               temp();
             }
          });
       }
@@ -171,13 +171,12 @@ function App() {
    const handleSubmit = async () => {
       if (newMessage.trim() !== '') {
          const res = await addChat({
-            userId: user.role === 'Admin' ? selectedUser.id : user.id,
+            userId: user.role === 'Admin' ? id : user.id,
             description: newMessage,
          });
          if (res?.status) {
             const sendmess = {
-               type: user.role === 'Admin' ? 1 : 0,
-               groupid: user.role === 'Admin' ? selectedUser.id : 'Admin',
+               groupid: user.role === 'Admin' ? id : 'Admin',
                value: { sendedUser: user.id, content: newMessage },
             };
             setNewMessage('');
@@ -252,11 +251,12 @@ function App() {
       }
    }
 
-   const handleUserClick = async (userclick) => {
-      setselectedUser(userclick);
-      if (isPhone && isOpenUser) {
-         setIsOpenUser(false);
-      }
+   const handleUserClick = (userclick) => {
+      navigate(`/chat/${userclick?.id}`);
+      //setselectedUser(userclick);
+      // if (isPhone && isOpenUser) {
+      //    setIsOpenUser(false);
+      // }
    };
    const [isPhone, setIsPhone] = useState(window.innerWidth < 756);
 
@@ -271,7 +271,6 @@ function App() {
          window.removeEventListener('resize', handleResize);
       };
    }, []);
-
    return (
       <>
          <ToastContainer />
@@ -282,14 +281,14 @@ function App() {
                      return (
                         <div
                            className={`user-single ${
-                              selectedUser?.Id == usertemp.Id ? 'selected' : ''
+                              id == usertemp.Id ? 'selected' : ''
                            }`}
                            key={index}
                            onClick={() => {
                               handleUserClick(usertemp);
                            }}
                            style={
-                              usertemp?.id === selectedUser?.id
+                              usertemp?.id === id
                                  ? { backgroundColor: '#808080' }
                                  : { backgroundColor: '#DCDCDC' }
                            }

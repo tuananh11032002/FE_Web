@@ -6,9 +6,9 @@ import { useStateProvider } from '../../StateProvider/StateProvider';
 import { DeleteProductIntoOrder } from '../../Axios/web';
 import { reducerCases } from '../../StateProvider/reducer';
 
-const CartTablet = ({ cart, onClose }) => {
+const CartTablet = ({ onClose }) => {
    const navigate = useNavigate();
-   const [{ user }, dispatch] = useStateProvider();
+   const [{ user, cart }, dispatch] = useStateProvider();
    const handlerRemove = async (productid) => {
       if (user) {
          const response = await DeleteProductIntoOrder(productid);
@@ -21,20 +21,25 @@ const CartTablet = ({ cart, onClose }) => {
 
    return (
       <Container>
-         {cart?.productOrder?.length > 0 ? (
-            <div>
+         <div>
+            {cart?.detail?.length > 0 ? (
                <ul>
-                  {cart?.productOrder?.map((cart, index) => (
-                     <li key={cart?.id}>
-                        <img src={processApiImagePath(cart?.image)} alt="" />
+                  {cart?.map((detail) => (
+                     <li key={detail?.id}>
+                        <img
+                           src={
+                              process.env.REACT_APP_URL_IMG + detail?.mainFile
+                           }
+                           alt=""
+                        />
                         <div>
-                           <div>{cart?.name}</div>
-                           <div>{cart?.priceNow.toLocaleString()}đ</div>
-                           <div>Số lượng: {cart?.quantity}</div>
+                           <div>{detail?.name}</div>
+                           <div>{detail?.priceNow.toLocaleString()} vnđ</div>
+                           <div>Số lượng: {detail?.quantity}</div>
                         </div>
                         <button
                            onClick={() => {
-                              handlerRemove(cart.id);
+                              handlerRemove(detail.id);
                            }}
                         >
                            Xóa
@@ -42,38 +47,39 @@ const CartTablet = ({ cart, onClose }) => {
                      </li>
                   ))}
                </ul>
+            ) : (
+               <div>Đơn hàng rỗng</div>
+            )}
+
+            <div
+               style={{
+                  textAlign: 'right',
+                  paddingRight: '10px',
+               }}
+            >
+               Tổng tiền: {cart?.totalPrice?.toLocaleString()} vnđ
+            </div>
+            <div className="direction">
                <div
-                  style={{
-                     textAlign: 'right',
-                     paddingRight: '10px',
+                  onClick={() => {
+                     onClose();
+
+                     navigate('/cart');
                   }}
                >
-                  Tổng tiền: &nbsp;
-                  {cart ? `${cart.totalAmount.toLocaleString()}đ` : '-----'}
+                  Tuỳ chỉnh
                </div>
-               <div className="direction">
-                  <div
-                     onClick={() => {
-                        onClose();
-
-                        navigate('/cart');
-                     }}
-                  >
-                     Tuỳ chỉnh
-                  </div>
-                  <div
-                     onClick={() => {
-                        onClose();
-
-                        navigate('/pay');
-                     }}
-                  >
-                     Thanh toán
-                  </div>
+               <div
+                  onClick={() => {
+                     onClose();
+                     navigate('/pay');
+                  }}
+               >
+                  Thanh toán
                </div>
             </div>
-         ) : null}
-         {cart?.productOrder?.length === 0 ? (
+         </div>
+         {/* {cart?.length === 0 ? (
             <div>
                Đơn hàng rỗng.Tiếp tục mua hàng{' '}
                <Link
@@ -85,7 +91,7 @@ const CartTablet = ({ cart, onClose }) => {
                   tại đây
                </Link>
             </div>
-         ) : null}
+         ) : null} */}
       </Container>
    );
 };
@@ -98,10 +104,11 @@ const Container = styled.div`
 
    background-color: white;
    position: absolute;
-   top: 40px;
+   top: 27px;
    right: 0px;
    overflow: auto;
-   padding: 10px;
+   padding: 0px;
+
    ul {
       list-style: none;
       padding: 0;

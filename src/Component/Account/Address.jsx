@@ -50,7 +50,6 @@ const Address = () => {
    };
    const fetchUser = async () => {
       const res = await getProfileByToken();
-      console.log('res user profile', res);
       if (res?.status) {
          dispatch({
             type: reducerCases.SET_USER,
