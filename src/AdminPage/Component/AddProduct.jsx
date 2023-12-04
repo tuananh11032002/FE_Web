@@ -2,10 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
-   createProductAPI, addProduct,
+   addProduct,
    getListCategory,
    getProduct,
-   updateProductAPI,updateProduct, addFile
+   updateProduct, addFile, deleteFile
 } from '../../Axios/web';
 import { useStateProvider } from '../../StateProvider/StateProvider';
 import { reducerCases } from '../../StateProvider/reducer';
@@ -41,11 +41,14 @@ export const AddProduct = () => {
    const handleAddOption = () => {
       setOptions([...options, { type: '', value: '' }]);
    };
-   const hanldeRemoveImageLink = (e, index) => {
+   
+   const hanldeRemoveImageLink = async(e, index) => {
       e.stopPropagation();
       const imageFilter = imageLink.filter((image, i) => i !== index);
       setImageLink(imageFilter);
+      await deleteFile(imageLink[index]);      
    };
+   
 
    const handRemoveImageLocal = (e, index) => {
       e.stopPropagation();
@@ -99,34 +102,36 @@ export const AddProduct = () => {
    const handleDragOver = (event) => {
       event.preventDefault();
    };
+   const addFiles = async () => {
+      let idFiles = [];
+      if (selectedImage.length > 0) {
+        await Promise.all(selectedImage.map(async (item) => {
+          let fD = new FormData();
+          fD.append('files', item);
+          const res = await addFile(fD);
+          console.log(res, 'res');
+          const tem = res.result.data?.data.map((item) => item.id);
+          idFiles = [...idFiles, ...tem];
+        }));
+      }
+      return idFiles;
+    }
    //function call update api
    const handleSubmit = async () => {
       const formData = {};
       formData.name = inputName;
       formData.category = [selectedCategory];
-      console.log('selectedCategory', selectedCategory);
       formData.decription= description;
       formData.discount = discountPrice;
       formData.unitPrice = price; 
       formData.totalItem = productEdit ? parseInt(productEdit.totalItem)+parseInt(soLuongThem) : parseInt(soLuongThem);
       formData.status = selectedStatus==="Active"?true:false;
-      let idFiles =[];
-      if(selectedImage.length>0){
-         selectedImage.forEach(async (item)=>{
-            let fD = new FormData();
-            fD.append('files', item);
-            const res = await addFile(fD);
-            res.result.data?.data.map((item)=>idFiles.push(item.id));
-         });         
-      }
+      let idFiles =await addFiles();
       setIsLoading(true);
       let data;
       if (id !== 'add') {
-         console.log("idfile",productEdit.files);
-         console.log("idfile1", idFiles);
-         formData.files = productEdit.files.length>0 ? productEdit.files.concat(idFiles) : idFiles;
-         console.log("files",formData.files);
-         formData.mainFile = formData.files;console.log("mainFile",formData.mainFile);
+         formData.files = imageLink.length>0 ? [...imageLink,...idFiles] : idFiles;
+         formData.mainFile = formData?.files[0];
          formData.id = id;
          data = await updateProduct(formData);
          console.log('dataUP', data);
@@ -290,6 +295,7 @@ export const AddProduct = () => {
                                           <IoRemoveCircleOutline
                                              onClick={(e) => {
                                                 hanldeRemoveImageLink(e, index);
+                                                
                                              }}
                                           />
                                        </div>

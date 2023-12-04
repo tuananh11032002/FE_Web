@@ -36,7 +36,7 @@ const Product = () => {
          await category.forEach(async (item)=>{
             if(item.id === id){
                const d = {id: item.id, name: item.name};            
-               const resP = await getListProduct({ index: 10, page: 1, sortBy: sortBy, desc: desc, category: id });
+               const resP = await getListProduct({ index: 10, page: 1, sortBy: sortBy, desc: desc, category: id, active:true});
                d.products = resP.result.productList;
                data.push(d);
             }
@@ -52,7 +52,7 @@ const Product = () => {
          let data = [];
          data = await Promise.all(res.result.productCategory?.map(async (item)=>{
             const d = {id: item.id, name: item.name};
-            const resP = await getListProduct({ index: 8, page: 1, category: item.id });
+            const resP = await getListProduct({ index: 8, page: 1, category: item.id, active:true });
             d.products = resP.result.productList;
             return d;
          }));       

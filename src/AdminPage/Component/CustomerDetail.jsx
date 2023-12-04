@@ -4,82 +4,21 @@ import { FaCartArrowDown, FaEllipsisV, FaMoneyBillAlt } from 'react-icons/fa';
 import styled from 'styled-components';
 import { AdminContext } from '../Admin';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getCustomerWithId } from '../../Axios/web';
+import { getAccountById, getListOrderByUserId } from '../../Axios/web';
 import processApiImagePath from '../../Helper/EditLinkImage';
 import ProcessDate from '../../Helper/ProcessDate';
 import ConfirmationDialog from '../../Sharing/MessageBox';
-
+import Pagination from './Pagination';
 const CustomerDetail = () => {
    const { id } = useParams();
    console.log(id, 'id');
    const { closeMenu } = useContext(AdminContext);
 
-   const [customerData, setCustomerData] = useState({
-      hoTen: 'Lorine Hischke',
-      id: '#45678',
-      numberOrder: 5674,
-      totalSpent: 19800000,
-      userName: 'lorine.hischke',
-      email: 'vafgot@vultukir.org',
-      status: 'Active',
-      contact: '(123) 456-7890',
-   });
-   const [orderList, setOrderList] = useState([
-      {
-         id: '#9957',
-         date: 'Nov 29, 2022',
-         status: {
-            id: 11,
-            orderId: 1080,
-            order: null,
-            status: 'Delivered',
-            updateTime: '2023-11-15T21:03:52.5289741',
-         },
-
-         spent: '59.28',
-      },
-      {
-         id: '#9958',
-         date: 'Nov 29, 2022',
-         status: 'Out for delivery',
-         spent: '59.28',
-         status: {
-            id: 11,
-            orderId: 1080,
-            order: null,
-            status: 'Delivered',
-            updateTime: '2023-11-15T21:03:52.5289741',
-         },
-      },
-      {
-         id: '#9959',
-         date: 'Nov 29, 2022',
-         status: {
-            id: 11,
-            orderId: 1080,
-            order: null,
-            status: 'Delivered',
-            updateTime: '2023-11-15T21:03:52.5289741',
-         },
-
-         spent: '59.28',
-      },
-      {
-         id: '#9960',
-         date: 'Nov 29, 2022',
-         status: {
-            id: 11,
-            orderId: 1080,
-            order: null,
-            status: 'Delivered',
-            updateTime: '2023-11-15T21:03:52.5289741',
-         },
-
-         spent: '59.28',
-      },
-   ]);
+   const [customerData, setCustomerData] = useState({});
+   const [orderList, setOrderList] = useState([]);
    const [isOptionsVisible, setIsOptionsVisible] = useState(false);
-
+   const [pageNow, setPageNow] = useState(1);
+   const [totalOrder, setTotalOrder] = useState(100);
    const toggleOptions = () => {
       setIsOptionsVisible(!isOptionsVisible);
    };
@@ -87,7 +26,7 @@ const CustomerDetail = () => {
    const [openDetailProduct, setOpenDetailProduct] = useState(false);
    const [contentDetailProduct, setContentDetailProduct] = useState(null);
    const [checkboxes, setCheckboxes] = useState(
-      Array(orderList.length).fill(false)
+      Array(orderList?.length).fill(false)
    );
    const messageBoxRef = useRef();
 
@@ -109,7 +48,7 @@ const CustomerDetail = () => {
    };
    const toggleSelectAll = () => {
       setSelectAll(!selectAll);
-      setCheckboxes(Array(orderList.length).fill(!selectAll));
+      setCheckboxes(Array(orderList?.length).fill(!selectAll));
    };
 
    const handleCheckboxChange = (index) => {
@@ -119,20 +58,22 @@ const CustomerDetail = () => {
    };
    const navigate = useNavigate();
    const fetchCustomerWithId = async (id) => {
-      const dataApi = await getCustomerWithId(id);
+      const dataApi = await getAccountById(id);
 
       console.log('dataApi', dataApi);
       if (dataApi.status) {
-         if (JSON.stringify(dataApi.result !== JSON.stringify(customerData))) {
-            setCustomerData(dataApi.result);
+         if (JSON.stringify(dataApi.result.data.user !== JSON.stringify(customerData))) {
+            setCustomerData(dataApi.result.data.user);
          }
+         const res = await getListOrderByUserId(id,{index:5,page:pageNow,status:null});
          if (
             JSON.stringify(
-               dataApi.result.orderList !== JSON.stringify(orderList)
+               res.result.data.orderList !== JSON.stringify(orderList)
             )
          ) {
-            console.log('dataApi.result.orderList', dataApi.result.orderList);
-            setOrderList(dataApi.result.orderList);
+            console.log('res.result.data.orderList', res.result.data.orderList);
+            setOrderList(res.result.data.orderList);
+            setTotalOrder(res.result.data.totalItemCount);
          }
       }
    };
@@ -170,26 +111,26 @@ const CustomerDetail = () => {
                            </tr>
                            <tr>
                               <td>DateTime</td>
-                              <td>{ProcessDate(contentDetailProduct.date)}</td>
+                              <td>{ProcessDate(contentDetailProduct.createdDate)}</td>
                            </tr>
 
                            <tr>
                               <td>Spent</td>
                               <td>
-                                 {contentDetailProduct.spent.toLocaleString()}đ
+                                 {contentDetailProduct.totalPrice?.toLocaleString()}đ
                               </td>
                            </tr>
 
                            <tr>
                               <td>Status</td>
                               <td>
-                                 <span
+                                 {/* <span
                                     className={contentDetailProduct.status.status
                                        .toLowerCase()
                                        .substring(0, 3)}
                                  >
                                     {contentDetailProduct.status.status}
-                                 </span>
+                                 </span> */}
                               </td>
                            </tr>
                            <tr>
@@ -233,12 +174,12 @@ const CustomerDetail = () => {
                   {console.log('customer,', customerData)}
                   <img
                      src={
-                        processApiImagePath(customerData.image) ||
+                        `http://112.78.1.194:5286/api/user/pro/pic/${customerData.id}` ||
                         require('../../Assets/Image/account-male.png')
                      }
                      alt=""
                   />
-                  <div className="name">{customerData.hoTen}</div>
+                  <div className="name">{customerData.names}</div>
                   <div style={{ fontWeight: 'bold' }}>
                      Customer ID: #{customerData.id}
                   </div>
@@ -246,7 +187,7 @@ const CustomerDetail = () => {
                      <div className="icons">
                         <FaCartArrowDown />
                         <div>
-                           <div>{customerData.numberOrder}</div>
+                           <div>{customerData.totalOrder}</div>
                            <div>Order</div>
                         </div>
                      </div>
@@ -254,7 +195,7 @@ const CustomerDetail = () => {
                         <FaMoneyBillAlt />
                         <div>
                            <div>
-                              {customerData?.totalSpent.toLocaleString()}đ
+                              {customerData.totalSpent?.toLocaleString()}đ
                            </div>
                            <div>Spent</div>
                         </div>
@@ -264,11 +205,11 @@ const CustomerDetail = () => {
                <div className="customer-detail">
                   <div className="title">DETAIL</div>
                   <div className="info">Username: {customerData.userName}</div>
-                  <div className="info">Email: {customerData.email}</div>
+                  <div className="info">Email: {customerData.userName}</div>
                   <div
-                     className={`status ${customerData?.status.toLowerCase()}`}
+                     className={`status ${customerData?.status===true?("Active").toLowerCase():("Inactive").toLowerCase()}`}
                   >
-                     Status: <span>{customerData?.status}</span>
+                     Status: <span>{customerData?.status===true?"Active":"Inactive"}</span>
                   </div>
                   <div className="info">Contact: {customerData.contact}</div>
                </div>
@@ -303,7 +244,7 @@ const CustomerDetail = () => {
                         </tr>
                      </thead>
                      <tbody>
-                        {orderList.map((order, index) => (
+                        {orderList?.map((order, index) => (
                            <tr key={index}>
                               <td
                                  className="td-action"
@@ -333,22 +274,30 @@ const CustomerDetail = () => {
                               >
                                  {order.id}
                               </td>
-                              <td>{ProcessDate(order.date)}</td>
+                              <td>{ProcessDate(order.createdDate)}</td>
                               <td>
-                                 <span
-                                    className={order.status?.status
+                                 {/* <span
+                                    className={order.status
                                        ?.toLocaleLowerCase()
                                        .substring(0, 3)}
                                  >
-                                    {order.status?.status}
-                                 </span>
+                                    {order.status}
+                                 </span> */}
                               </td>
-                              <td>{order.spent.toLocaleString()}đ</td>
+                              <td>{order.totalPrice?.toLocaleString()}đ</td>
                            </tr>
                         ))}
                      </tbody>
                   </table>
                </div>
+               <Pagination
+                  setPageNow={setPageNow}
+                  obj={{
+                     pageNow: pageNow,
+                     size: 5,
+                     totalProduct: totalOrder || 100,
+                  }}
+               />
             </div>
          </Container>
       </>

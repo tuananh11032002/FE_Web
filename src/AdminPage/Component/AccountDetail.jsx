@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { getCustomerWithId, updateUserInfoforAdmin } from '../../Axios/web';
+import { UpdateAccountForAdmin,getAccountById } from '../../Axios/web';
 import { VscLoading } from 'react-icons/vsc';
 import { ToastContainer, toast } from 'react-toastify';
 import processApiImagePath from '../../Helper/EditLinkImage';
@@ -10,40 +10,27 @@ import { validateEmail } from '../../Helper/CheckInput';
 const AccountDetail = () => {
    const { id } = useParams();
 
-   const [customerData, setCustomerData] = useState({
-      displayName: 'Lorine Hischke',
-      userId: '#45678',
-      numberOrder: 5674,
-      spent: 19800000,
-      userName: 'lorine.hischke',
-      email: 'vafgot@vultukir.org',
-      status: 'Active',
-      contact: '(123) 456-7890',
-   });
+   const [customerData, setCustomerData] = useState({});
 
    const [tempCustomerData, setTempCustomerData] = useState({});
    const [isOpenEditAccount, setisOpenEditAccount] = useState(false);
    const [loading, setLoading] = useState(false);
    const [isReload, setIsReload] = useState(false);
    const fetchData = async (userId) => {
-      const dataApi = await getCustomerWithId(userId);
+      const dataApi = await getAccountById(userId);
       console.log('dataApi', dataApi);
       if (dataApi?.status) {
-         if (JSON.stringify(dataApi.result) !== JSON.stringify(customerData)) {
-            setCustomerData(dataApi.result);
+         if (JSON.stringify(dataApi.result.data.user) !== JSON.stringify(customerData)) {
+            setCustomerData(dataApi.result.data.user);
          }
       }
    };
    const handleSubmit = async (e) => {
       e.preventDefault();
       setLoading(true);
-      const data = await updateUserInfoforAdmin({
+      const data = await UpdateAccountForAdmin({
          id: tempCustomerData.id,
-         hoTen: tempCustomerData.displayName,
-         phone: tempCustomerData.contact,
-         email: tempCustomerData.email,
-
-         userStatus: tempCustomerData.status,
+         status: tempCustomerData.status==="Active"?true:false
       });
       setLoading(false);
       if (data?.status === true) {
@@ -85,7 +72,7 @@ const AccountDetail = () => {
                                  type="text"
                                  id="last-name"
                                  name="last-name"
-                                 value={tempCustomerData.displayName}
+                                 value={tempCustomerData.name}
                                  onChange={(e) =>
                                     setTempCustomerData({
                                        ...tempCustomerData,
@@ -118,7 +105,7 @@ const AccountDetail = () => {
                                  type="email"
                                  id="email"
                                  name="email"
-                                 value={tempCustomerData.email}
+                                 value={tempCustomerData.userName}
                                  onChange={(e) =>
                                     setTempCustomerData({
                                        ...tempCustomerData,
@@ -174,7 +161,7 @@ const AccountDetail = () => {
                                  }
                               >
                                  <option value="Admin">Admin</option>
-                                 <option value="Customer">Customer</option>
+                                 <option value="Member">Customer</option>
                               </select>
                            </div>
                            <div className="button-container">
@@ -211,12 +198,12 @@ const AccountDetail = () => {
                <div className="customer-avatar">
                   <img
                      src={
-                        processApiImagePath(customerData.image) ||
+                        `http://112.78.1.194:5286/api/user/pro/pic/${customerData.id}` ||
                         require('../../Assets/Image/account-male.png')
                      }
                      alt=""
                   />
-                  <div className="name">{customerData.displayName}</div>
+                  <div className="name">{customerData.name}</div>
                   <div>USER ID: #{customerData.id}</div>
                </div>
                <div className="customer-detail">
@@ -226,13 +213,13 @@ const AccountDetail = () => {
                      {customerData.userName}
                   </div>
                   <div className="info">
-                     <span className="bold">Email:</span> {customerData.email}
+                     <span className="bold">Email:</span> {customerData.userName}
                   </div>
                   <div
-                     className={`status ${customerData?.status.toLowerCase()}`}
+                     className={`status ${customerData?.status===true?("Active").toLowerCase():("Inactive").toLowerCase()}`}
                   >
                      <small className="bold">Status:</small>
-                     <span>{customerData.status}</span>
+                     <span>{customerData?.status===true?"Active":"Inactive"}</span>
                   </div>
                   <div className="info">
                      <span className="bold">Contact:</span>{' '}

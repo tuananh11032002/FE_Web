@@ -3,61 +3,24 @@ import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { FaCartPlus } from 'react-icons/fa';
 import {
-   DeleteOrder,
-   GetOrderDetailAndCustomerInfo,
+   deleteOrder,
+   getOrder,
    UpdateStatusOrder,
 } from '../../Axios/web';
 import processApiImagePath from '../../Helper/EditLinkImage';
 const DetailOrder = () => {
    const { id } = useParams(); // Truy cập ID từ URL
    const [selectAll, setSelectAll] = useState(false);
-   const [detailData, setDetailData] = useState([
-      {
-         image: 'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/products/woodenchair.png',
-         name: 'Wooden Chair',
-         price: 1876,
-         quantity: 454,
-         total: 3409,
-      },
-      {
-         image: 'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/products/woodenchair.png',
-         name: 'Wooden Chair',
-         price: 1876,
-         quantity: 454,
-         total: 3409,
-      },
-      {
-         image: 'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/products/woodenchair.png',
-         name: 'Wooden Chair',
-         price: 1876,
-         quantity: 454,
-         total: 3409,
-      },
-      {
-         image: 'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/products/woodenchair.png',
-         name: 'Wooden Chair',
-         price: 1876,
-         quantity: 454,
-         total: 3090909,
-      },
-   ]);
+   const [detailData, setDetailData] = useState([]);
    const [fee, setFee] = useState({
       subtotal: '500025',
       discount: '0000',
       total: ' 510025',
    });
-   const [customer, setCustomer] = useState({
-      userNameReceive: 'Hoang',
-      displayName: 'Shamus Tuttle',
-      userId: '#58909',
-      totalOrder: 256,
-      email: 'Shamus889@yahoo.com',
-      shippingAdress: '',
-      contact: '+1 (609) 972-22-22',
-      cardNumber: '******4291',
-      methodPayment: 'online',
-      payment: 'Mastercard',
-   });
+   const [customer, setCustomer] = useState({});
+   const [address, setAddress] = useState();
+   const [receiveName, setReceiveName] = useState();
+   const [receiveContact, setReceiveContact] = useState();
    const [orderStatus, setOrderStatus] = useState([]);
    const [selectOrderStatus, setSelectOrderStatus] = useState('');
 
@@ -66,7 +29,7 @@ const DetailOrder = () => {
    );
    const navigate = useNavigate();
    const handleDeleteOrder = async () => {
-      const data = await DeleteOrder(id);
+      const data = await deleteOrder(id);
       console.log(data);
       if (data?.status) {
          navigate('/admin/order-list');
@@ -90,20 +53,23 @@ const DetailOrder = () => {
       }
    };
    const fetchData = async () => {
-      const data = await GetOrderDetailAndCustomerInfo(id);
+      const data = await getOrder(id);
       console.log('dataApi', data);
       if (data?.status) {
-         const value = data.result;
-         setDetailData(value.orderItems);
+         const value = data.result.data;
+         setDetailData(value.order.detail);
          setFee({
-            subtotal: value.subtotal,
-            discount: value.discount,
-            total: value.totalMoney,
-            feeShip: value.feeShip,
+            subtotal: value.order.totalPrice-value.order.discount-(value.order.feeShip?value.order.feeShip:0),
+            discount: value.order.discount,
+            total: value.order.totalPrice,
+            feeShip: value.order.feeShip?value.order.feeShip:0,
          });
-         setOrderStatus(value.orderStatus);
-         setCustomer({ ...value.customerInfo, ...value.userInfor });
-         setSelectOrderStatus(value.orderStatus[0].status);
+         setOrderStatus(value.order.status);
+         setCustomer({ ...value.order.user });
+         setAddress(value.order.address);
+         setReceiveName(value.order.receiveName);
+         setReceiveContact(value.order.receiveContact);
+         // setSelectOrderStatus(value.orderStatus[0].status);
       }
    };
 
@@ -114,9 +80,9 @@ const DetailOrder = () => {
    return (
       <Container>
          <div className="delete-button-container">
-            {orderStatus.length > 0 ? (
+            {orderStatus > 0 ? (
                <>
-                  <span>Status: {orderStatus[0]?.status}</span>
+                  <span>Status: {orderStatus}</span>
                   <button onClick={() => handleChangStatus()}>
                      Cập nhật đến bước tiếp theo
                   </button>
@@ -162,20 +128,20 @@ const DetailOrder = () => {
                               <td>
                                  <div className="td-flex">
                                     <img
-                                       src={processApiImagePath(product.image)}
+                                       src={processApiImagePath(product.mainFile)}
                                        alt=""
                                        width="40px"
                                        height="40px"
                                     />
                                     <div>
-                                       <div>{product.name}</div>
-                                       <div>{product.title}</div>
+                                       <div>{product.productName}</div>
+                                       {/* <div>{product.title}</div> */}
                                     </div>
                                  </div>
                               </td>
-                              <td>{product.price.toLocaleString()}đ</td>
-                              <td>{product.quantity}</td>
-                              <td>{product.total.toLocaleString()}đ</td>
+                              <td>{product.unitPrice.toLocaleString()}đ</td>
+                              <td>{product.itemCount}</td>
+                              <td>{product.totalPrice.toLocaleString()}đ</td>
                            </tr>
                         ))}
                      </tbody>
@@ -233,8 +199,8 @@ const DetailOrder = () => {
                         alt=""
                      />
                      <div>
-                        <div>{customer.displayName}</div>
-                        <div>CustomerId: #{customer.userId}</div>
+                        <div>{customer.name}</div>
+                        <div>CustomerId: #{customer.id}</div>
                      </div>
                   </div>
                   <div>
@@ -242,17 +208,17 @@ const DetailOrder = () => {
                         <FaCartPlus />
                      </span>
                      &nbsp;
-                     {customer.totalOrder} Order
+                     {customer?.totalOrder} Order
                   </div>
                   <div>
                      <div className="flex">
                         <h1>Contact Info</h1>
                         <span className="edit">Edit</span>
                      </div>
-                     <div>People Receive: {customer.userNameReceive}</div>
+                     <div>People Receive: {receiveName}</div>
 
                      <div>Email: {customer.email}</div>
-                     <div>Phone: {customer.contact}</div>
+                     <div>Phone: {receiveContact}</div>
                   </div>
                </div>
                <div className="shipping">
@@ -260,7 +226,7 @@ const DetailOrder = () => {
                      <h1>Shipping Address</h1>
                      <span className="edit">Edit</span>
                   </div>
-                  <p>{customer.shippingAdress}</p>
+                  <p>{address}</p>
                </div>
                <div className="billing">
                   <div className="flex">
@@ -269,7 +235,7 @@ const DetailOrder = () => {
                   </div>
                   <div>
                      <div>
-                        {customer.payment === 'Momo'
+                        {customer?.payment === 'Momo'
                            ? 'VNPAY'
                            : customer.payment}
                      </div>

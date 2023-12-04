@@ -6,76 +6,20 @@ import styled from 'styled-components';
 import Pagination from './Pagination';
 import { RiRefundFill } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
-import { GetOrderAdminApi } from '../../Axios/web';
+import { GetOrderAdminApi, getListOrder } from '../../Axios/web';
 import processApiImagePath from '../../Helper/EditLinkImage';
 import ProcessDate from '../../Helper/ProcessDate';
 
 const OrderList = () => {
    const navigate = useNavigate();
-   const [data, setData] = useState([
-      {
-         orderId: '123',
-         order: '#6979',
-         date: 'Apr 15, 2023, 10:21',
-         customerName: 'TUAN ANH HANDSOME',
-         customerImage:
-            'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/avatars/19.png',
-         customerEmail: 'tuaananh@gmail.com',
-         payment: 'pending',
-         status: 'delivered',
-         methodPayment: '***789',
-         imagePaymentMethod:
-            'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/icons/payments/mastercard.png',
-      },
-      {
-         orderId: '123',
-         order: '#6979',
-         date: 'Apr 15, 2023, 10:21',
-         customerName: 'TUAN ANH HANDSOME',
-         customerImage:
-            'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/avatars/19.png',
-         customerEmail: 'tuaananh@gmail.com',
-         payment: 'Failed',
-         status: 'Out for Delivery',
-         methodPayment: '***789',
-         imagePaymentMethod:
-            'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/icons/payments/paypal_logo.png',
-      },
-      {
-         orderId: '123',
-         order: '#6979',
-         date: 'Apr 15, 2023, 10:21',
-         customerName: 'TUAN ANH HANDSOME',
-         customerImage:
-            'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/avatars/19.png',
-         customerEmail: 'tuaananh@gmail.com',
-         payment: 'Paid',
-         status: 'Dispatched',
-         methodPayment: '***789',
-         imagePaymentMethod:
-            'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/icons/payments/paypal_logo.png',
-      },
-      {
-         order: '#6979',
-         date: 'Apr 15, 2023, 10:21',
-         customerName: 'TUAN ANH HANDSOME',
-         customerImage:
-            'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/avatars/19.png',
-         customerEmail: 'tuaananh@gmail.com',
-         payment: 'Cancelled',
-         status: 'Ready to Pickup',
-         methodPayment: '***789',
-         imagePaymentMethod:
-            'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/icons/payments/paypal_logo.png',
-      },
-   ]);
+   const [data, setData] = useState([]);
    const [selectAll, setSelectAll] = useState(false);
 
-   const [checkboxes, setCheckboxes] = useState(Array(data.length).fill(false));
+   const [checkboxes, setCheckboxes] = useState(Array(data?.length).fill(false));
 
    const toggleSelectAll = () => {
       setSelectAll(!selectAll);
-      setCheckboxes(Array(data.length).fill(!selectAll));
+      setCheckboxes(Array(data?.length).fill(!selectAll));
    };
 
    const handleCheckboxChange = (index) => {
@@ -88,14 +32,14 @@ const OrderList = () => {
    const [totalOrder, setTotalOrder] = useState(100);
    const [search, setSearch] = useState('');
    const fetchOrder = async () => {
-      const dataApi = await GetOrderAdminApi(search, pageNow, selectedValue);
+      const dataApi = await getListOrder({page:pageNow, index:selectedValue});
       console.log('data', dataApi);
       if (dataApi?.status) {
          if (
-            JSON.stringify(dataApi.result.orderList) !== JSON.stringify(data)
+            JSON.stringify(dataApi.result.data.orderList) !== JSON.stringify(data)
          ) {
-            setData(dataApi.result.orderList);
-            setTotalOrder(dataApi.result.totalOrder);
+            setData(dataApi.result.data.orderList);
+            setTotalOrder(dataApi.result.data.totalItemCount);
          }
       }
    };
@@ -187,7 +131,7 @@ const OrderList = () => {
                      </tr>
                   </thead>
                   <tbody>
-                     {data.map((product, index) => (
+                     {data?.map((product, index) => (
                         <tr key={index}>
                            <td>
                               <input
@@ -204,44 +148,42 @@ const OrderList = () => {
                                  }}
                                  onClick={() => {
                                     navigate(
-                                       `/admin/order-detail/${product.orderId}`
+                                       `/admin/order-detail/${product.id}`
                                     );
                                  }}
                               >
-                                 {product.orderId}
+                                 {product.id}
                               </div>
                            </td>
-                           <td>{ProcessDate(product.date)}</td>
+                           <td>{ProcessDate(product.createdDate)}</td>
 
                            <td className="td-customer">
                               <div className="td-flex">
                                  <img
-                                    src={processApiImagePath(
-                                       product.customerImage
-                                    )}
+                                    src={
+                                       `http://112.78.1.194:5286/api/user/pro/pic/${product.user.id}`
+                                    }
                                     alt=""
                                     width="40px"
                                     height="40px"
                                  />
                                  <div>
-                                    <div>{product.customerName}</div>
-                                    <div>{product.customerEmail}</div>
+                                    <div>{product.user.name}</div>
+                                    <div>{product.user.email}</div>
                                  </div>
                               </div>
                            </td>
                            <td className="td-payment">
-                              <div className={product.payment.toLowerCase()}>
-                                 {product.payment}
-                              </div>
+                              {/* <div className={product.totalPrice?.toLowerCase()}>
+                                 {product.totalPrice}
+                              </div> */}
                            </td>
 
                            <td className="td-status">
                               <span
-                                 className={product?.status
-                                    ?.substring(0, 3)
-                                    .toLowerCase()}
+                                 className={product?.status===0?"delivered":product.status===1?"dis":"rea"}
                               >
-                                 {product?.status}
+                                 {product?.status===0?"delivered":product.status===1?"dispatch":"ready"}
                               </span>
                            </td>
                            <td className="td-methodPayment">

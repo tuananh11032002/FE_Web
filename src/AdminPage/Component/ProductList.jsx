@@ -15,7 +15,7 @@ import Pagination from './Pagination';
 import { useNavigate } from 'react-router-dom';
 import { AdminContext } from '../Admin';
 import {
-   deleteProduct, getListCategory, getListProduct,
+   deleteProduct, getListCategory, getListProduct,getListProductForAdmin
 } from '../../Axios/web';
 import processApiImagePath from '../../Helper/EditLinkImage';
 
@@ -25,7 +25,7 @@ const ProductList = () => {
    const [data, setData] = useState([]);
    const [selectAll, setSelectAll] = useState(false);
 
-   const [checkboxes, setCheckboxes] = useState(Array(data.length).fill(false));
+   const [checkboxes, setCheckboxes] = useState(Array(data?.length).fill(false));
    const [valueSearch, setValueSearch] = useState('');
    const [selectedValue, setSelectedValue] = useState('7');
    const [openDetailProduct, setOpenDetailProduct] = useState(false);
@@ -40,7 +40,7 @@ const ProductList = () => {
    const navigate = useNavigate();
    const toggleSelectAll = () => {
       setSelectAll(!selectAll);
-      setCheckboxes(Array(data.length).fill(!selectAll));
+      setCheckboxes(Array(data?.length).fill(!selectAll));
    };
    const handleDelete = async (productId) => {
       const data = await deleteProduct(productId);
@@ -62,7 +62,7 @@ const ProductList = () => {
 
    useEffect(() => {
       const fetchProduct = async () => {
-         const dataProduct = await getListProduct(
+         const dataProduct = await getListProductForAdmin(
             {index: parseInt(selectedValue),
             page: pageNow,
             sortBy: null,
@@ -74,7 +74,7 @@ const ProductList = () => {
          );
 
          if (dataProduct?.status === true) {
-            const { productList, totalItemCount } = dataProduct.result;
+            const { productList, totalItemCount } = dataProduct.result.data;
             if (JSON.stringify(data) !== JSON.stringify(productList)) {
                setData(productList);
                setTotalProduct(totalItemCount);
@@ -175,7 +175,7 @@ const ProductList = () => {
                            <tr>
                               <td>Status</td>
                               <td
-                                 className={contentDetailProduct.active===true?("Active").toLowerCase():("Inactive").toLowerCase()}
+                                 className={contentDetailProduct.active===true?("Active-ic").toLowerCase():("Inactive").toLowerCase()}
                               >
                                  <span> {contentDetailProduct.active===true?"Active":"Inactive"}</span>
                               </td>
@@ -386,14 +386,14 @@ const ProductList = () => {
                                     />
                                     <div>
                                        <div>{product.name}</div>
-                                       <div>{product.code}</div>
+                                       <div>{product?.code}</div>
                                     </div>
                                  </div>
                               </td>
                               <td>{product.category?.map((cate)=>(cate.name+","))}</td>
                               <td>{product.unitPrice?.toLocaleString()}đ</td>
                               <td>{product.totalItem}</td>
-                              <td className={product.active===true?("Active").toLowerCase():("Inactive").toLowerCase()}>
+                              <td className={product.active===true?("Active-ic").toLowerCase():("Inactive").toLowerCase()}>
                                  <span>{product.active===true?"Active":"Inactive"}</span>
                               </td>
                            </tr>
@@ -534,7 +534,7 @@ const DetailProduct = styled.div`
       }
    }
 
-   .publish {
+   .active-ic {
       font-weight: bold;
       color: #008000; /* Màu xanh dương cho trạng thái 'Active' */
       span {
@@ -783,7 +783,7 @@ const Container = styled.div`
          }
       }
       /* Đặt kiểu cho cột "STATUS" */
-      .datatable-product .publish {
+      .datatable-product .active-ic {
          text-align: center;
          font-weight: bold;
          color: #008000; /* Màu xanh dương cho trạng thái 'Active' */

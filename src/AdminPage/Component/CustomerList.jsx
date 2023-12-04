@@ -4,49 +4,12 @@ import { AiOutlinePlus } from 'react-icons/ai';
 import styled from 'styled-components';
 import Pagination from './Pagination';
 import { useNavigate } from 'react-router-dom';
-import { getCustomerApi } from '../../Axios/web';
+import { getListAccount } from '../../Axios/web';
 import processApiImagePath from '../../Helper/EditLinkImage';
 
 const CustomerList = () => {
    const navigate = useNavigate();
-   const [data, setData] = useState([
-      {
-         hoTen: 'xxxx',
-         image: 'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/avatars/17.png',
-         id: '#1234',
-         totalSpent: '$125',
-         order: 110,
-         country: 'Ukraine',
-         email: 'zarton8@weibo.com',
-      },
-      {
-         hoTen: 'xxxx',
-         image: 'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/avatars/17.png',
-         id: '#1234',
-         totalSpent: '$125',
-         order: 110,
-         country: 'Ukraine',
-         email: 'zarton8@weibo.com',
-      },
-      {
-         hoTen: 'xxxx',
-         image: 'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/avatars/17.png',
-         id: '#1234',
-         email: 'zarton8@weibo.com',
-         totalSpent: '$125',
-         order: 110,
-         country: 'Ukraine',
-      },
-      {
-         hoTen: 'xxxx',
-         email: 'zarton8@weibo.com',
-         image: 'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/avatars/17.png',
-         id: '#1234',
-         totalSpent: '$125',
-         order: 110,
-         country: 'Ukraine',
-      },
-   ]);
+   const [data, setData] = useState([]);
 
    const [selectAll, setSelectAll] = useState(false);
    const [checkStock, setCheckStock] = useState(data.map((item) => item.stock));
@@ -68,19 +31,19 @@ const CustomerList = () => {
    const [search, setSearch] = useState('');
    const [totalCustomer, setTotalCustomer] = useState(100);
    const fetchData = async () => {
-      const dataApi = await getCustomerApi(search, pageNow, selectedValue);
+      const dataApi = await getListAccount({index: selectedValue, page:pageNow, role: "Member",search:search});
       console.log('data', dataApi);
 
       if (dataApi.status) {
-         if (JSON.stringify(dataApi.result.customer) !== JSON.stringify(data)) {
-            setData(dataApi.result.customer);
-            setTotalCustomer(dataApi.result.totalCustomer);
+         if (JSON.stringify(dataApi.result.data.userList) !== JSON.stringify(data)) {
+            setData(dataApi.result.data.userList);
+            setTotalCustomer(dataApi.result.data.totalItemCount);
          }
       }
    };
    useEffect(() => {
       fetchData();
-   }, [data, search]);
+   }, [data, search,selectedValue]);
    return (
       <Container>
          <h1>eCommerce / Customer List</h1>
@@ -122,7 +85,7 @@ const CustomerList = () => {
                         <th colSpan="3">CUSTOMER</th>
                         <th>CUSTOMER ID</th>
 
-                        <th>COUNTRY</th>
+                        {/* <th>COUNTRY</th> */}
                         <th>ORDER</th>
                         <th>TOTAL SPENT</th>
                      </tr>
@@ -140,7 +103,7 @@ const CustomerList = () => {
                            <td colSpan="3">
                               <div className="td-flex">
                                  <img
-                                    src={processApiImagePath(product.image)}
+                                    src={`http://112.78.1.194:5286/api/user/pro/pic/${product.id}`}
                                     alt=""
                                     width="40px"
                                     height="40px"
@@ -157,16 +120,15 @@ const CustomerList = () => {
                                           );
                                        }}
                                     >
-                                       {product.hoTen}
+                                       {product.name}
                                     </div>
-                                    <div>{product.email}</div>
+                                    <div>{product.userName}</div>
                                  </div>
                               </div>
                            </td>
                            <td>{product.id}</td>
-
-                           <td>{product.country}</td>
-                           <td>{product.order}</td>
+                           {/* <td>{product.country}</td> */}
+                           <td>{product.totalOrder}</td>
                            <td>{product?.totalSpent.toLocaleString()}đ</td>
                         </tr>
                      ))}

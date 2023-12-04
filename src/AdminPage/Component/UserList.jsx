@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import Pagination from './Pagination';
 import { useNavigate } from 'react-router-dom';
 import { AdminContext } from '../Admin';
-import { deleteUser, getUser, insertUserforAdmin } from '../../Axios/web';
+import { deleteAccount, getListAccount, insertUserforAdmin } from '../../Axios/web';
 import adminSVG from '../../Assets/Image/admin.svg';
 import customerSVG from '../../Assets/Image/customer.svg';
 import processApiImagePath from '../../Helper/EditLinkImage';
@@ -15,53 +15,7 @@ import ConfirmationDialog from '../../Sharing/MessageBox';
 import { ToastContainer, toast } from 'react-toastify';
 
 const UserList = () => {
-   const [data, setData] = useState([
-      {
-         id: 1,
-         role: 'admin',
-         image: 'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/avatars/2.png',
-         category: 'Shoes',
-         displayName: 'TRAN TUAN ANH',
-         userName: '@zmcclevertye',
-         email: 'zmcclevertye@soundcloud.com',
-         status: 'active',
-         action: 'none',
-      },
-      {
-         id: 1,
-         role: 'admin',
-         image: 'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/avatars/7.png',
-         displayName: 'TRAN TUAN ANH',
-         userName: '@zmcclevertye',
-         email: 'zmcclevertye@soundcloud.com',
-         status: 'active',
-         action: 'none',
-      },
-      {
-         id: 1,
-         role: 'user',
-         displayName: 'TRAN TUAN ANH',
-         userName: '@zmcclevertye',
-         email: 'zmcclevertye@soundcloud.com',
-         image: 'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/avatars/6.png',
-         category: 'Shoes',
-
-         status: 'inactive',
-         action: 'none',
-      },
-      {
-         id: 1,
-         role: 'user',
-
-         displayName: 'TRAN TUAN ANH',
-         userName: '@zmcclevertye',
-         email: 'zmcclevertye@soundcloud.com',
-         image: 'https://demos.themeselection.com/materio-bootstrap-html-admin-template/assets/img/avatars/6.png',
-
-         status: 'active',
-         action: 'none',
-      },
-   ]);
+   const [data, setData] = useState([]);
    const { closeMenu } = useContext(AdminContext);
    const [isOpenEditUser, setIsOpenEditUser] = useState(false);
    const navigate = useNavigate();
@@ -75,7 +29,7 @@ const UserList = () => {
    const handleYes = async () => {
       console.log('userIdEdit', userIdEdit);
 
-      const data = await deleteUser(userIdEdit);
+      const data = await deleteAccount(userIdEdit);
 
       console.log('delete', data);
       if (data?.status) {
@@ -148,18 +102,20 @@ const UserList = () => {
    };
    const [search, setSearch] = useState('');
    const fetchData = async () => {
-      const dataAPi = await getUser(
-         search,
-         pageNow,
-         selectedValue,
-         selection.userRole,
-         selection.userStatus
+      const dataAPi = await getListAccount(
+         {
+            page:pageNow,
+            index:selectedValue,
+            search:search,
+            role:selection.userRole===""?null:selection.userRole==="Admin"?"Admin":"Member",
+            status:selection.userStatus===""?null:selection.userStatus==="Active"?true:false
+         }
       );
       console.log('dataApi', dataAPi);
       if (dataAPi?.status) {
-         if (JSON.stringify(data) !== JSON.stringify(dataAPi.result)) {
-            setData(dataAPi.result.userList);
-            setTotalUser(dataAPi.result.totalUser);
+         if (JSON.stringify(data) !== JSON.stringify(dataAPi.result.data.userList)) {
+            setData(dataAPi.result.data.userList);
+            setTotalUser(dataAPi.result.data.totalItemCount);
          }
       }
    };
@@ -301,7 +257,7 @@ const UserList = () => {
                      >
                         <option value=""> Select Role </option>
                         <option value="Admin">Admin</option>
-                        <option value="Customer">Customer</option>
+                        <option value="Member">Customer</option>
                      </select>
                   </div>
 
@@ -317,9 +273,6 @@ const UserList = () => {
                         }}
                      >
                         <option value=""> Select Status </option>
-                        <option value="Pending" className="text-capitalize">
-                           Pending
-                        </option>
                         <option value="Active" className="text-capitalize">
                            Active
                         </option>
@@ -395,7 +348,7 @@ const UserList = () => {
                               <td>
                                  <div className="td-flex">
                                     <img
-                                       src={processApiImagePath(user.image)}
+                                       src={`http://112.78.1.194:5286/api/user/pro/pic/${user.id}`}
                                        alt=""
                                        width="40px"
                                        height="40px"
@@ -408,13 +361,13 @@ const UserList = () => {
                                              );
                                           }}
                                        >
-                                          {user.displayName}
+                                          {user.name}
                                        </div>
                                        <div>{user.userName}</div>
                                     </div>
                                  </div>
                               </td>
-                              <td>{user.email}</td>
+                              <td>{user.userName}</td>
                               <td className={`td-role ${user.role}`}>
                                  {user.role.toLowerCase() === 'admin' ? (
                                     <span>
@@ -429,9 +382,9 @@ const UserList = () => {
                               </td>
 
                               <td
-                                 className={`${user.status.toLowerCase()}-user`}
+                                 className={`${user.status===true?("active"):("inctive")}-user`}
                               >
-                                 <span>{user.status}</span>
+                                 <span>{user.status===true?"active":"inactive"}</span>
                               </td>
                               <td className="td-action">
                                  <span onClick={() => HandleDelete(user.id)}>
