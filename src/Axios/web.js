@@ -286,34 +286,40 @@ export const getMyListOrder = async (data) => {
 
 // Product
 //add
-export const addProduct = (product) => {
+export const addProduct = async (product) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   return axiosClient.post(`${END_POINT.PRODUCT}`, product, {
+   const {token} = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res= axiosClient.post(`${END_POINT.PRODUCT}`, product, {
       headers: {
          Authorization: token,
       },
    });
+   await checkAndRenewToken(res);
+   return res;
 };
 //update
-export const updateProduct = (product) => {
+export const updateProduct = async (product) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   return axiosClient.put(`${END_POINT.PRODUCT}`, product, {
+   const {token} = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res= axiosClient.put(`${END_POINT.PRODUCT}`, product, {
       headers: {
          Authorization: token,
       },
    });
+   await checkAndRenewToken(res);
+   return res;
 };
 //delete
-export const deleteProduct = (id) => {
+export const deleteProduct = async (id) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   return axiosClient.delete(`${END_POINT.PRODUCT}/${id}`, {
+   const {token} = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res= axiosClient.delete(`${END_POINT.PRODUCT}/${id}`, {
       headers: {
          Authorization: token,
       },
    });
+   await checkAndRenewToken(res);
+   return res;
 };
 //get(id)
 export const getProduct = (id) => {
