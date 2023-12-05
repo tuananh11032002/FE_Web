@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import Pagination from './Pagination';
 import { useNavigate } from 'react-router-dom';
 import { AdminContext } from '../Admin';
-import { deleteAccount, getListAccount, insertUserforAdmin } from '../../Axios/web';
+import { deleteAccount, getListAccount, register,UpdateAccountForAdmin } from '../../Axios/web';
 import adminSVG from '../../Assets/Image/admin.svg';
 import customerSVG from '../../Assets/Image/customer.svg';
 import processApiImagePath from '../../Helper/EditLinkImage';
@@ -25,7 +25,11 @@ const UserList = () => {
    const [pageNow, setPageNow] = useState(1);
    const messageBoxRef = useRef();
    const [userIdEdit, setUserIdEdit] = useState(null);
-
+   const [role, setRole] = useState();
+   const [activeUPay, setActiveUPay] = useState(0);
+   const [inActiveUPay, setInactiveUPay] = useState(0);
+   const [activeUOrder, setActiveUOrder] = useState(0);
+   const [inActiveUOrder, setInactiveUOrder] = useState(0);
    const handleYes = async () => {
       console.log('userIdEdit', userIdEdit);
 
@@ -67,11 +71,8 @@ const UserList = () => {
    const [selectedValue, setSelectedValue] = useState('7');
    const [formData, setFormData] = useState({
       userName: '',
-      hoTen: '',
-      email: '',
-      phoneNumber: '',
-      role: '',
       password: '',
+      name: '',
    });
    const [selection, setSelection] = useState({
       userRole: '',
@@ -84,8 +85,11 @@ const UserList = () => {
 
    const handleSubmit = async (e) => {
       e.preventDefault();
-      const data = await insertUserforAdmin(formData);
+      const data = await register(formData);
       console.log('api:', data);
+      if(role==="Admin"&&data.result.id){
+         const res = await UpdateAccountForAdmin({id:data.result.id,role:role});
+      }
       if (data?.status) {
          toast.info('Thao tác thành công', {
             position: toast.POSITION.TOP_CENTER,
@@ -116,6 +120,17 @@ const UserList = () => {
          if (JSON.stringify(data) !== JSON.stringify(dataAPi.result.data.userList)) {
             setData(dataAPi.result.data.userList);
             setTotalUser(dataAPi.result.data.totalItemCount);
+            setActiveUPay(0);setInactiveUPay(0);setActiveUOrder(0);setInactiveUOrder(0);
+            await Promise.all(dataAPi.result.data.userList.map(async (el) => {
+               if(el.status===true){
+                  setActiveUPay((prevCount) => prevCount + el.totalSpent);
+                  setActiveUOrder((prevCount) => prevCount + el.totalOrder);
+               }
+               if(el.status===false){
+                  setInactiveUPay((prevCount) => prevCount + el.totalSpent);
+                  setInactiveUOrder((prevCount) => prevCount + el.totalOrder);
+               }
+            }));
          }
       }
    };
@@ -164,18 +179,8 @@ const UserList = () => {
                         </label>
                         <input
                            type="text"
-                           name="hoTen"
-                           value={formData.hoTen}
-                           onChange={handleChange}
-                        />
-                     </div>
-
-                     <div className="form-group">
-                        <label htmlFor="email">Nhập email:</label>
-                        <input
-                           type="email"
-                           name="email"
-                           value={formData.email}
+                           name="name"
+                           value={formData.name}
                            onChange={handleChange}
                         />
                      </div>
@@ -186,10 +191,10 @@ const UserList = () => {
                         </label>
                         <select
                            name="role"
-                           value={formData.role}
-                           onChange={handleChange}
+                           value={role}
+                           onChange={(e)=>{setRole(e.target.value)}}
                         >
-                           <option value="Customer">Customer</option>
+                           <option value="Member">Customer</option>
                            <option value="Admin">Admin</option>
                         </select>
                      </div>
@@ -203,6 +208,7 @@ const UserList = () => {
                            className="cancel-button"
                            onClick={() => {
                               setIsOpenEditUser(false);
+                              
                            }}
                         >
                            Cancel
@@ -218,10 +224,10 @@ const UserList = () => {
                <div className="card">
                   <div>
                      <p>Active Users</p>
-                     <h1>$14,235.12</h1>
+                     <h1>{activeUPay.toLocaleString()}đ</h1>
                      <p>
-                        <span> 6k orders</span>
-                        <span className="card-widget-rate-increase">+5.7%</span>
+                        <span> {activeUOrder} orders</span>
+                        {/* <span className="card-widget-rate-increase">+5.7%</span> */}
                      </p>
                   </div>
                   <div>
@@ -231,10 +237,10 @@ const UserList = () => {
                <div className="card">
                   <div>
                      <p> Inactive Users</p>
-                     <h1>$8,345.23</h1>
+                     <h1>{inActiveUPay.toLocaleString()}đ</h1>
                      <p>
-                        <span> 150 orders</span>
-                        <span className="card-widget-rate-decrease">-3.5%</span>
+                        <span> {inActiveUOrder} orders</span>
+                        {/* <span className="card-widget-rate-decrease">-3.5%</span> */}
                      </p>
                   </div>
                   <div>

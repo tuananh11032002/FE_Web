@@ -253,7 +253,7 @@ const ProductList = () => {
                      <h1>{venue.inAffiliate.totalAmount.toLocaleString()}đ</h1>
                      <p>
                         <span> {venue.inAffiliate.totalOrder} orders</span>
-                        <span className="card-widget-rate-decrease">-3.5%</span>
+                        <span className="card-widget-rate-decrease"></span>
                      </p>
                   </div>
                   <div>

@@ -11,7 +11,7 @@ const AccountDetail = () => {
    const { id } = useParams();
 
    const [customerData, setCustomerData] = useState({});
-
+   const [selectedStatus, setSelectedStatus] = useState(null);
    const [tempCustomerData, setTempCustomerData] = useState({});
    const [isOpenEditAccount, setisOpenEditAccount] = useState(false);
    const [loading, setLoading] = useState(false);
@@ -22,6 +22,7 @@ const AccountDetail = () => {
       if (dataApi?.status) {
          if (JSON.stringify(dataApi.result.data.user) !== JSON.stringify(customerData)) {
             setCustomerData(dataApi.result.data.user);
+            setSelectedStatus(dataApi.result.data.user.status===true?"Active":"Inactive");
          }
       }
    };
@@ -30,7 +31,8 @@ const AccountDetail = () => {
       setLoading(true);
       const data = await UpdateAccountForAdmin({
          id: tempCustomerData.id,
-         status: tempCustomerData.status==="Active"?true:false
+         role:tempCustomerData.role,
+         status: selectedStatus==="Active"||null?true:false
       });
       setLoading(false);
       if (data?.status === true) {
@@ -135,13 +137,10 @@ const AccountDetail = () => {
                               <select
                                  id="status"
                                  name="status"
-                                 value={tempCustomerData.status}
-                                 onChange={(e) =>
-                                    setTempCustomerData({
-                                       ...tempCustomerData,
-                                       status: e.target.value,
-                                    })
-                                 }
+                                 value={selectedStatus}
+                                 onChange={(e) =>{
+                                    setSelectedStatus(e.target.value)
+                                 }}
                               >
                                  <option value="Active">Active</option>
                                  <option value="Inactive">Inactive</option>
@@ -153,12 +152,12 @@ const AccountDetail = () => {
                                  id="role"
                                  name="role"
                                  value={tempCustomerData.role}
-                                 onChange={(e) =>
+                                 onChange={(e) =>{
                                     setTempCustomerData({
                                        ...tempCustomerData,
                                        role: e.target.value,
                                     })
-                                 }
+                                 }}
                               >
                                  <option value="Admin">Admin</option>
                                  <option value="Member">Customer</option>

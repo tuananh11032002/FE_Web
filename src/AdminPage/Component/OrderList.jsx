@@ -14,6 +14,10 @@ const OrderList = () => {
    const navigate = useNavigate();
    const [data, setData] = useState([]);
    const [selectAll, setSelectAll] = useState(false);
+   const [countCompeted, setCountCompleted] = useState(0);
+   const [countCancel, setCountCancel] = useState(0);
+   const [countRefunded, setCountRefunded] = useState(0);
+   const [countPP, setCountPP] = useState(0);
 
    const [checkboxes, setCheckboxes] = useState(Array(data?.length).fill(false));
 
@@ -40,6 +44,12 @@ const OrderList = () => {
          ) {
             setData(dataApi.result.data.orderList);
             setTotalOrder(dataApi.result.data.totalItemCount);
+            setCountCompleted(0);setCountPP(0);setCountCancel(0);
+            await Promise.all(dataApi.result.data.orderList.map(async (el) => {
+               if(el.status===3){setCountCompleted((prevCount) => prevCount + 1);}
+               if(el.status===1||el.status===0){setCountPP((prevCount) => prevCount + 1);}
+               if(el.status===4){setCountCancel((prevCount) => prevCount + 1);}
+            }));
          }
       }
    };
@@ -53,7 +63,7 @@ const OrderList = () => {
             <div className="card">
                <div>
                   <p>Pending Payment</p>
-                  <h1>56</h1>
+                  <h1>{countPP}</h1>
                </div>
                <div>
                   <MdOutlinePendingActions />
@@ -62,7 +72,7 @@ const OrderList = () => {
             <div className="card">
                <div>
                   <p> Completed</p>
-                  <h1>12,689</h1>
+                  <h1>{countCompeted}</h1>
                </div>
                <div>
                   <IoMdDoneAll />
@@ -71,7 +81,7 @@ const OrderList = () => {
             <div className="card">
                <div>
                   <p>Refunded</p>
-                  <h1>124</h1>
+                  <h1>{countRefunded}</h1>
                </div>
                <div>
                   <RiRefundFill />
@@ -80,7 +90,7 @@ const OrderList = () => {
             <div className="card">
                <div>
                   <p> Failed</p>
-                  <h1>23</h1>
+                  <h1>{countCancel}</h1>
                </div>
                <div>
                   <MdOutlineSmsFailed />
@@ -181,9 +191,9 @@ const OrderList = () => {
 
                            <td className="td-status">
                               <span
-                                 className={product?.status===0?"delivered":product.status===1?"dis":"rea"}
+                                 className={product?.status===3?"delivered":product.status===2?"pay":product.status===1?"dis":product.status===0?"rea":"del"}
                               >
-                                 {product?.status===0?"delivered":product.status===1?"dispatch":"ready"}
+                                 {product?.status===0?"Khởi tạo":product.status===1?"Xác nhận":product.status===2?"Thanh toán":product.status===3?"Hoàn tất":"Huỷ"}
                               </span>
                            </td>
                            <td className="td-methodPayment">
@@ -401,7 +411,17 @@ const Container = styled.div`
       }
       .datatable-product .td-status {
          .dis {
-            color: #ffb400; /* Màu cam cho trạng thái không 'dispatched' */
+            color: #41bfff; /* Màu cam cho trạng thái không 'dispatched' */
+
+            background-color: #fff4d9 !important;
+            border-radius: 50rem !important;
+            padding: 8px;
+            font-weight: bold;
+         }
+      }
+      .datatable-product .td-status {
+         .pay {
+            color: #ff4141 ; /* Màu cam cho trạng thái không 'dispatched' */
 
             background-color: #fff4d9 !important;
             border-radius: 50rem !important;
@@ -411,7 +431,7 @@ const Container = styled.div`
       }
       .datatable-product .td-status {
          .rea {
-            color: #41bfff;
+            color: #cc2ec7;
 
             background-color: #dde9f4 !important;
             border-radius: 50rem !important;
@@ -420,7 +440,7 @@ const Container = styled.div`
          }
       }
       .datatable-product .td-status .del {
-         color: #2ecc71;
+         color: #cc2e46;
          background-color: #d4f5e3 !important;
          border-radius: 50rem !important;
          padding: 8px;
