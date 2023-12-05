@@ -81,7 +81,7 @@ const CartTablet = ({ onClose }) => {
                   paddingRight: '10px',
                }}
             >
-               Tổng tiền:{' '}
+               Tổng tiền:
                {cart?.detail?.length == 0
                   ? 0
                   : cart?.detail?.length == 1
@@ -94,7 +94,7 @@ const CartTablet = ({ onClose }) => {
                              a?.unitPrice * a?.itemCount +
                              b?.unitPrice * b?.itemCount
                        )
-                       .toLocaleString()}{' '}
+                       .toLocaleString()}
                vnđ
             </div>
             <div className="direction">

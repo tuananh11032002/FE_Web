@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { styled } from 'styled-components';
 import { useStateProvider } from '../StateProvider/StateProvider';
-import { reducerCases } from '../StateProvider/reducer';
-import { getOrder, getCoupon } from '../Axios/web';
+import { getCoupon } from '../Axios/web';
 import { Link, useNavigate } from 'react-router-dom';
-import processApiImagePath from '../Helper/EditLinkImage';
 import PaymentInfo from './PaymentInfo';
 import { validateEmail, validatePhone } from '../Helper/CheckInput';
 import ProvinceList from '../Data/Province';
@@ -21,6 +19,7 @@ const PayPage = () => {
    const [numberState, setNumberState] = useState(1);
    const [discount, setDiscount] = useState(0);
    const couponRef = useRef();
+   const addressRef = useRef();
    const spanRef = useRef(null);
    const [customerInfor, setCustomerInfo] = useState({
       customerName: user.name,
@@ -32,7 +31,34 @@ const PayPage = () => {
       orderNote: '',
       coupon: '',
    });
+   const discountCodes = [
+      { code: 'DISCOUNT10', discount: 100000 },
+      { code: 'SAVE20', discount: 200000 },
+      { code: 'DEAL30', discount: 300000 },
+   ];
+   const addresses = [
+      { id: 1, address: '123 Main Street, Cityville, Stateville, 12345' },
+      { id: 2, address: '456 Oak Avenue, Townsville, Stateville, 56789' },
+      { id: 3, address: '789 Pine Lane, Villagetown, Stateville, 98765' },
+   ];
 
+   const [isDropdownVisible, setDropdownVisible] = useState(false);
+   const [isDropdownAddress, setDropdownAddress] = useState(false);
+
+   const handleLiClick = (ref, data) => {
+      ref.current.value = data;
+      console.log('da set code');
+      setDropdownAddress(false);
+      setDropdownVisible(false);
+   };
+
+   const handleInputFocus = (setFunction) => {
+      setFunction(true);
+   };
+
+   const handleInputBlur = (setFunction) => {
+      setFunction(false);
+   };
    const handleUseCoupon = async () => {
       setLoading(true);
       const data = await getCoupon(couponRef.current.value);
@@ -198,13 +224,35 @@ const PayPage = () => {
                         </div>
                      </div>
                      <div className="input-row">
-                        <div className="input-column">
+                        <div
+                           className="input-column addressHome"
+                           onFocus={() => setDropdownAddress(true)}
+                           onMouseLeave={() => setDropdownAddress(false)}
+                        >
                            <label htmlFor="">Số nhà </label>
                            <input
+                              ref={addressRef}
                               type="text"
                               className="input"
                               placeholder="Số nhà và tên đường"
                            />
+                           {isDropdownAddress === true ? (
+                              <ul className="code-list">
+                                 {addresses.map((address, index) => (
+                                    <li
+                                       key={index}
+                                       onClick={() =>
+                                          handleLiClick(
+                                             addressRef,
+                                             address.address
+                                          )
+                                       }
+                                    >
+                                       <strong>{address.address}</strong>
+                                    </li>
+                                 ))}
+                              </ul>
+                           ) : null}
                         </div>
                      </div>
                   </div>
@@ -374,13 +422,31 @@ const PayPage = () => {
                ))}
             </ul>
             {numberState === 1 ? (
-               <div className="code-container">
+               <div
+                  className="code-container"
+                  onFocus={() => handleInputFocus(setDropdownVisible)}
+                  onMouseLeave={() => handleInputBlur(setDropdownVisible)}
+               >
                   <input
                      ref={couponRef}
                      type="text"
                      placeholder="Nhập mã giảm giá tại đây"
                      className="discount-input"
                   />
+                  {isDropdownVisible && (
+                     <ul className="code-list">
+                        {discountCodes.map((code, index) => (
+                           <li
+                              key={index}
+                              onClick={() =>
+                                 handleLiClick(couponRef, code.code)
+                              }
+                           >
+                              <strong>{code.code}</strong> - {code.discount}
+                           </li>
+                        ))}
+                     </ul>
+                  )}
                   <button
                      className="apply-button"
                      onClick={(e) => {
@@ -565,6 +631,41 @@ const Container = styled.div`
          margin-left: 10px;
       }
    }
+   .input-column.addressHome {
+      .code-list {
+         list-style: none;
+         padding: 0;
+         margin: 0;
+         position: absolute;
+         top: 100%;
+         left: 0;
+         background-color: #fff;
+         border: 1px solid #ccc;
+         border-radius: 4px;
+         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+         max-height: 150px;
+         overflow-y: auto;
+         width: 100%;
+         z-index: 1;
+         border-radius: 8px;
+         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .code-list li {
+         padding: 8px;
+         border-bottom: 1px solid #ccc;
+         cursor: pointer;
+         transition: background-color 0.3s;
+      }
+
+      .code-list li:hover {
+         background-color: #f0f0f0;
+      }
+
+      .code-list li:last-child {
+         border-bottom: none;
+      }
+   }
    .green {
       color: green !important;
    }
@@ -636,6 +737,40 @@ const Container = styled.div`
    .code-container {
       display: flex;
       align-items: center;
+
+      .code-list {
+         list-style: none;
+         padding: 0;
+         margin: 0;
+         position: absolute;
+         top: 100%;
+         left: 0;
+         background-color: #fff;
+         border: 1px solid #ccc;
+         border-radius: 4px;
+         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+         max-height: 150px;
+         overflow-y: auto;
+         width: calc(100% - 95px);
+         z-index: 1;
+         border-radius: 8px;
+         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .code-list li {
+         padding: 8px;
+         border-bottom: 1px solid #ccc;
+         cursor: pointer;
+         transition: background-color 0.3s;
+      }
+
+      .code-list li:hover {
+         background-color: #f0f0f0;
+      }
+
+      .code-list li:last-child {
+         border-bottom: none;
+      }
       .discount-input {
          flex: 1;
          padding: 10px;
