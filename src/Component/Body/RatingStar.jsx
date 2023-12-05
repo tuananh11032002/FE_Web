@@ -27,7 +27,7 @@ const RatingStars = ({ totalRating, rating }) => {
    return (
       <Container>
          {createStars(rating)}
-         <span>Có {totalRating || 0} đánh giá</span>
+         {/* <span>Có {totalRating || 0} đánh giá</span> */}
       </Container>
    );
 };

@@ -3,12 +3,7 @@ import Header from '../Header';
 import Footer from '../Footer';
 import { useNavigate, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
-import {
-   AddProductIntoOrder,
-   getOrder,
-   getProduct,
-   getListComment,
-} from '../../Axios/web';
+import { updateOrder, getProduct, getListComment } from '../../Axios/web';
 import { VscLoading } from 'react-icons/vsc';
 
 import { ToastContainer, toast } from 'react-toastify';
@@ -29,7 +24,7 @@ const ProductDetail = () => {
    const { pathname } = useLocation();
 
    const [count, setCount] = useState(1);
-   const [isAdd, setIsAdd] = useState(true);
+   //const [isAdd, setIsAdd] = useState(true);
    const [loading, setLoading] = useState(false);
    const [productReview, setProductReview] = useState([]);
 
@@ -38,35 +33,49 @@ const ProductDetail = () => {
    }, [pathname]);
 
    const SaveData = async (productdetail) => {
-      const datafilter = cart?.productOrder?.filter((cart) => {
-         return cart.id == productdetail.id;
-      });
-      let response;
+      let cartdetail = cart?.detail?.map((item) => ({
+         productId: item.productId,
+         itemCount: item.itemCount,
+      }));
 
       if (user) {
          setLoading(true);
-         if (datafilter?.length > 0) {
-            response = await AddProductIntoOrder({
-               ProdductId: productId,
-               Quantity: datafilter[0].quantity + count,
-            });
+         let cartproduct = cartdetail?.find(
+            (item) => item.productId === productdetail.id
+         );
+         if (cartproduct) {
+            cartproduct.itemCount = cartproduct.itemCount + count;
+            cartdetail = cartdetail.filter(
+               (item) => item.productId !== productdetail.id
+            );
+            cartdetail = [cartproduct, ...cartdetail];
          } else {
-            response = await AddProductIntoOrder({
-               ProdductId: productId,
-               Quantity: count,
-            });
+            cartdetail = [
+               {
+                  productId: productdetail?.id,
+                  itemCount: count,
+               },
+               ...cartdetail,
+            ];
          }
-         const dataApi = await getOrder(user.newOrderId);
-         if (dataApi.status) {
-            if (JSON.stringify(dataApi.result) !== JSON.stringify(cart)) {
-               dispatch({
-                  type: reducerCases.SET_CART,
-                  cart: dataApi.result.data.order.detail,
-               });
-            }
-         }
+         const response = await updateOrder(cart?.id, {
+            orderDetail: cartdetail,
+         });
+         //const dataApi = await getOrder(user.newOrderId);
+         // if (dataApi.status) {
+         //    if (JSON.stringify(dataApi.result) !== JSON.stringify(cart)) {
+         //       dispatch({
+         //          type: reducerCases.SET_CART,
+         //          cart: dataApi.result.data.order.detail,
+         //       });
+         //    }
+         // }
          setLoading(false);
          if (response?.status) {
+            dispatch({
+               type: reducerCases.SET_CART,
+               cart: 1,
+            });
             toast.info('Thêm thành công', {
                position: toast.POSITION.TOP_CENTER,
                autoClose: 1000,
@@ -78,15 +87,21 @@ const ProductDetail = () => {
             });
          }
 
-         setIsAdd(!isAdd);
+         //setIsAdd(!isAdd);
       } else {
          navigate('/login');
       }
    };
    const handlerClick = (e) => {
-      e.stopPropagation();
-
-      SaveData(productdetail);
+      //e.stopPropagation();
+      if (user) {
+         SaveData(productdetail);
+      } else {
+         toast.info('Bạn cần đăng nhập', {
+            position: toast.POSITION.TOP_CENTER,
+            autoClose: 1000,
+         });
+      }
    };
    useEffect(() => {
       const fetchData = async () => {
@@ -122,7 +137,7 @@ const ProductDetail = () => {
             connection.off('Received');
          }
       };
-   }, [productId, isAdd]);
+   }, [productId]);
 
    return (
       <div>
@@ -155,8 +170,8 @@ const ProductDetail = () => {
                               {(
                                  productdetail?.unitPrice -
                                  productdetail?.discount
-                              ).toLocaleString() || 0}
-                              đ
+                              ).toLocaleString() || 0}{' '}
+                              vnđ
                            </div>
                            <div className="original-price">
                               {productdetail?.unitPrice.toLocaleString() || 0}{' '}
@@ -194,7 +209,7 @@ const ProductDetail = () => {
                      <div className="total">
                         <button
                            className="add"
-                           onClick={() => setCount(Math.max(0, count - 1))}
+                           onClick={() => setCount(Math.max(1, count - 1))}
                         >
                            -
                         </button>
@@ -207,6 +222,8 @@ const ProductDetail = () => {
                                  setCount(
                                     e.target.value > productdetail?.totalItem
                                        ? productdetail?.totalItem
+                                       : e.target.value < 1
+                                       ? 1
                                        : e.target.value
                                  );
                               }}
@@ -236,8 +253,8 @@ const ProductDetail = () => {
                         <>
                            <div
                               className="button"
-                              onClick={(e) => {
-                                 handlerClick(e);
+                              onClick={() => {
+                                 handlerClick();
                               }}
                            >
                               <span> Thêm vào giỏ hàng</span>
@@ -247,14 +264,14 @@ const ProductDetail = () => {
                                  </span>
                               ) : null}
                            </div>
-                           <div
+                           {/*<div
                               className="button red"
                               onClick={() => {
                                  navigate('/pay');
                               }}
                            >
                               Mua ngay
-                           </div>
+                           </div>*/}
                         </>
                      ) : (
                         <div

@@ -159,7 +159,7 @@ export const addFile = async (files) => {
 //delete
 export const deleteFile = async (id) => {
    //require author
-   const {token} = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
    const res = axiosClient.delete(`${END_POINT.FILE}/${id}`, {
       headers: {
          Authorization: token,
@@ -189,19 +189,21 @@ export const addOrder = async (order) => {
    return res;
 };
 //update
-export const updateOrder = (id, body) => {
+export const updateOrder = async (id, body) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   return axiosClient.put(`${END_POINT.ORDER}/${id}`, body, {
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = await axiosClient.put(`${END_POINT.ORDER}/${id}`, body, {
       headers: {
          Authorization: token,
       },
    });
+   await checkAndRenewToken(res);
+   return res;
 };
 //delete
-export const deleteOrder = async(id) => {
+export const deleteOrder = async (id) => {
    //require author
-   const {token} = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
    const res = axiosClient.delete(`${END_POINT.ORDER}/${id}`, {
       headers: {
          Authorization: token,
@@ -255,7 +257,7 @@ export const cancelOrder = (id) => {
 //get list
 export const getListOrder = async (data) => {
    //require author
-   const {token} = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
    const res = axiosClient.post(`${END_POINT.ORDER}/list`, data, {
       headers: {
          Authorization: token,
@@ -268,7 +270,7 @@ export const getListOrder = async (data) => {
 export const getListOrderByUserId = async (userId, body) => {
    //require author
    const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   const res= axiosClient.post(`${END_POINT.ORDER}/list/${userId}`, body, {
+   const res = axiosClient.post(`${END_POINT.ORDER}/list/${userId}`, body, {
       headers: {
          'Content-Type': 'application/json',
          Authorization: token,
@@ -296,8 +298,8 @@ export const getMyListOrder = async (data) => {
 //add
 export const addProduct = async (product) => {
    //require author
-   const {token} = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   const res= axiosClient.post(`${END_POINT.PRODUCT}`, product, {
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = axiosClient.post(`${END_POINT.PRODUCT}`, product, {
       headers: {
          Authorization: token,
       },
@@ -308,8 +310,8 @@ export const addProduct = async (product) => {
 //update
 export const updateProduct = async (product) => {
    //require author
-   const {token} = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   const res= axiosClient.put(`${END_POINT.PRODUCT}`, product, {
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = axiosClient.put(`${END_POINT.PRODUCT}`, product, {
       headers: {
          Authorization: token,
       },
@@ -320,8 +322,8 @@ export const updateProduct = async (product) => {
 //delete
 export const deleteProduct = async (id) => {
    //require author
-   const {token} = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   const res= axiosClient.delete(`${END_POINT.PRODUCT}/${id}`, {
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = axiosClient.delete(`${END_POINT.PRODUCT}/${id}`, {
       headers: {
          Authorization: token,
       },
@@ -340,7 +342,7 @@ export const getListProduct = (data) => {
 //get list admin
 export const getListProductForAdmin = async (data) => {
    //require author
-   const {token} = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
    const res = axiosClient.post(`${END_POINT.PRODUCT}/la`, data, {
       headers: {
          Authorization: token,
@@ -430,7 +432,7 @@ export const login = (data) => {
    return axiosClient.post(`${END_POINT.USER}/lg`, data);
 };
 //List account
-export const getListAccount = async(data) => {
+export const getListAccount = async (data) => {
    //require author
    const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
    const res = axiosClient.post(`${END_POINT.USER}/list`, data, {
@@ -466,7 +468,7 @@ export const getAvatar = () => {
 //get account by id
 export const getAccountById = async (id) => {
    //require author
-   const {token} = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
    const res = axiosClient.get(`${END_POINT.USER}/${id}`, {
       headers: {
          Authorization: token,
@@ -478,8 +480,8 @@ export const getAccountById = async (id) => {
 //update Account for Admin
 export const UpdateAccountForAdmin = async (body) => {
    //require author
-   const {token} = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   const res= axiosClient.put(`${END_POINT.USER}/admin`,body, {
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = axiosClient.put(`${END_POINT.USER}/admin`, body, {
       headers: {
          Authorization: token,
       },
@@ -490,8 +492,8 @@ export const UpdateAccountForAdmin = async (body) => {
 //delete account
 export const deleteAccount = async (id) => {
    //require author
-   const {token} = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   const res= axiosClient.delete(`${END_POINT.USER}/${id}`, {
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = axiosClient.delete(`${END_POINT.USER}/${id}`, {
       headers: {
          Authorization: token,
       },

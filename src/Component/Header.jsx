@@ -13,18 +13,12 @@ import { useStateProvider } from '../StateProvider/StateProvider';
 import { Link, useNavigate } from 'react-router-dom';
 import { reducerCases } from '../StateProvider/reducer';
 import { BsSearch } from 'react-icons/bs';
-import {
-   DeleteProductIntoOrder,
-   addOrder,
-   getOrder,
-   getListProduct,
-} from '../Axios/web';
+import { addOrder, getOrder, getListProduct } from '../Axios/web';
 import _ from 'lodash';
 import SearchMini from './Header/SearchMini';
 import Notification from './Body/Notification';
-import processApiImagePath from '../Helper/EditLinkImage';
 import CartTablet from './Header/CartTablet';
-import CartPhone from './Header/CartPhone';
+import CartPhone from './Header/CartTablet';
 
 const Header = () => {
    const navigate = useNavigate();
@@ -125,11 +119,17 @@ const Header = () => {
                if (orderAPi?.status) {
                   if (
                      JSON.stringify(cart) !==
-                     JSON.stringify(orderAPi?.result?.data?.order)
+                     JSON.stringify({
+                        id: orderAPi?.result?.data?.order?.id,
+                        detail: orderAPi?.result?.data?.order?.detail,
+                     })
                   ) {
                      dispatch({
                         type: reducerCases.SET_CART,
-                        cart: orderAPi?.result?.data?.order,
+                        cart: {
+                           id: orderAPi?.result?.data?.order?.id,
+                           detail: orderAPi?.result?.data?.order?.detail,
+                        },
                      });
                   }
                }
@@ -225,28 +225,20 @@ const Header = () => {
                         {loading ? (
                            <FaSpinner className="loading-icon" />
                         ) : (
-                           cart?.length || 0
+                           cart?.detail?.length || 0
                         )}
                      </span>
                      <AiOutlineShoppingCart />
                      {
-                        showCart && (
-                           <CartTablet
-                              //cart={cart}
-                              onClose={() => setShowCart(false)}
-                           />
-                        ) //    isWindow ? (
-                        //       <CartTablet
-                        //          cart={cart}
-                        //          onClose={() => setShowCart(false)}
-                        //       />
-                        //    ) : (
-                        //       <CartPhone
-                        //          cart={cart}
-                        //          onClose={() => setShowCart(false)}
-                        //       />
-                        //    )
+                        // showCart && (
+                        //    <CartTablet onClose={() => setShowCart(false)} />
                         // )
+                        showCart &&
+                           (isWindow ? (
+                              <CartTablet onClose={() => setShowCart(false)} />
+                           ) : (
+                              <CartPhone onClose={() => setShowCart(false)} />
+                           ))
                      }
                   </div>
                   <div

@@ -68,13 +68,6 @@ function PaymentInfo({ customerInfor, orderId }) {
    return (
       <Container className="payment-info-container">
          <ToastContainer />
-         <div className="delivery-time">
-            <p> Thời gian nhận hàng:</p>
-            <div className="delivery-time-info">
-               <div> Vận chuyển trong 2-4 ngày (trừ CN)</div>
-               <div>30.000đ</div>
-            </div>
-         </div>
          <div className="payment-method">
             <p>Phương thức thanh toán:</p>
             <div className="payment-options">

@@ -103,14 +103,14 @@ function App() {
                      element={<Slide child={<PaymentInfo />} />}
                   ></Route>
 
-                  <Route
+                  {/* <Route
                      path="/cart"
                      element={
                         <UserRoute>
                            <Slide child={<Cart />} />
                         </UserRoute>
                      }
-                  ></Route>
+                  ></Route> */}
                   <Route
                      path="/pay"
                      element={

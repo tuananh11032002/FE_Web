@@ -3,29 +3,53 @@ import processApiImagePath from '../../Helper/EditLinkImage';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useStateProvider } from '../../StateProvider/StateProvider';
-import { DeleteProductIntoOrder } from '../../Axios/web';
+import { updateOrder } from '../../Axios/web';
 import { reducerCases } from '../../StateProvider/reducer';
+import { ToastContainer, toast } from 'react-toastify';
 
 const CartTablet = ({ onClose }) => {
    const navigate = useNavigate();
    const [{ user, cart }, dispatch] = useStateProvider();
    const handlerRemove = async (productid) => {
       if (user) {
-         const response = await DeleteProductIntoOrder(productid);
-         if (response?.status)
-            dispatch({ type: reducerCases.SET_CART, cart: [] });
+         let cartdetail = cart?.detail
+            ?.map((item) => ({
+               productId: item.productId,
+               itemCount: item.itemCount,
+            }))
+            .filter((item) => item.productId !== productid);
+
+         console.log('aaaaaaaaaaaa', cartdetail, productid);
+         const response = await updateOrder(cart?.id, {
+            orderDetail: cartdetail,
+         });
+         if (response?.status) {
+            dispatch({
+               type: reducerCases.SET_CART,
+               cart: 1,
+            });
+            toast.info('Xóa thành công', {
+               position: toast.POSITION.TOP_CENTER,
+               autoClose: 1000,
+            });
+         } else {
+            toast.error(`${response.result}`, {
+               position: toast.POSITION.TOP_CENTER,
+               autoClose: 3000,
+            });
+         }
       } else {
          navigate('/');
       }
    };
-
    return (
       <Container>
+         <ToastContainer />
          <div>
             {cart?.detail?.length > 0 ? (
                <ul>
-                  {cart?.map((detail) => (
-                     <li key={detail?.id}>
+                  {cart?.detail?.map((detail) => (
+                     <li key={detail?.productId}>
                         <img
                            src={
                               process.env.REACT_APP_URL_IMG + detail?.mainFile
@@ -33,13 +57,13 @@ const CartTablet = ({ onClose }) => {
                            alt=""
                         />
                         <div>
-                           <div>{detail?.name}</div>
-                           <div>{detail?.priceNow.toLocaleString()} vnđ</div>
-                           <div>Số lượng: {detail?.quantity}</div>
+                           <div>{detail?.productName}</div>
+                           <div>{detail?.unitPrice.toLocaleString()} vnđ</div>
+                           <div>Số lượng: {detail?.itemCount}</div>
                         </div>
                         <button
                            onClick={() => {
-                              handlerRemove(detail.id);
+                              handlerRemove(detail?.productId);
                            }}
                         >
                            Xóa
@@ -57,10 +81,24 @@ const CartTablet = ({ onClose }) => {
                   paddingRight: '10px',
                }}
             >
-               Tổng tiền: {cart?.totalPrice?.toLocaleString()} vnđ
+               Tổng tiền:{' '}
+               {cart?.detail?.length == 0
+                  ? 0
+                  : cart?.detail?.length == 1
+                  ? (
+                       cart?.detail[0].unitPrice * cart?.detail[0].itemCount
+                    ).toLocaleString()
+                  : cart?.detail
+                       ?.reduce(
+                          (a, b) =>
+                             a?.unitPrice * a?.itemCount +
+                             b?.unitPrice * b?.itemCount
+                       )
+                       .toLocaleString()}{' '}
+               vnđ
             </div>
             <div className="direction">
-               <div
+               {/* <div
                   onClick={() => {
                      onClose();
 
@@ -68,7 +106,7 @@ const CartTablet = ({ onClose }) => {
                   }}
                >
                   Tuỳ chỉnh
-               </div>
+               </div> */}
                <div
                   onClick={() => {
                      onClose();

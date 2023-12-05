@@ -12,37 +12,27 @@ import { ToastContainer, toast } from 'react-toastify';
 import { VscLoading } from 'react-icons/vsc';
 
 const PayPage = () => {
+   const [{ cart, user }, dispatch] = useStateProvider();
+   const navigate = useNavigate();
    const [loading, setLoading] = useState(false);
-   const [error, setError] = useState('');
    const [provinces, setProvinces] = useState([]);
    const [districts, setDistricts] = useState([]);
    const [wards, setWards] = useState([]);
-   const [order, setOrder] = useState(null);
-   const [customerInfor, setCustomerInfo] = useState(() => {
-      const data = JSON.parse(
-         localStorage.getItem('webbanbalo-shippingInfor')
-      ) || {
-         customerName: '',
-         customerEmail: '',
-         customerPhone: '',
-         customerProvince: '',
-         customerWard: '',
-         customerDistrict: '',
-         orderNote: '',
-         coupon: '',
-      };
-      const dataNew = {
-         ...data,
-         customerProvince: '',
-         customerWard: '',
-         coupon: '',
-
-         customerDistrict: '',
-      };
-      return dataNew;
-   });
+   const [numberState, setNumberState] = useState(1);
    const [discount, setDiscount] = useState(0);
    const couponRef = useRef();
+   const spanRef = useRef(null);
+   const [customerInfor, setCustomerInfo] = useState({
+      customerName: user.name,
+      customerEmail: user.userName,
+      customerPhone: user.contact,
+      customerProvince: '',
+      customerWard: '',
+      customerDistrict: '',
+      orderNote: '',
+      coupon: '',
+   });
+
    const handleUseCoupon = async () => {
       setLoading(true);
       const data = await getCoupon(couponRef.current.value);
@@ -53,19 +43,13 @@ const PayPage = () => {
          setDiscount(data.result);
          setCustomerInfo({ ...customerInfor, coupon: couponRef.current.value });
       } else {
-         setError(data.result);
-      }
-   };
-
-   useEffect(() => {
-      console.log('Đã vào');
-      if (error) {
-         toast.error(`${error}`, {
+         toast.error(`${data?.result}`, {
             position: toast.POSITION.TOP_CENTER,
             autoClose: 3000,
          });
       }
-   }, [error]);
+   };
+
    useEffect(() => {
       //api province
       const fetchData = async () => {
@@ -80,6 +64,7 @@ const PayPage = () => {
       };
       fetchData();
    }, []);
+
    //api district
    const fetchDataDistrict = (code) => {
       try {
@@ -96,6 +81,7 @@ const PayPage = () => {
          console.error(error);
       }
    };
+
    //api wards
    const fetchDataWard = (code) => {
       try {
@@ -106,64 +92,14 @@ const PayPage = () => {
          console.error(error);
       }
    };
-   const [{ cart, user }, dispatch] = useStateProvider();
-   const navigate = useNavigate();
-   useEffect(() => {
-      const fetchCart = async () => {
-         if (user) {
-            const orderAPi = await getOrder(user.newOrderId);
-            if (orderAPi?.status) {
-               console.log(orderAPi.result);
-               setOrder(orderAPi.result);
-               if (
-                  JSON.stringify(orderAPi.result.productOrder) !==
-                     JSON.stringify(cart?.productOrder) &&
-                  JSON.stringify(orderAPi.result.productOrder)
-               ) {
-                  dispatch({
-                     type: reducerCases.SET_CART,
-                     cart: orderAPi.result.data.order.detail,
-                  });
-               }
-            }
-         } else {
-            navigate('/');
-         }
-      };
-      fetchCart();
-   }, [cart]);
-   const spanRef = useRef(null);
-   const updateParentState = (newState) => {
-      setError(newState);
-   };
+
    useEffect(() => {
       if (spanRef.current) {
          const spanHeight = spanRef.current.clientHeight;
          spanRef.current.style.width = `${spanHeight}px`;
       }
    }, []);
-   const [numberState, setNumberState] = useState(1);
-   console.log('customer', customerInfor);
-   useEffect(() => {
-      const data = localStorage.getItem('webbanbalo-shippingInfor');
 
-      try {
-         if (data) {
-            const parsedData = JSON.parse(data);
-            if (parsedData != null) {
-               setCustomerInfo({ ...parsedData });
-            }
-         }
-      } catch (error) {
-         console.error('Lỗi phân tích cú pháp JSON:', error);
-      }
-   }, []);
-   // useEffect(() => {
-   //    await localStorage.setItem(
-   //       'webbanbalo-shippingInfor',
-   //       JSON.stringify(customerInfor)
-   //    );
-   // }, [customerInfor]);
    return (
       <Container>
          <ToastContainer />
@@ -185,7 +121,7 @@ const PayPage = () => {
             {numberState === 1 ? (
                <>
                   <div className="introduce">
-                     <i>TranTuanAnh Brand</i>
+                     <i>Misaproject</i>
                      <h3>Thông tin thanh toán</h3>
                   </div>
                   <div className="input-container">
@@ -197,7 +133,7 @@ const PayPage = () => {
                               className="input"
                               placeholder="Tên của bạn"
                               name="name"
-                              value={customerInfor.customerName}
+                              value={customerInfor?.customerName}
                               onChange={(e) =>
                                  setCustomerInfo({
                                     ...customerInfor,
@@ -205,7 +141,7 @@ const PayPage = () => {
                                  })
                               }
                            />
-                           {customerInfor.customerName === '' ? (
+                           {customerInfor?.customerName === '' ? (
                               <p className="red">Nhập giá trị cho Name</p>
                            ) : (
                               <p className="green">Đã nhập giá trị cho Name</p>
@@ -220,7 +156,7 @@ const PayPage = () => {
                               className="input"
                               placeholder="Email"
                               name="email"
-                              value={customerInfor.customerEmail}
+                              value={customerInfor?.customerEmail}
                               onChange={(e) =>
                                  setCustomerInfo({
                                     ...customerInfor,
@@ -228,7 +164,7 @@ const PayPage = () => {
                                  })
                               }
                            />
-                           {customerInfor.customerEmail === '' ? (
+                           {customerInfor?.customerEmail === '' ? (
                               <p className="red">Nhập giá trị cho Mail</p>
                            ) : !validateEmail(customerInfor.customerEmail) ? (
                               <p className="red">Mail chưa hợp lệ</p>
@@ -243,7 +179,7 @@ const PayPage = () => {
                               className="input"
                               placeholder="Số điện thoại"
                               name="phone"
-                              value={customerInfor.customerPhone}
+                              value={customerInfor?.customerPhone}
                               onChange={(e) =>
                                  setCustomerInfo({
                                     ...customerInfor,
@@ -252,9 +188,9 @@ const PayPage = () => {
                               }
                            />
 
-                           {customerInfor.customerPhone === '' ? (
+                           {customerInfor?.customerPhone === '' ? (
                               <p className="red">Nhập giá trị cho Phone</p>
-                           ) : !validatePhone(customerInfor.customerPhone) ? (
+                           ) : !validatePhone(customerInfor?.customerPhone) ? (
                               <p className="red">Số điện thoại chưa hợp lệ</p>
                            ) : (
                               <p className="green">Số điện thoại hợp lệ</p>
@@ -278,7 +214,7 @@ const PayPage = () => {
 
                         <select
                            className="custom-select"
-                           value={customerInfor.customerProvince}
+                           value={customerInfor?.customerProvince}
                            onChange={(e) => {
                               setCustomerInfo({
                                  ...customerInfor,
@@ -318,7 +254,7 @@ const PayPage = () => {
 
                         <select
                            className="custom-select"
-                           value={customerInfor.customerDistrict}
+                           value={customerInfor?.customerDistrict}
                            onChange={(e) => {
                               setCustomerInfo({
                                  ...customerInfor,
@@ -381,7 +317,7 @@ const PayPage = () => {
                   </div>
                   <div className="button-container">
                      <div>
-                        <Link to="/cart">Quay lại giỏ hàng</Link>
+                        <Link to="">Quay lại giỏ hàng</Link>
                      </div>
                      <button
                         onClick={() => {
@@ -407,22 +343,32 @@ const PayPage = () => {
                   </div>
                </>
             ) : (
-               <PaymentInfo customerInfor={customerInfor} orderId={order.id} />
+               <PaymentInfo customerInfor={customerInfor} orderId={cart?.id} />
             )}
          </div>
 
          <div className="column">
             <ul className="cart">
-               {cart?.productOrder?.map((ca, index) => (
+               {cart?.detail?.map((detail, index) => (
                   <li key={index}>
                      <div className="image">
-                        <img src={processApiImagePath(ca.image)} alt="" />
-                        <span className="quantity-badge">{ca.quantity}</span>
+                        <img
+                           src={
+                              process.env.REACT_APP_URL_IMG + detail?.mainFile
+                           }
+                           alt=""
+                        />
+                        <span className="quantity-badge">
+                           {detail.itemCount}
+                        </span>
                      </div>
 
-                     <span>{ca.name}</span>
+                     <span>{detail?.productName}</span>
                      <span>
-                        {(ca.priceNow * ca.quantity).toLocaleString()}đ
+                        {(
+                           detail?.unitPrice * detail?.itemCount
+                        ).toLocaleString()}{' '}
+                        vnđ
                      </span>
                   </li>
                ))}
@@ -454,32 +400,43 @@ const PayPage = () => {
                <div className="price">
                   <div>Tạm tính</div>
                   <div>
-                     {order
-                        ? `${order?.totalAmount.toLocaleString()}đ`
+                     {cart
+                        ? `${(cart?.detail?.length == 0
+                             ? 0
+                             : cart?.detail?.length == 1
+                             ? cart?.detail[0].unitPrice *
+                               cart?.detail[0].itemCount
+                             : cart?.detail?.reduce(
+                                  (a, b) =>
+                                     a?.unitPrice * a?.itemCount +
+                                     b?.unitPrice * b?.itemCount
+                               )
+                          ).toLocaleString()} vnđ`
                         : '-----'}
                   </div>
                </div>
                <div className="ship">
-                  <div>Phí ship</div>
-                  <div>{order?.feeShip.toLocaleString()}đ</div>
-               </div>
-               <div className="ship">
                   <div>Giảm giá</div>
-                  <div>-{discount.toLocaleString()}đ</div>
+                  <div>{discount.toLocaleString()} vnđ</div>
                </div>
                <hr />
                <div className="ship">
                   <h3>Tổng tiền</h3>
-                  {numberState == 2 ? (
-                     <div>
-                        {(
-                           order?.totalAmount +
-                           order?.feeShip -
-                           discount
-                        ).toLocaleString()}
-                        đ
-                     </div>
-                  ) : null}
+                  <div>
+                     {(
+                        (cart?.detail?.length == 0
+                           ? 0
+                           : cart?.detail?.length == 1
+                           ? cart?.detail[0].unitPrice *
+                             cart?.detail[0].itemCount
+                           : cart?.detail?.reduce(
+                                (a, b) =>
+                                   a?.unitPrice * a?.itemCount +
+                                   b?.unitPrice * b?.itemCount
+                             )) - discount
+                     ).toLocaleString()}{' '}
+                     vnđ
+                  </div>
                </div>
             </div>
          </div>
