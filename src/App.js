@@ -5,7 +5,6 @@ import { Route, Routes, Navigate } from 'react-router-dom';
 import ProductDetail from './Component/Body/ProductDetail';
 import WebSocket from './AppSocket';
 import PayPage from './Page/PayPage';
-import Cart from './Page/Cart';
 import About from './Page/About';
 import Membership from './Page/Membership';
 import Address from './Page/Address';
@@ -35,7 +34,6 @@ import RegistrationPage from './Page/RegistrationPage';
 import PaymentInfo from './Page/PaymentInfo';
 import PasswordAccount from './Page/PasswordAccount';
 import PermissionDenied from './Component/Body/PermissionDenied ';
-import { ToastContainer, toast } from 'react-toastify';
 
 function App() {
    const [isUserReady, setIsUserReady] = useState(false);
@@ -60,7 +58,7 @@ function App() {
    }, [user]);
    useEffect(() => {
       console.log('abc');
-      if (connection == null || connection.state == 'Disconnected') {
+      if (connection === null || connection.state === 'Disconnected') {
          Hub.startConnection();
          dispatch({
             connection: Hub.connection,
@@ -80,7 +78,6 @@ function App() {
 
    return (
       <Container>
-         <ToastContainer />
          {isUserReady ? (
             <>
                <Routes>

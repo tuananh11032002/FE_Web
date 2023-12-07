@@ -89,7 +89,6 @@ const LoginPage = () => {
    const handleLogin = async (e) => {
       e.preventDefault();
       const data = await login({ password: password, username: username });
-      console.log('user', data);
       if (data?.status) {
          setShowProductAdded(true);
          dispatch({

@@ -1,80 +1,109 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { styled } from 'styled-components';
 import { useStateProvider } from '../StateProvider/StateProvider';
-import { getCoupon } from '../Axios/web';
-import { Link, useNavigate } from 'react-router-dom';
+import { getAllDiscount } from '../Axios/web';
+import { useNavigate } from 'react-router-dom';
 import PaymentInfo from './PaymentInfo';
 import { validateEmail, validatePhone } from '../Helper/CheckInput';
 import ProvinceList from '../Data/Province';
 import { ToastContainer, toast } from 'react-toastify';
-import { VscLoading } from 'react-icons/vsc';
 
 const PayPage = () => {
-   const [{ cart, user }, dispatch] = useStateProvider();
+   const [{ cart, user }] = useStateProvider();
    const navigate = useNavigate();
-   const [loading, setLoading] = useState(false);
+   //const [loading, setLoading] = useState(false);
    const [provinces, setProvinces] = useState([]);
    const [districts, setDistricts] = useState([]);
    const [wards, setWards] = useState([]);
    const [numberState, setNumberState] = useState(1);
-   const [discount, setDiscount] = useState(0);
-   const couponRef = useRef();
-   const addressRef = useRef();
    const spanRef = useRef(null);
    const [customerInfor, setCustomerInfo] = useState({
+      address: '',
       customerName: user.name,
-      customerEmail: user.userName,
       customerPhone: user.contact,
+      customerEmail: user.userName,
       customerProvince: '',
       customerWard: '',
       customerDistrict: '',
-      orderNote: '',
-      coupon: '',
+      coupon: null,
    });
-   const discountCodes = [
-      { code: 'DISCOUNT10', discount: 100000 },
-      { code: 'SAVE20', discount: 200000 },
-      { code: 'DEAL30', discount: 300000 },
-   ];
-   const addresses = [
-      { id: 1, address: '123 Main Street, Cityville, Stateville, 12345' },
-      { id: 2, address: '456 Oak Avenue, Townsville, Stateville, 56789' },
-      { id: 3, address: '789 Pine Lane, Villagetown, Stateville, 98765' },
-   ];
+
+   // const discountCodes = [
+   //    { id: 1, code: 'DISCOUNT10', discount: 100000 },
+   //    { id: 2, code: 'SAVE20', discount: 200000 },
+   //    { id: 3, code: 'DEAL30', discount: 300000 },
+   // ];
+   const [discountCodes, setDiscountCodes] = useState([]);
+
+   const [addresses] = useState(
+      user?.addressList?.map((item) => ({
+         id: item?.id,
+         address: item?.description,
+         name: item?.name,
+         contact: item?.contact,
+      }))
+   );
 
    const [isDropdownVisible, setDropdownVisible] = useState(false);
    const [isDropdownAddress, setDropdownAddress] = useState(false);
 
-   const handleLiClick = (ref, data) => {
-      ref.current.value = data;
-      console.log('da set code');
-      setDropdownAddress(false);
-      setDropdownVisible(false);
-   };
-
-   const handleInputFocus = (setFunction) => {
-      setFunction(true);
-   };
-
-   const handleInputBlur = (setFunction) => {
-      setFunction(false);
-   };
-   const handleUseCoupon = async () => {
-      setLoading(true);
-      const data = await getCoupon(couponRef.current.value);
-
-      setLoading(false);
-      console.log(data);
-      if (data?.status) {
-         setDiscount(data.result);
-         setCustomerInfo({ ...customerInfor, coupon: couponRef.current.value });
-      } else {
-         toast.error(`${data?.result}`, {
-            position: toast.POSITION.TOP_CENTER,
-            autoClose: 3000,
-         });
+   const getDiscountList = async () => {
+      const res = await getAllDiscount();
+      if (res?.status) {
+         if (
+            JSON.stringify(res?.result?.data?.discountList) !==
+            JSON.stringify(discountCodes)
+         ) {
+            setDiscountCodes(
+               res?.result?.data?.discountList?.map((item) => ({
+                  id: item.id,
+                  code: item.code,
+                  discount: item.value,
+               }))
+            );
+         }
       }
    };
+
+   const handleLiClick = (data, type) => {
+      switch (type) {
+         case 'Address':
+            setCustomerInfo({
+               ...customerInfor,
+               customerName: data?.name,
+               customerPhone: data?.contact,
+               address: data?.address,
+            });
+            setDropdownAddress(false);
+            break;
+         case 'Coupon':
+            setCustomerInfo({
+               ...customerInfor,
+               coupon: data,
+            });
+            setDropdownVisible(false);
+            break;
+         default:
+            break;
+      }
+   };
+
+   // const handleUseCoupon = async () => {
+   //    setLoading(true);
+   //    const data = await getCoupon(couponRef.current.value);
+
+   //    setLoading(false);
+   //    console.log(data);
+   //    if (data?.status) {
+   //       setDiscount(data.result);
+   //       setCustomerInfo({ ...customerInfor, coupon: couponRef.current.value });
+   //    } else {
+   //       toast.error(`${data?.result}`, {
+   //          position: toast.POSITION.TOP_CENTER,
+   //          autoClose: 3000,
+   //       });
+   //    }
+   // };
 
    useEffect(() => {
       //api province
@@ -157,7 +186,7 @@ const PayPage = () => {
                            <input
                               type="text"
                               className="input"
-                              placeholder="Tên của bạn"
+                              placeholder="Tên của người nhận"
                               name="name"
                               value={customerInfor?.customerName}
                               onChange={(e) =>
@@ -180,7 +209,7 @@ const PayPage = () => {
                            <input
                               type="text"
                               className="input"
-                              placeholder="Email"
+                              placeholder="Email liên hệ sau khi giao hàng"
                               name="email"
                               value={customerInfor?.customerEmail}
                               onChange={(e) =>
@@ -203,7 +232,7 @@ const PayPage = () => {
                            <input
                               type="text"
                               className="input"
-                              placeholder="Số điện thoại"
+                              placeholder="Số điện thoại nhận hàng"
                               name="phone"
                               value={customerInfor?.customerPhone}
                               onChange={(e) =>
@@ -226,29 +255,32 @@ const PayPage = () => {
                      <div className="input-row">
                         <div
                            className="input-column addressHome"
-                           onFocus={() => setDropdownAddress(true)}
+                           onClick={() => setDropdownAddress(true)}
                            onMouseLeave={() => setDropdownAddress(false)}
                         >
-                           <label htmlFor="">Số nhà </label>
+                           <label htmlFor="">Địa chỉ</label>
                            <input
-                              ref={addressRef}
                               type="text"
                               className="input"
-                              placeholder="Số nhà và tên đường"
+                              placeholder="Địa chỉ giao hàng"
+                              value={customerInfor?.address}
+                              onChange={(e) =>
+                                 setCustomerInfo({
+                                    ...customerInfor,
+                                    address: e.target.value,
+                                 })
+                              }
                            />
                            {isDropdownAddress === true ? (
                               <ul className="code-list">
-                                 {addresses.map((address, index) => (
+                                 {addresses?.map((address, index) => (
                                     <li
                                        key={index}
                                        onClick={() =>
-                                          handleLiClick(
-                                             addressRef,
-                                             address.address
-                                          )
+                                          handleLiClick(address, 'Address')
                                        }
                                     >
-                                       <strong>{address.address}</strong>
+                                       <strong>{address?.address}</strong>
                                     </li>
                                  ))}
                               </ul>
@@ -256,133 +288,144 @@ const PayPage = () => {
                         </div>
                      </div>
                   </div>
-                  <div className="select">
-                     <div>
-                        <label htmlFor="">Chọn tỉnh</label>
+                  <div>
+                     <div>Thông tin thêm: </div>
+                     <div className="select">
+                        <div>
+                           <div htmlFor="">Chọn tỉnh</div>
 
-                        <select
-                           className="custom-select"
-                           value={customerInfor?.customerProvince}
-                           onChange={(e) => {
-                              setCustomerInfo({
-                                 ...customerInfor,
-                                 customerProvince: e.target.value,
-                                 customerDistrict: '',
-                                 customerWard: '',
-                              });
+                           <select
+                              className="custom-select"
+                              value={customerInfor?.customerProvince}
+                              onChange={(e) => {
+                                 setCustomerInfo({
+                                    ...customerInfor,
+                                    customerProvince: e.target.value,
+                                    customerDistrict: '',
+                                    customerWard: '',
+                                 });
 
-                              const code =
-                                 e.target.selectedOptions[0].getAttribute(
-                                    'data-key'
-                                 );
-                              fetchDataDistrict(code);
-                           }}
-                        >
-                           <option value="">Chọn Tỉnh</option>
-                           {provinces?.map((province, index) => (
-                              <option
-                                 key={index}
-                                 value={province.name}
-                                 data-key={province.index}
-                              >
-                                 {province.name}
-                              </option>
-                           ))}
-                        </select>
+                                 const code =
+                                    e.target.selectedOptions[0].getAttribute(
+                                       'data-key'
+                                    );
+                                 fetchDataDistrict(code);
+                              }}
+                           >
+                              <option value="">Chọn Tỉnh</option>
+                              {provinces?.map((province, index) => (
+                                 <option
+                                    key={index}
+                                    value={province.name}
+                                    data-key={province.index}
+                                 >
+                                    {province.name}
+                                 </option>
+                              ))}
+                           </select>
 
-                        {customerInfor.customerProvince === '' ? (
+                           {/* {customerInfor.customerProvince === '' ? (
                            <p className="red">Chọn tỉnh đi bạn yêu</p>
                         ) : (
                            <p className="green">Đã chọn tỉnh</p>
-                        )}
-                     </div>
+                        )} */}
+                        </div>
 
-                     <div>
-                        <label htmlFor="">Chọn huyện</label>
+                        <div>
+                           <div htmlFor="">Chọn huyện</div>
 
-                        <select
-                           className="custom-select"
-                           value={customerInfor?.customerDistrict}
-                           onChange={(e) => {
-                              setCustomerInfo({
-                                 ...customerInfor,
-                                 customerDistrict: e.target.value,
-                                 customerWard: '',
-                              });
+                           <select
+                              className="custom-select"
+                              value={customerInfor?.customerDistrict}
+                              onChange={(e) => {
+                                 setCustomerInfo({
+                                    ...customerInfor,
+                                    customerDistrict: e.target.value,
+                                    customerWard: '',
+                                 });
 
-                              const code =
-                                 e.target.selectedOptions[0].getAttribute(
-                                    'data-key'
-                                 );
-                              fetchDataWard(code);
-                           }}
-                        >
-                           <option value="">Chọn Huyện</option>
-                           {districts.map((district, index) => (
-                              <option
-                                 key={index}
-                                 value={district.name}
-                                 data-key={district.index}
-                              >
-                                 {district.name}
-                              </option>
-                           ))}
-                        </select>
+                                 const code =
+                                    e.target.selectedOptions[0].getAttribute(
+                                       'data-key'
+                                    );
+                                 fetchDataWard(code);
+                              }}
+                           >
+                              <option value="">Chọn Huyện</option>
+                              {districts.map((district, index) => (
+                                 <option
+                                    key={index}
+                                    value={district.name}
+                                    data-key={district.index}
+                                 >
+                                    {district.name}
+                                 </option>
+                              ))}
+                           </select>
 
-                        {customerInfor.customerDistrict === '' ? (
+                           {/* {customerInfor.customerDistrict === '' ? (
                            <p className="red">Chọn huyện đi bạn yêu </p>
                         ) : (
                            <p className="green">Đã chọn huyện </p>
-                        )}
-                     </div>
-                     <div>
-                        <label htmlFor="">Chọn xã</label>
+                        )} */}
+                        </div>
+                        <div>
+                           <div htmlFor="">Chọn xã</div>
 
-                        <select
-                           className="custom-select"
-                           value={customerInfor.customerWard}
-                           onChange={(e) => {
-                              setCustomerInfo({
-                                 ...customerInfor,
-                                 customerWard: e.target.value,
-                              });
-                           }}
-                        >
-                           <option value="">Chọn Xã</option>
-                           {wards.map((ward, index) => (
-                              <option key={index} value={ward.name}>
-                                 {ward.name}
-                              </option>
-                           ))}
-                        </select>
+                           <select
+                              className="custom-select"
+                              value={customerInfor.customerWard}
+                              onChange={(e) => {
+                                 setCustomerInfo({
+                                    ...customerInfor,
+                                    customerWard: e.target.value,
+                                 });
+                              }}
+                           >
+                              <option value="">Chọn Xã</option>
+                              {wards.map((ward, index) => (
+                                 <option key={index} value={ward.name}>
+                                    {ward.name}
+                                 </option>
+                              ))}
+                           </select>
 
-                        {customerInfor.customerWard === '' ? (
+                           {/* {customerInfor.customerWard === '' ? (
                            <p className="red">Chọn xã đi bạn yêu</p>
                         ) : (
                            <p className="green">Đã chọn xã</p>
-                        )}
+                        )} */}
+                        </div>
                      </div>
                   </div>
+
                   <div className="button-container">
                      <div>
-                        <Link to="">Quay lại giỏ hàng</Link>
+                        <button
+                           onClick={() => {
+                              navigate(`/`);
+                           }}
+                        >
+                           Quay lại trang chủ
+                        </button>
                      </div>
                      <button
                         onClick={() => {
                            if (
-                              customerInfor.customerDistrict === '' ||
-                              customerInfor.customerProvince === '' ||
-                              customerInfor.customerWard === '' ||
-                              customerInfor.customerEmail === '' ||
-                              validateEmail(customerInfor.customerEmail) ===
-                                 false ||
-                              customerInfor.customerName === '' ||
-                              customerInfor.customerPhone === '' ||
-                              validatePhone(customerInfor.customerPhone) ===
-                                 false
+                              customerInfor &&
+                              customerInfor?.customerName !== '' &&
+                              customerInfor?.address !== '' &&
+                              customerInfor?.customerPhone !== '' &&
+                              validatePhone(customerInfor?.customerPhone) &&
+                              customerInfor?.customerEmail !== '' &&
+                              validateEmail(customerInfor?.customerEmail)
                            ) {
-                           } else {
                               setNumberState(2);
+                           } else {
+                              toast.error('Vui lòng nhập đầy đủ thông tin', {
+                                 position: toast.POSITION.TOP_CENTER,
+                                 autoClose: 3000,
+                              });
                            }
                         }}
                      >
@@ -424,41 +467,62 @@ const PayPage = () => {
             {numberState === 1 ? (
                <div
                   className="code-container"
-                  onFocus={() => handleInputFocus(setDropdownVisible)}
-                  onMouseLeave={() => handleInputBlur(setDropdownVisible)}
+                  onMouseLeave={() => setDropdownVisible(false)}
                >
                   <input
-                     ref={couponRef}
                      type="text"
                      placeholder="Nhập mã giảm giá tại đây"
                      className="discount-input"
+                     value={customerInfor?.coupon?.code ?? ''}
+                     onClick={() => {
+                        getDiscountList();
+                        setDropdownVisible(true);
+                     }}
                   />
                   {isDropdownVisible && (
-                     <ul className="code-list">
-                        {discountCodes.map((code, index) => (
-                           <li
+                     // <ul className="code-list">
+                     //    {discountCodes?.map((code, index) => (
+                     //       <li
+                     //          key={index}
+                     //          onClick={() => handleLiClick(code, 'Coupon')}
+                     //       >
+                     //          <strong>{code?.code}</strong>
+                     //          {code?.discount}
+                     //       </li>
+                     //    ))}
+                     // </ul>
+                     <table className="code-list">
+                        {discountCodes?.map((code, index) => (
+                           <tr
                               key={index}
-                              onClick={() =>
-                                 handleLiClick(couponRef, code.code)
-                              }
+                              onClick={() => handleLiClick(code, 'Coupon')}
                            >
-                              <strong>{code.code}</strong> - {code.discount}
-                           </li>
+                              <td>
+                                 <strong>{code?.code}</strong>
+                              </td>
+                              <td>{code?.discount} vnđ</td>
+                           </tr>
                         ))}
-                     </ul>
+                     </table>
                   )}
                   <button
                      className="apply-button"
-                     onClick={(e) => {
-                        handleUseCoupon();
-                     }}
+                     // onClick={(e) => {
+                     //    handleUseCoupon();
+                     // }}
+                     onClick={() =>
+                        setCustomerInfo({
+                           ...customerInfor,
+                           coupon: null,
+                        })
+                     }
                   >
-                     <span>Áp dụng</span>
-                     {loading ? (
+                     <span>Reset</span>
+                     {/* {loading ? (
                         <span className="loading-icons">
                            <VscLoading />
                         </span>
-                     ) : null}
+                     ) : null} */}
                   </button>
                </div>
             ) : null}
@@ -467,9 +531,9 @@ const PayPage = () => {
                   <div>Tạm tính</div>
                   <div>
                      {cart
-                        ? `${(cart?.detail?.length == 0
+                        ? `${(cart?.detail?.length === 0
                              ? 0
-                             : cart?.detail?.length == 1
+                             : cart?.detail?.length === 1
                              ? cart?.detail[0].unitPrice *
                                cart?.detail[0].itemCount
                              : cart?.detail?.reduce(
@@ -483,23 +547,27 @@ const PayPage = () => {
                </div>
                <div className="ship">
                   <div>Giảm giá</div>
-                  <div>{discount.toLocaleString()} vnđ</div>
+                  <div>
+                     {(customerInfor?.coupon?.discount ?? 0).toLocaleString()}{' '}
+                     vnđ
+                  </div>
                </div>
                <hr />
                <div className="ship">
                   <h3>Tổng tiền</h3>
                   <div>
-                     {(
-                        (cart?.detail?.length == 0
+                     {Math.max(
+                        (cart?.detail?.length === 0
                            ? 0
-                           : cart?.detail?.length == 1
+                           : cart?.detail?.length === 1
                            ? cart?.detail[0].unitPrice *
                              cart?.detail[0].itemCount
                            : cart?.detail?.reduce(
                                 (a, b) =>
                                    a?.unitPrice * a?.itemCount +
                                    b?.unitPrice * b?.itemCount
-                             )) - discount
+                             )) - (customerInfor?.coupon?.discount ?? 0),
+                        0
                      ).toLocaleString()}{' '}
                      vnđ
                   </div>
@@ -513,6 +581,7 @@ const Container = styled.div`
    margin: 15vh 10%;
    display: flex;
    flex-direction: row;
+
    .column {
       flex: 1;
       margin: 0 10px;

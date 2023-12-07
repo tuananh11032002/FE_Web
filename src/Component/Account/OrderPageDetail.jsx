@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { getOrder } from '../../Axios/web';
 import Rating from '../Rating';
 
 const OrderPageDetail = () => {
+   const location = useLocation().state;
    const { id } = useParams();
    const navigate = useNavigate();
    const [data, setData] = useState([]);
@@ -55,7 +56,9 @@ const OrderPageDetail = () => {
          <Navbar>
             <span
                onClick={() => {
-                  navigate('/account/order');
+                  navigate(`/account/order`, {
+                     state: location,
+                  });
                }}
             >
                Order

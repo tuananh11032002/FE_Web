@@ -2,16 +2,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { CancelOrder, getMyListOrder } from '../../Axios/web';
 import Pagination from '../../AdminPage/Component/Pagination';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import ConfirmationDialog from '../../Sharing/MessageBox';
 
 const OrderPage = () => {
    const navigate = useNavigate();
    const [data, setData] = useState();
-   const [pageNow, setPageNow] = useState(1);
-   const [status, setStatus] = useState(0);
-   const [activeItem, setActiveItem] = useState(0);
-   const [totalPage, setTotalPage] = useState(5);
+   const [location, setLocation] = useState(useLocation().state);
+   const [pageNow, setPageNow] = useState(location?.pageNumber ?? 1);
+   const [status, setStatus] = useState(location?.status ?? 0);
+   const [totalPage, setTotalPage] = useState(location?.totalPage ?? 5);
    const [orderIdEdit, setOrderIdEdit] = useState();
    const messageBoxRef = useRef();
 
@@ -26,9 +26,6 @@ const OrderPage = () => {
    const showConfirmationDialog = () => {
       messageBoxRef.current.show();
    };
-   const handleItemClick = (index) => {
-      setActiveItem(index);
-   };
    const handleCancelOrder = async () => {
       const data = await CancelOrder(orderIdEdit);
       if (data?.status) {
@@ -36,43 +33,48 @@ const OrderPage = () => {
       }
    };
    const fetchData = async () => {
-      const dataApi = await getMyListOrder(
-         JSON.stringify({
-            index: 5,
-            page: pageNow,
-            status: status == 0 ? null : status,
-         })
-      );
-      if (dataApi?.status) {
-         const Index = dataApi?.result?.data?.orderList?.filter(
-            (i) => i.status !== 0
+      if (location) {
+         setData(location?.detail);
+         setLocation(undefined);
+      } else {
+         const dataApi = await getMyListOrder(
+            JSON.stringify({
+               index: 5,
+               page: pageNow,
+               status: status === 0 ? null : status,
+            })
          );
-         setData(
-            Index.map((i) => ({
-               orderId: i.id,
-               customerName: i.user.name,
-               orderDate: i.createdDate,
-               totalAmount: i.totalPrice,
-               methodPayment: i.methodPayment,
-               orderStatus:
-                  i.status === 0
-                     ? 'Khởi tạo'
-                     : i.status === 1
-                     ? 'Chờ thanh toán'
-                     : i.status === 2
-                     ? 'Đang giao'
-                     : i.status === 3
-                     ? 'Hoàn thành'
-                     : i.status === 4
-                     ? 'Đã hủy'
-                     : 'Lỗi trạng thái',
-               feeShip: 0,
-               grandTotal: i.totalPrice - i.discount,
-               discount: i.discount,
-               shippingAddress: i.address,
-            }))
-         );
-         setTotalPage(dataApi?.result?.data?.totalItemPage);
+         if (dataApi?.status) {
+            const Index = dataApi?.result?.data?.orderList?.filter(
+               (i) => i.status !== 0
+            );
+            setData(
+               Index.map((i) => ({
+                  orderId: i.id,
+                  customerName: i.user.name,
+                  orderDate: i.createdDate,
+                  totalAmount: i.totalPrice,
+                  methodPayment: i.methodPayment,
+                  orderStatus:
+                     i.status === 0
+                        ? 'Khởi tạo'
+                        : i.status === 1
+                        ? 'Chờ thanh toán'
+                        : i.status === 2
+                        ? 'Đang giao'
+                        : i.status === 3
+                        ? 'Hoàn thành'
+                        : i.status === 4
+                        ? 'Đã hủy'
+                        : 'Lỗi trạng thái',
+                  feeShip: 0,
+                  grandTotal: i.totalPrice - i.discount,
+                  discount: i.discount,
+                  shippingAddress: i.address,
+               }))
+            );
+            setTotalPage(dataApi?.result?.data?.totalItemPage);
+         }
       }
    };
    useEffect(() => {
@@ -87,45 +89,40 @@ const OrderPage = () => {
          />
          <div className="navbar">
             <div
-               className={`nav-item ${activeItem === 0 ? 'active' : ''}`}
+               className={`nav-item ${status === 0 ? 'active' : ''}`}
                onClick={() => {
-                  handleItemClick(0);
-                  setStatus(null);
+                  setStatus(0);
                }}
             >
                Tất cả
             </div>
             <div
-               className={`nav-item ${activeItem === 1 ? 'active' : ''}`}
+               className={`nav-item ${status === 1 ? 'active' : ''}`}
                onClick={() => {
-                  handleItemClick(1);
                   setStatus(1);
                }}
             >
                Chờ thanh toán
             </div>
             <div
-               className={`nav-item ${activeItem === 2 ? 'active' : ''}`}
+               className={`nav-item ${status === 2 ? 'active' : ''}`}
                onClick={() => {
-                  handleItemClick(2);
                   setStatus(2);
                }}
             >
                Đang giao
             </div>
             <div
-               className={`nav-item ${activeItem === 3 ? 'active' : ''}`}
+               className={`nav-item ${status === 3 ? 'active' : ''}`}
                onClick={() => {
-                  handleItemClick(3);
                   setStatus(3);
                }}
             >
                Hoàn thành
             </div>
             <div
-               className={`nav-item ${activeItem === 4 ? 'active' : ''}`}
+               className={`nav-item ${status === 4 ? 'active' : ''}`}
                onClick={() => {
-                  handleItemClick(4);
                   setStatus(4);
                }}
             >
@@ -138,7 +135,14 @@ const OrderPage = () => {
                   className="order-child"
                   key={index}
                   onClick={() => {
-                     navigate(`/account/order/${da.orderId}`);
+                     navigate(`/account/order/${da.orderId}`, {
+                        state: {
+                           detail: data,
+                           pageNumber: pageNow,
+                           totalPage: totalPage,
+                           status: status,
+                        },
+                     });
                   }}
                >
                   <div className="header">

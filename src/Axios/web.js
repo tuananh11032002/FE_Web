@@ -10,6 +10,7 @@ const END_POINT = {
    PRODUCT: 'product',
    CATEGORY: 'category',
    USER: 'user',
+   DISCOUNT: 'dis',
 };
 // Address
 //add
@@ -175,6 +176,60 @@ export const getFile = (id) => {
 };
 // end File
 
+// Discount
+//add Discount
+export const addDiscount = async (data) => {
+   //require author
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = await axiosClient.post(`${END_POINT.DISCOUNT}`, data, {
+      headers: {
+         Authorization: token,
+      },
+   });
+   await checkAndRenewToken(res);
+   return res;
+};
+
+// Delete Discount
+export const deleteDiscount = async (id) => {
+   //require author
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = await axiosClient.post(`${END_POINT.DISCOUNT}/${id}`, {
+      headers: {
+         Authorization: token,
+      },
+   });
+   await checkAndRenewToken(res);
+   return res;
+};
+
+//Get all Discount
+export const getAllDiscount = async () => {
+   //require author
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = await axiosClient.post(`${END_POINT.DISCOUNT}/list`, null, {
+      headers: {
+         Authorization: token,
+      },
+   });
+   await checkAndRenewToken(res);
+   return res;
+};
+
+//Get one Discount
+export const getOneDiscount = async (id) => {
+   //require author
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = await axiosClient.post(`${END_POINT.DISCOUNT}/${id}`, {
+      headers: {
+         Authorization: token,
+      },
+   });
+   await checkAndRenewToken(res);
+   return res;
+};
+// end Disnount
+
 // Order
 //add
 export const addOrder = async (order) => {
@@ -225,14 +280,16 @@ export const getOrder = async (id) => {
    return res;
 };
 //confirm order
-export const confirmOrder = (id, body) => {
+export const confirmOrder = async (id, body) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   return axiosClient.put(`${END_POINT.ORDER}/cof/${id}`, body, {
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = await axiosClient.put(`${END_POINT.ORDER}/cof/${id}`, body, {
       headers: {
          Authorization: token,
       },
    });
+   await checkAndRenewToken(res);
+   return res;
 };
 //finish order
 export const finishOrder = (id) => {
