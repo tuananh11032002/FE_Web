@@ -60,7 +60,7 @@ function App() {
    }, [user]);
    useEffect(() => {
       console.log('abc');
-      if (!connection) {
+      if (connection == null || connection.state == 'Disconnected') {
          Hub.startConnection();
          dispatch({
             connection: Hub.connection,
@@ -68,7 +68,7 @@ function App() {
          });
       }
       return () => {
-         if (connection) {
+         if (connection != null) {
             Hub.Disconnect();
             dispatch({
                connection: null,
@@ -76,7 +76,7 @@ function App() {
             });
          }
       };
-   }, []);
+   }, [connection]);
 
    return (
       <Container>

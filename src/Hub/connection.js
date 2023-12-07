@@ -15,14 +15,7 @@ class SignalRConnection {
    async startConnection() {
       if (this.connection == null) {
          this.connection = new signalR.HubConnectionBuilder()
-            .withUrl('http://backend.misaproject.click/hub', {
-               accessTokenFactory: async () => {
-                  const { token } = JSON.parse(
-                     localStorage.getItem('webbanbalo_user')
-                  );
-                  return token;
-               },
-            })
+            .withUrl('http://backend.misaproject.click/hub')
             .withAutomaticReconnect()
             .build();
 
