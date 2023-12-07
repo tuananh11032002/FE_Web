@@ -29,11 +29,6 @@ const Profile = () => {
       const res = await getProfileByToken();
       console.log('res user profile', res);
       if (res?.status) {
-         // setPhone(userTemp?.contact || '');
-         // setUserName(userTemp?.userName);
-         // setName(userTemp?.name);
-         // setselectedGender(userTemp?.gender || '');
-         // //setImage(await getAvatarByToken()?.result);
          dispatch({
             type: reducerCases.SET_USER,
             user: res?.result?.data?.user,
@@ -57,7 +52,7 @@ const Profile = () => {
                userName: userName,
                contact: phone,
                gender: selectedGender,
-               birthday: '',
+               birthday: null,
             })
          );
          setLoading(false);
