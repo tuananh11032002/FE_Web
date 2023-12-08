@@ -135,6 +135,7 @@ const ProductDetail = () => {
       return () => {
          if (connection) {
             connection.off('Received');
+            connection.invoke('Leave', productId);
          }
       };
    }, [productId]);

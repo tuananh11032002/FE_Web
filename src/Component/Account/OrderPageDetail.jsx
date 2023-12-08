@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { getOrder } from '../../Axios/web';
+import { cancelOrder, finishOrder, getOrder } from '../../Axios/web';
 import Rating from '../Rating';
 
 const OrderPageDetail = () => {
-   const location = useLocation().state;
+   const [location, setLocation] = useState(useLocation().state);
    const { id } = useParams();
    const navigate = useNavigate();
    const [data, setData] = useState([]);
@@ -35,7 +35,7 @@ const OrderPageDetail = () => {
                   : temp?.status === 1
                   ? 'Chờ thanh toán'
                   : temp?.status === 2
-                  ? 'Đang giao'
+                  ? 'Đã thanh toán'
                   : temp?.status === 3
                   ? 'Hoàn thành'
                   : temp?.status === 4
@@ -51,6 +51,23 @@ const OrderPageDetail = () => {
    useEffect(() => {
       fetchData();
    }, [id]);
+
+   const CancelOrder = async () => {
+      const res = await cancelOrder(id);
+      if (res?.status) {
+         fetchData();
+         setLocation(undefined);
+      }
+   };
+
+   const FinishOrder = async () => {
+      const res = await finishOrder(id);
+      if (res?.status) {
+         fetchData();
+         setLocation(undefined);
+      }
+   };
+
    return (
       <div>
          <Navbar>
@@ -80,7 +97,25 @@ const OrderPageDetail = () => {
                      </tr>
                      <tr>
                         <td>Trạng thái:</td>
-                        <td>{orderInfo?.status}</td>
+                        <td>
+                           {orderInfo?.status}{' '}
+                           {orderInfo?.status === 'Chờ thanh toán' ? (
+                              <button
+                                 type="button"
+                                 onClick={() => CancelOrder()}
+                              >
+                                 Hủy
+                              </button>
+                           ) : null}
+                           {orderInfo?.status === 'Đã thanh toán' ? (
+                              <button
+                                 type="button"
+                                 onClick={() => FinishOrder()}
+                              >
+                                 Nhận hàng
+                              </button>
+                           ) : null}
+                        </td>
                      </tr>
                      <tr>
                         <td>Phương thức:</td>

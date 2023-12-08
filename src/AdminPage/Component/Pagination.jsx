@@ -15,13 +15,9 @@ function Pagination({ obj, setPageNow }) {
    }, []);
 
    const renderPaginationButtons = () => {
-      const maxButtons = 5;
       const buttons = [];
-      let startPage = currentPage - 2; //Math.floor(maxButtons / 2);
-
-      if (startPage < 1) {
-         startPage = 1;
-      }
+      let startPage = Math.max(currentPage - 2, 1);
+      const endPage = Math.min(currentPage + 2, totalPage);
 
       buttons.push(
          <button onClick={() => onPageChange(1)} className={''}>
@@ -39,8 +35,6 @@ function Pagination({ obj, setPageNow }) {
             {'<'}
          </button>
       );
-
-      const endPage = Math.min(startPage + maxButtons - 1, totalPage);
 
       for (let i = startPage; i <= endPage; i++) {
          buttons.push(

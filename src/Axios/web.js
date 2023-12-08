@@ -11,6 +11,7 @@ const END_POINT = {
    CATEGORY: 'category',
    USER: 'user',
    DISCOUNT: 'dis',
+   PAYMENT: 'payment',
 };
 // Address
 //add
@@ -220,7 +221,7 @@ export const getAllDiscount = async () => {
 export const getOneDiscount = async (id) => {
    //require author
    const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   const res = await axiosClient.post(`${END_POINT.DISCOUNT}/${id}`, {
+   const res = await axiosClient.get(`${END_POINT.DISCOUNT}/${id}`, {
       headers: {
          Authorization: token,
       },
@@ -229,6 +230,26 @@ export const getOneDiscount = async (id) => {
    return res;
 };
 // end Disnount
+
+// Payment
+
+// Get Payment Link
+export const getPaymentLink = async (id, discount) => {
+   //require author
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   return axiosClient.post(
+      `${END_POINT.PAYMENT}/${id}${
+         discount === null ? '' : '?Discount=' + discount
+      }`,
+      null,
+      {
+         headers: {
+            Authorization: token,
+         },
+      }
+   );
+};
+// end Payment
 
 // Order
 //add
@@ -292,24 +313,28 @@ export const confirmOrder = async (id, body) => {
    return res;
 };
 //finish order
-export const finishOrder = (id) => {
+export const finishOrder = async (id) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   return axiosClient.put(`${END_POINT.ORDER}/fin/${id}`, {
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = await axiosClient.put(`${END_POINT.ORDER}/fin/${id}`, null, {
       headers: {
          Authorization: token,
       },
    });
+   await checkAndRenewToken(res);
+   return res;
 };
 //cancel order
-export const cancelOrder = (id) => {
+export const cancelOrder = async (id) => {
    //require author
-   const token = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   return axiosClient.put(`${END_POINT.ORDER}/can/${id}`, {
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = await axiosClient.put(`${END_POINT.ORDER}/can/${id}`, null, {
       headers: {
          Authorization: token,
       },
    });
+   await checkAndRenewToken(res);
+   return res;
 };
 //get list
 export const getListOrder = async (data) => {

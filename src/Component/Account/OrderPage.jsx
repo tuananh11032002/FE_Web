@@ -61,7 +61,7 @@ const OrderPage = () => {
                         : i.status === 1
                         ? 'Chờ thanh toán'
                         : i.status === 2
-                        ? 'Đang giao'
+                        ? 'Đã thanh toán'
                         : i.status === 3
                         ? 'Hoàn thành'
                         : i.status === 4
@@ -110,7 +110,7 @@ const OrderPage = () => {
                   setStatus(2);
                }}
             >
-               Đang giao
+               Đã thanh toán
             </div>
             <div
                className={`nav-item ${status === 3 ? 'active' : ''}`}
