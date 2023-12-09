@@ -1,15 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import Header from './Header';
 import Footer from './Footer';
 import { styled } from 'styled-components';
 import { useStateProvider } from '../StateProvider/StateProvider';
-import { AiOutlineEdit } from 'react-icons/ai';
 import { RiListOrdered } from 'react-icons/ri';
 import { MdOutlinePassword } from 'react-icons/md';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { FaAddressCard } from 'react-icons/fa';
 import { ImProfile } from 'react-icons/im';
-import processApiImagePath from '../Helper/EditLinkImage';
 const Account = ({ component, indexActive = 1 }) => {
    const { pathname } = useLocation();
    const [{ user }, dispatch] = useStateProvider();
@@ -25,19 +23,16 @@ const Account = ({ component, indexActive = 1 }) => {
             <div className="sidebar">
                <div className={`user-section sidebar-child `}>
                   <img
-                     src={
-                        processApiImagePath(user?.image) ||
-                        require('../Assets/Image/nologin.jpg')
-                     }
+                     src={`http://backend.misaproject.click/api/user/pro/pic/${user.id}`}
                      alt=""
                   />
 
                   <div className="user-button">
                      <div>{user?.userName}</div>
-                     <div>
+                     {/* <div>
                         <AiOutlineEdit />
                         <i>Sửa hồ sơ</i>
-                     </div>
+                     </div> */}
                   </div>
                </div>
                <div

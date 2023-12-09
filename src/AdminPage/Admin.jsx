@@ -300,19 +300,16 @@ const Admin = ({ Child, indexActive = 0, ...props }) => {
                      />
                   </div>
                   <div className="nav-action">
-                     <div>
+                     {/* <div>
                         <AiTwotoneCalendar />
                      </div>
 
                      <div className="notification">
                         <AiOutlineBell />
-                     </div>
+                     </div> */}
                      <div>
                         <img
-                           src={
-                              processApiImagePath(user?.image) ||
-                              require('../Assets/Image/account-male.png')
-                           }
+                           src={`http://backend.misaproject.click/api/user/pro/pic/${user.id}`}
                            alt=""
                         />
                         <div className="img-status"></div>

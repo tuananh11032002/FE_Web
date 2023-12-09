@@ -7,7 +7,6 @@ import Pagination from './Pagination';
 import { RiRefundFill } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
 import { GetOrderAdminApi, getListOrder } from '../../Axios/web';
-import processApiImagePath from '../../Helper/EditLinkImage';
 import ProcessDate from '../../Helper/ProcessDate';
 
 const OrderList = () => {
@@ -19,7 +18,9 @@ const OrderList = () => {
    const [countRefunded, setCountRefunded] = useState(0);
    const [countPP, setCountPP] = useState(0);
 
-   const [checkboxes, setCheckboxes] = useState(Array(data?.length).fill(false));
+   const [checkboxes, setCheckboxes] = useState(
+      Array(data?.length).fill(false)
+   );
 
    const toggleSelectAll = () => {
       setSelectAll(!selectAll);
@@ -36,20 +37,34 @@ const OrderList = () => {
    const [totalOrder, setTotalOrder] = useState(100);
    const [search, setSearch] = useState('');
    const fetchOrder = async () => {
-      const dataApi = await getListOrder({page:pageNow, index:selectedValue});
+      const dataApi = await getListOrder({
+         page: pageNow,
+         index: selectedValue,
+      });
       console.log('data', dataApi);
       if (dataApi?.status) {
          if (
-            JSON.stringify(dataApi.result.data.orderList) !== JSON.stringify(data)
+            JSON.stringify(dataApi.result.data.orderList) !==
+            JSON.stringify(data)
          ) {
             setData(dataApi.result.data.orderList);
             setTotalOrder(dataApi.result.data.totalItemCount);
-            setCountCompleted(0);setCountPP(0);setCountCancel(0);
-            await Promise.all(dataApi.result.data.orderList.map(async (el) => {
-               if(el.status===3){setCountCompleted((prevCount) => prevCount + 1);}
-               if(el.status===1||el.status===0){setCountPP((prevCount) => prevCount + 1);}
-               if(el.status===4){setCountCancel((prevCount) => prevCount + 1);}
-            }));
+            setCountCompleted(0);
+            setCountPP(0);
+            setCountCancel(0);
+            await Promise.all(
+               dataApi.result.data.orderList.map(async (el) => {
+                  if (el.status === 3) {
+                     setCountCompleted((prevCount) => prevCount + 1);
+                  }
+                  if (el.status === 1 || el.status === 0) {
+                     setCountPP((prevCount) => prevCount + 1);
+                  }
+                  if (el.status === 4) {
+                     setCountCancel((prevCount) => prevCount + 1);
+                  }
+               })
+            );
          }
       }
    };
@@ -135,7 +150,7 @@ const OrderList = () => {
                         <th>DATE</th>
 
                         <th>CUTOMER</th>
-                        <th>PAYMENT</th>
+                        {/* <th>PAYMENT</th> */}
                         <th>STATUS</th>
                         <th>METHOD</th>
                      </tr>
@@ -170,9 +185,7 @@ const OrderList = () => {
                            <td className="td-customer">
                               <div className="td-flex">
                                  <img
-                                    src={
-                                       `http://112.78.1.194:5286/api/user/pro/pic/${product.user.id}`
-                                    }
+                                    src={`http://112.78.1.194:5286/api/user/pro/pic/${product.user.id}`}
                                     alt=""
                                     width="40px"
                                     height="40px"
@@ -183,26 +196,44 @@ const OrderList = () => {
                                  </div>
                               </div>
                            </td>
-                           <td className="td-payment">
-                              {/* <div className={product.totalPrice?.toLowerCase()}>
+                           {/* <td className="td-payment">
+                               <div className={product.totalPrice?.toLowerCase()}>
                                  {product.totalPrice}
-                              </div> */}
-                           </td>
+                              </div> 
+                           </td> */}
 
                            <td className="td-status">
                               <span
-                                 className={product?.status===3?"delivered":product.status===2?"pay":product.status===1?"dis":product.status===0?"rea":"del"}
+                                 className={
+                                    product?.status === 3
+                                       ? 'delivered'
+                                       : product.status === 2
+                                       ? 'pay'
+                                       : product.status === 1
+                                       ? 'dis'
+                                       : product.status === 0
+                                       ? 'rea'
+                                       : 'del'
+                                 }
                               >
-                                 {product?.status===0?"Khởi tạo":product.status===1?"Xác nhận":product.status===2?"Thanh toán":product.status===3?"Hoàn tất":"Huỷ"}
+                                 {product?.status === 0
+                                    ? 'Khởi tạo'
+                                    : product.status === 1
+                                    ? 'Xác nhận'
+                                    : product.status === 2
+                                    ? 'Thanh toán'
+                                    : product.status === 3
+                                    ? 'Hoàn tất'
+                                    : 'Huỷ'}
                               </span>
                            </td>
                            <td className="td-methodPayment">
-                              <img
+                              {/* <img
                                  src={processApiImagePath(
                                     product.imagePaymentMethod
                                  )}
                                  alt=""
-                              />
+                              /> */}
                               <span>{product.methodPayment}</span>
                            </td>
                         </tr>
@@ -421,7 +452,7 @@ const Container = styled.div`
       }
       .datatable-product .td-status {
          .pay {
-            color: #ff4141 ; /* Màu cam cho trạng thái không 'dispatched' */
+            color: #ff4141; /* Màu cam cho trạng thái không 'dispatched' */
 
             background-color: #fff4d9 !important;
             border-radius: 50rem !important;

@@ -177,16 +177,16 @@ const Header = () => {
          <div className="header-parent">
             <div className="container_nobo" ref={containerRef}>
                <div className="branch hover ">
-                  <LinkCustome to={'/'}>TuanAnh Brand ®</LinkCustome>
+                  <LinkCustome to={'/'}>Misa Project ®</LinkCustome>
                </div>
                <div className="details">
                   <div className=" hover container_nobo-item1 details-child">
                      <AiTwotonePhone className="svg" />
-                     0987654321
+                     09012345678
                   </div>
                   <div className=" hover hidden container_nobo-item2 details-child">
                      <AiOutlineMail className="svg" />
-                     ttuananh372@gmail.com
+                     spmisaproject@gmail.com
                   </div>
                   <div
                      className="search  container_nobo-item3 details-child"

@@ -6,7 +6,6 @@ import {
    getProfileByToken,
    updateUserInfo,
 } from '../../Axios/web';
-import processApiImagePath from '../../Helper/EditLinkImage';
 import { validateEmail, validatePhone } from '../../Helper/CheckInput';
 import { ToastContainer, toast } from 'react-toastify';
 import { VscLoading } from 'react-icons/vsc';

@@ -16,12 +16,11 @@ const Footer = () => {
          <div className="footer-info">
             <div className="address info-child">
                <div>
-                  <a href="#">TUANANH BRAND</a>
+                  <a href="#">MISAPROJECT</a>
                </div>
-               <div>Store 1: 633 Nguyễn Đình Chiểu, P.2, Q.3.HCM</div>
-               <div>Store 2: 71 Trần Quang Diệu, P14, Q3, HCM</div>
-               <div>Hotline: 19001052</div>
-               <div>thecameliavn@gmail.com</div>
+               <div>Địa chỉ kho hàng: 633 Nguyễn Đình Chiểu, P.2, Q.3.HCM</div>
+               <div>Hotline: 09012345678</div>
+               <div>spmisaproject@gmail.com</div>
             </div>
             <div className="social info-child">
                <div>Đăng kí nhận tin</div>
@@ -66,7 +65,7 @@ const Footer = () => {
             </div>
          </div>
          <div className="copyright">
-            <span>Copyrights © 2022 by TuanAnh Brand</span>
+            <span>Copyrights © 2022 by MisaCompany</span>
          </div>
       </Container>
    );

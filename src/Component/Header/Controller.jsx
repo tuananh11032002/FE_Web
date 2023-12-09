@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import Image from './Image';
 import { getListCategory } from '../../Axios/web';
@@ -11,7 +11,7 @@ const Controller = () => {
          const data = await getListCategory({ index: 4, page: 1 });
          if (data?.status) {
             if (
-               JSON.stringify(data.result.productCategory) !=
+               JSON.stringify(data.result.productCategory) !==
                JSON.stringify(category)
             ) {
                dispatch({
@@ -26,13 +26,13 @@ const Controller = () => {
 
    return (
       <Container>
-         {category?.map(({ icon, imageReplace, name, id }, index) => (
+         {category?.map(({ icon, name, id }, index) => (
             <div className="image" key={index}>
                <Image
                   id_image={id}
                   src={icon}
                   message={name}
-                  replace={imageReplace}
+                  replace={icon}
                   key={index}
                   key_name={index}
                ></Image>

@@ -1,30 +1,35 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
+//import { useNavigate } from 'react-router-dom';
 import processApiImagePath from '../../Helper/EditLinkImage';
-const Image = ({ src, message, replace, key_name, id_image }) => {
-   const [imageSrc, setImageSrc] = useState(src);
+const Image = ({ src, message, key_name, id_image }) => {
+   const [IsOver, setIsOver] = useState(false);
    const handleMouseOver = () => {
-      setImageSrc(replace);
+      setIsOver(true);
    };
-   const navigator = useNavigate();
+   //const navigator = useNavigate();
    const handleMouseOut = () => {
-      setImageSrc(src);
+      setIsOver(false);
    };
-   const handlerClick = async (id, name) => {
-      navigator(`/collections/${id}`);
-   };
+   // const handlerClick = async (id) => {
+   //    navigator(`/collections/${id}`);
+   // };
    return (
       <Container>
          <img
-            src={processApiImagePath(imageSrc)}
+            src={processApiImagePath(src)}
             id={`image${key_name}`}
             alt={message}
             onMouseOver={handleMouseOver}
             onMouseOut={handleMouseOut}
-            onClick={() => {
-               handlerClick(id_image, message);
-            }}
+            // onClick={() => {
+            //    handlerClick(id_image);
+            // }}
+            style={
+               IsOver
+                  ? { backgroundColor: '#D3D3D3' }
+                  : { backgroundColor: 'rgba(255,255,255)' }
+            }
          />
          <div>{message}</div>
       </Container>

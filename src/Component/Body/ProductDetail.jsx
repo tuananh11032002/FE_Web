@@ -163,22 +163,27 @@ const ProductDetail = () => {
                   <div className="price-container">
                      {productdetail?.discount === 0 ? (
                         <div className="price">
-                           {productdetail?.unitPrice.toLocaleString() || 0} vnđ
+                           <strong>
+                              {productdetail?.unitPrice.toLocaleString() || 0}{' '}
+                              vnđ
+                           </strong>
                         </div>
                      ) : (
-                        <div>
+                        <>
                            <div className="price">
-                              {(
-                                 productdetail?.unitPrice -
-                                 productdetail?.discount
-                              ).toLocaleString() || 0}{' '}
-                              vnđ
+                              <strong>
+                                 {(
+                                    productdetail?.unitPrice -
+                                    productdetail?.discount
+                                 ).toLocaleString() || 0}{' '}
+                                 vnđ
+                              </strong>
                            </div>
                            <div className="original-price">
                               {productdetail?.unitPrice.toLocaleString() || 0}{' '}
                               vnđ
                            </div>
-                        </div>
+                        </>
                      )}
                      <div className="rating">
                         <RatingStars
