@@ -2,11 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { FaCartPlus } from 'react-icons/fa';
-import {
-   deleteOrder,
-   getOrder,
-   UpdateStatusOrder,
-} from '../../Axios/web';
+import { deleteOrder, getOrder, UpdateStatusOrder } from '../../Axios/web';
 import processApiImagePath from '../../Helper/EditLinkImage';
 const DetailOrder = () => {
    const { id } = useParams(); // Truy cập ID từ URL
@@ -59,10 +55,13 @@ const DetailOrder = () => {
          const value = data.result.data;
          setDetailData(value.order.detail);
          setFee({
-            subtotal: value.order.totalPrice-value.order.discount-(value.order.feeShip?value.order.feeShip:0),
+            subtotal:
+               value.order.totalPrice -
+               value.order.discount -
+               (value.order.feeShip ? value.order.feeShip : 0),
             discount: value.order.discount,
             total: value.order.totalPrice,
-            feeShip: value.order.feeShip?value.order.feeShip:0,
+            feeShip: value.order.feeShip ? value.order.feeShip : 0,
          });
          setOrderStatus(value.order.status);
          setCustomer({ ...value.order.user });
@@ -79,7 +78,7 @@ const DetailOrder = () => {
    console.log('orderStatus', orderStatus);
    return (
       <Container>
-         <div className="delete-button-container">
+         {/* <div className="delete-button-container">
             {orderStatus > 0 ? (
                <>
                   <span>Status: {orderStatus}</span>
@@ -94,7 +93,7 @@ const DetailOrder = () => {
             >
                Xóa
             </button>
-         </div>
+         </div> */}
          <div className="container-order">
             <div className="col1">
                <div className="wrapper-table">
@@ -128,7 +127,9 @@ const DetailOrder = () => {
                               <td>
                                  <div className="td-flex">
                                     <img
-                                       src={processApiImagePath(product.mainFile)}
+                                       src={processApiImagePath(
+                                          product.mainFile
+                                       )}
                                        alt=""
                                        width="40px"
                                        height="40px"

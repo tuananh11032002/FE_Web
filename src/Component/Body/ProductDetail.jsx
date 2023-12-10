@@ -340,7 +340,9 @@ const Container = styled.div`
          justify-content: center;
          margin-right: 10px;
       }
-
+      .button span {
+         user-select: none;
+      }
       .button.red {
          background-color: #e74c3c;
       }

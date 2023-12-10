@@ -5,7 +5,9 @@ import {
    addProduct,
    getListCategory,
    getProduct,
-   updateProduct, addFile, deleteFile
+   updateProduct,
+   addFile,
+   deleteFile,
 } from '../../Axios/web';
 import { useStateProvider } from '../../StateProvider/StateProvider';
 import { reducerCases } from '../../StateProvider/reducer';
@@ -41,14 +43,13 @@ export const AddProduct = () => {
    const handleAddOption = () => {
       setOptions([...options, { type: '', value: '' }]);
    };
-   
-   const hanldeRemoveImageLink = async(e, index) => {
+
+   const hanldeRemoveImageLink = async (e, index) => {
       e.stopPropagation();
       const imageFilter = imageLink.filter((image, i) => i !== index);
       setImageLink(imageFilter);
-      await deleteFile(imageLink[index]);      
+      await deleteFile(imageLink[index]);
    };
-   
 
    const handRemoveImageLocal = (e, index) => {
       e.stopPropagation();
@@ -87,7 +88,9 @@ export const AddProduct = () => {
       const file = event.target.files[0];
       const test = event.target.files;
       console.log(file, 'fil');
-      if (file){setSelectedImage([...selectedImage, file])};
+      if (file) {
+         setSelectedImage([...selectedImage, file]);
+      }
    };
    const handleDrop = (event) => {
       event.preventDefault();
@@ -105,32 +108,37 @@ export const AddProduct = () => {
    const addFiles = async () => {
       let idFiles = [];
       if (selectedImage.length > 0) {
-        await Promise.all(selectedImage.map(async (item) => {
-          let fD = new FormData();
-          fD.append('files', item);
-          const res = await addFile(fD);
-          console.log(res, 'res');
-          const tem = res.result.data?.data.map((item) => item.id);
-          idFiles = [...idFiles, ...tem];
-        }));
+         await Promise.all(
+            selectedImage.map(async (item) => {
+               let fD = new FormData();
+               fD.append('files', item);
+               const res = await addFile(fD);
+               console.log(res, 'res');
+               const tem = res.result.data?.data.map((item) => item.id);
+               idFiles = [...idFiles, ...tem];
+            })
+         );
       }
       return idFiles;
-    }
+   };
    //function call update api
    const handleSubmit = async () => {
       const formData = {};
       formData.name = inputName;
       formData.category = [selectedCategory];
-      formData.decription= description;
+      formData.decription = description;
       formData.discount = discountPrice;
-      formData.unitPrice = price; 
-      formData.totalItem = productEdit ? parseInt(productEdit.totalItem)+parseInt(soLuongThem) : parseInt(soLuongThem);
-      formData.status = selectedStatus==="Active"?true:false;
-      let idFiles =await addFiles();
+      formData.unitPrice = price;
+      formData.totalItem = productEdit
+         ? parseInt(productEdit.totalItem) + parseInt(soLuongThem)
+         : parseInt(soLuongThem);
+      formData.status = selectedStatus === 'Active' ? true : false;
+      let idFiles = await addFiles();
       setIsLoading(true);
       let data;
       if (id !== 'add') {
-         formData.files = imageLink.length>0 ? [...imageLink,...idFiles] : idFiles;
+         formData.files =
+            imageLink.length > 0 ? [...imageLink, ...idFiles] : idFiles;
          formData.mainFile = formData?.files[0];
          formData.id = id;
          data = await updateProduct(formData);
@@ -141,7 +149,7 @@ export const AddProduct = () => {
             setSoLuongThem(0);
          }
       } else {
-         formData.files = idFiles;         
+         formData.files = idFiles;
          formData.mainFile = idFiles[0];
          data = await addProduct(formData);
       }
@@ -158,12 +166,13 @@ export const AddProduct = () => {
    useEffect(() => {
       const fetchCategory = async () => {
          //console.log(category.length);
-         const categoryTemp = await getListCategory({index:4,page:1});
+         const categoryTemp = await getListCategory({ index: 4, page: 1 });
          setSelectedCategory(category[0]?.id);
 
          if (categoryTemp?.status) {
             if (
-               JSON.stringify(categoryTemp.result.productCategory) !== JSON.stringify(category)
+               JSON.stringify(categoryTemp.result.productCategory) !==
+               JSON.stringify(category)
             ) {
                console.log(categoryTemp, 'temps');
                setSelectedCategory(categoryTemp.result.productCategory[0]?.id);
@@ -181,8 +190,8 @@ export const AddProduct = () => {
       const fetchProduct = async () => {
          if (id !== 'add') {
             const productTemp = await getProduct(id);
-            console.log('productTemp',productTemp);
-            if (productTemp?.status===true) {
+            console.log('productTemp', productTemp);
+            if (productTemp?.status === true) {
                setImageLink(productTemp.result.product.files);
                setInputName(productTemp.result.product.name);
                setPrice(productTemp.result.product.unitPrice);
@@ -193,7 +202,7 @@ export const AddProduct = () => {
                if (
                   JSON.stringify(productTemp.result.product) !==
                   JSON.stringify(productEdit)
-               ){
+               ) {
                   setProductEdit(productTemp.result.product);
                }
             }
@@ -279,7 +288,6 @@ export const AddProduct = () => {
                               className="dropzone-div"
                               onClick={() => handleBrowseImageClick()}
                            >
-                           
                               <div className="image-list">
                                  Ảnh hiện tại: {imageLink.length}
                                  {imageLink?.map((im, index) => (
@@ -295,7 +303,6 @@ export const AddProduct = () => {
                                           <IoRemoveCircleOutline
                                              onClick={(e) => {
                                                 hanldeRemoveImageLink(e, index);
-                                                
                                              }}
                                           />
                                        </div>
@@ -411,7 +418,7 @@ export const AddProduct = () => {
                            onChange={(e) => setSoLuongThem(e.target.value)}
                         />
                      </div>
-                     {console.log("pe",productEdit)}
+                     {console.log('pe', productEdit)}
                      <div className="product-info">
                         <p>Sản phẩm đang có: {productEdit?.totalItem}</p>
                         {/* <p>
@@ -683,6 +690,7 @@ const Container = styled.div`
             width: 100%;
             margin-bottom: 10px;
             align-items: center;
+            flex-wrap: wrap;
          }
          label {
             margin-right: 10px;
@@ -723,6 +731,14 @@ const Container = styled.div`
          .card {
             min-width: 95%;
             margin-bottom: 20px;
+         }
+         .quantity .input-row {
+            label {
+               min-width: 100%;
+            }
+            input {
+               width: 100%;
+            }
          }
       }
    }
