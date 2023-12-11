@@ -15,7 +15,7 @@ export const reducerCases = {
 export const initialValues = {
    user: null,
    listUser: null,
-   cart: [],
+   cart: null,
    product: [],
    category: [],
    productdetail: null,

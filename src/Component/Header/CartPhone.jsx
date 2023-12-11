@@ -1,45 +1,77 @@
 import React from 'react';
-import processApiImagePath from '../../Helper/EditLinkImage';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useStateProvider } from '../../StateProvider/StateProvider';
-import { DeleteProductIntoOrder } from '../../Axios/web';
+import { updateOrder } from '../../Axios/web';
 import { reducerCases } from '../../StateProvider/reducer';
+import { ToastContainer, toast } from 'react-toastify';
 import { GiReturnArrow } from 'react-icons/gi';
 
-const CartPhone = ({ cart, onClose }) => {
+const CartPhone = ({ onClose }) => {
    const navigate = useNavigate();
-   const [{ user }, dispatch] = useStateProvider();
+   const [{ user, cart }, dispatch] = useStateProvider();
    const handlerRemove = async (productid) => {
       if (user) {
-         const response = await DeleteProductIntoOrder(productid);
-         if (response?.status)
-            dispatch({ type: reducerCases.SET_CART, cart: [] });
+         let cartdetail = cart?.detail
+            ?.map((item) => ({
+               productId: item.productId,
+               itemCount: item.itemCount,
+            }))
+            .filter((item) => item.productId !== productid);
+
+         console.log('aaaaaaaaaaaa', cartdetail, productid);
+         const response = await updateOrder(cart?.id, {
+            orderDetail: cartdetail,
+         });
+         if (response?.status) {
+            dispatch({
+               type: reducerCases.SET_CART,
+               cart: 1,
+            });
+            toast.info('Xóa thành công', {
+               position: toast.POSITION.TOP_CENTER,
+               autoClose: 1000,
+            });
+         } else {
+            toast.error(`${response.result}`, {
+               position: toast.POSITION.TOP_CENTER,
+               autoClose: 3000,
+            });
+         }
       } else {
          navigate('/');
       }
    };
    return (
       <Container>
+         <ToastContainer />
          <div className="container-cart">
             <div className="header">
                <h2>Giỏ hàng</h2>
                <GiReturnArrow onClick={() => onClose(false)} />
             </div>
-            {cart?.productOrder?.length > 0 ? (
+            {cart?.detail?.length > 0 ? (
                <>
                   <ul>
-                     {cart?.productOrder?.map((cart, index) => (
-                        <li key={cart?.id}>
-                           <img src={processApiImagePath(cart?.image)} alt="" />
+                     {cart?.detail?.map((detail) => (
+                        <li key={detail?.productId}>
+                           <img
+                              src={
+                                 process.env.REACT_APP_URL_IMG +
+                                 detail?.mainFile
+                              }
+                              alt=""
+                           />
                            <div>
-                              <div>{cart?.name}</div>
-                              <div>{cart?.priceNow.toLocaleString()}đ</div>
-                              <div>Số lượng: {cart?.quantity}</div>
+                              <div>{detail?.productName}</div>
+                              <div>
+                                 {detail?.unitPrice.toLocaleString()} vnđ
+                              </div>
+                              <div>Số lượng: {detail?.itemCount}</div>
                            </div>
                            <button
                               onClick={() => {
-                                 handlerRemove(cart.id);
+                                 handlerRemove(detail?.productId);
                               }}
                            >
                               Xóa
@@ -53,11 +85,11 @@ const CartPhone = ({ cart, onClose }) => {
                         paddingRight: '10px',
                      }}
                   >
-                     Tổng tiền: &nbsp;
-                     {cart ? `${cart.totalAmount.toLocaleString()}đ` : '-----'}
+                     Tổng tiền:
+                     {`${cart?.totalPrice?.toLocaleString()} vnđ`}
                   </h3>
                   <div className="direction">
-                     <div
+                     {/* <div
                         onClick={() => {
                            onClose(false);
 
@@ -65,16 +97,17 @@ const CartPhone = ({ cart, onClose }) => {
                         }}
                      >
                         Tuỳ chỉnh
-                     </div>
-                     <div
-                        onClick={() => {
-                           onClose(false);
-
-                           navigate('/pay');
-                        }}
-                     >
-                        Thanh toán
-                     </div>
+                     </div> */}
+                     {cart?.detail?.length > 0 ? (
+                        <div
+                           onClick={() => {
+                              onClose();
+                              navigate('/pay');
+                           }}
+                        >
+                           Thanh toán
+                        </div>
+                     ) : null}
                   </div>
                </>
             ) : (

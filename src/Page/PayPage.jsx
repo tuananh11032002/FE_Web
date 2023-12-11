@@ -66,6 +66,8 @@ const PayPage = () => {
    };
 
    const handleLiClick = (data, type) => {
+      setDropdownAddress(false);
+      setDropdownVisible(false);
       switch (type) {
          case 'Address':
             setCustomerInfo({
@@ -74,14 +76,12 @@ const PayPage = () => {
                customerPhone: data?.contact,
                address: data?.address,
             });
-            setDropdownAddress(false);
             break;
          case 'Coupon':
             setCustomerInfo({
                ...customerInfor,
                coupon: data,
             });
-            setDropdownVisible(false);
             break;
          default:
             break;
@@ -255,7 +255,7 @@ const PayPage = () => {
                      <div className="input-row">
                         <div
                            className="input-column addressHome"
-                           onClick={() => setDropdownAddress(true)}
+                           onFocus={() => setDropdownAddress(true)}
                            onMouseLeave={() => setDropdownAddress(false)}
                         >
                            <label htmlFor="">Địa chỉ</label>
@@ -276,11 +276,14 @@ const PayPage = () => {
                                  {addresses?.map((address, index) => (
                                     <li
                                        key={index}
-                                       onClick={() =>
+                                       onClick={(e) =>
                                           handleLiClick(address, 'Address')
                                        }
                                     >
-                                       <strong>{address?.address}</strong>
+                                       <strong>
+                                          {address?.name} - {address?.contact} -{' '}
+                                          {address?.address}
+                                       </strong>
                                     </li>
                                  ))}
                               </ul>
@@ -480,30 +483,32 @@ const PayPage = () => {
                      }}
                   />
                   {isDropdownVisible && (
-                     // <ul className="code-list">
-                     //    {discountCodes?.map((code, index) => (
-                     //       <li
-                     //          key={index}
-                     //          onClick={() => handleLiClick(code, 'Coupon')}
-                     //       >
-                     //          <strong>{code?.code}</strong>
-                     //          {code?.discount}
-                     //       </li>
-                     //    ))}
-                     // </ul>
-                     <table className="code-list">
+                     <ul className="code-list">
                         {discountCodes?.map((code, index) => (
-                           <tr
+                           <li
                               key={index}
                               onClick={() => handleLiClick(code, 'Coupon')}
                            >
-                              <td>
+                              <div>
                                  <strong>{code?.code}</strong>
-                              </td>
-                              <td>{code?.discount} vnđ</td>
-                           </tr>
+                              </div>
+                              <div>{code?.discount} vnđ</div>
+                           </li>
                         ))}
-                     </table>
+                     </ul>
+                     // <table className="code-list">
+                     //    {discountCodes?.map((code, index) => (
+                     //       <tr
+                     //          key={index}
+                     //          onClick={() => handleLiClick(code, 'Coupon')}
+                     //       >
+                     //          <td>
+                     //             <strong>{code?.code}</strong>
+                     //          </td>
+                     //          <td>{code?.discount} vnđ</td>
+                     //       </tr>
+                     //    ))}
+                     // </table>
                   )}
                   <button
                      className="apply-button"
@@ -529,21 +534,7 @@ const PayPage = () => {
             <div className="price-ship">
                <div className="price">
                   <div>Tạm tính</div>
-                  <div>
-                     {cart
-                        ? `${(cart?.detail?.length === 0
-                             ? 0
-                             : cart?.detail?.length === 1
-                             ? cart?.detail[0].unitPrice *
-                               cart?.detail[0].itemCount
-                             : cart?.detail?.reduce(
-                                  (a, b) =>
-                                     a?.unitPrice * a?.itemCount +
-                                     b?.unitPrice * b?.itemCount
-                               )
-                          ).toLocaleString()} vnđ`
-                        : '-----'}
-                  </div>
+                  <div>{`${cart?.totalPrice?.toLocaleString()} vnđ`}</div>
                </div>
                <div className="ship">
                   <div>Giảm giá</div>
@@ -556,20 +547,11 @@ const PayPage = () => {
                <div className="ship">
                   <h3>Tổng tiền</h3>
                   <div>
-                     {Math.max(
-                        (cart?.detail?.length === 0
-                           ? 0
-                           : cart?.detail?.length === 1
-                           ? cart?.detail[0].unitPrice *
-                             cart?.detail[0].itemCount
-                           : cart?.detail?.reduce(
-                                (a, b) =>
-                                   a?.unitPrice * a?.itemCount +
-                                   b?.unitPrice * b?.itemCount
-                             )) - (customerInfor?.coupon?.discount ?? 0),
+                     {`${Math.max(
+                        cart?.totalPrice -
+                           (customerInfor?.coupon?.discount ?? 0),
                         0
-                     ).toLocaleString()}{' '}
-                     vnđ
+                     ).toLocaleString()} vnđ`}
                   </div>
                </div>
             </div>
@@ -725,6 +707,7 @@ const Container = styled.div`
          border-bottom: 1px solid #ccc;
          cursor: pointer;
          transition: background-color 0.3s;
+         display: flex;
       }
 
       .code-list li:hover {

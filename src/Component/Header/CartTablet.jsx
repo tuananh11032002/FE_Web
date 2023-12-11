@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import processApiImagePath from '../../Helper/EditLinkImage';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useStateProvider } from '../../StateProvider/StateProvider';
@@ -82,20 +81,7 @@ const CartTablet = ({ onClose }) => {
                }}
             >
                Tổng tiền:
-               {cart?.detail?.length == 0
-                  ? 0
-                  : cart?.detail?.length == 1
-                  ? (
-                       cart?.detail[0].unitPrice * cart?.detail[0].itemCount
-                    ).toLocaleString()
-                  : cart?.detail
-                       ?.reduce(
-                          (a, b) =>
-                             a?.unitPrice * a?.itemCount +
-                             b?.unitPrice * b?.itemCount
-                       )
-                       .toLocaleString()}
-               vnđ
+               {`${cart?.totalPrice?.toLocaleString()} vnđ`}
             </div>
             <div className="direction">
                {/* <div
@@ -107,14 +93,16 @@ const CartTablet = ({ onClose }) => {
                >
                   Tuỳ chỉnh
                </div> */}
-               <div
-                  onClick={() => {
-                     onClose();
-                     navigate('/pay');
-                  }}
-               >
-                  Thanh toán
-               </div>
+               {cart?.detail?.length > 0 ? (
+                  <div
+                     onClick={() => {
+                        onClose();
+                        navigate('/pay');
+                     }}
+                  >
+                     Thanh toán
+                  </div>
+               ) : null}
             </div>
          </div>
          {/* {cart?.length === 0 ? (

@@ -18,7 +18,7 @@ import _ from 'lodash';
 import SearchMini from './Header/SearchMini';
 import Notification from './Body/Notification';
 import CartTablet from './Header/CartTablet';
-import CartPhone from './Header/CartTablet';
+import CartPhone from './Header/CartPhone';
 
 const Header = () => {
    const navigate = useNavigate();
@@ -128,6 +128,8 @@ const Header = () => {
                         type: reducerCases.SET_CART,
                         cart: {
                            id: orderAPi?.result?.data?.order?.id,
+                           totalPrice:
+                              orderAPi?.result?.data?.order?.totalPrice,
                            detail: orderAPi?.result?.data?.order?.detail,
                         },
                      });
@@ -233,7 +235,8 @@ const Header = () => {
                         // showCart && (
                         //    <CartTablet onClose={() => setShowCart(false)} />
                         // )
-                        showCart &&
+                        user &&
+                           showCart &&
                            (isWindow ? (
                               <CartTablet onClose={() => setShowCart(false)} />
                            ) : (

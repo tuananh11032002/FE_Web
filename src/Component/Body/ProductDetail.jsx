@@ -44,7 +44,10 @@ const ProductDetail = () => {
             (item) => item.productId === productdetail.id
          );
          if (cartproduct) {
-            cartproduct.itemCount = cartproduct.itemCount + count;
+            cartproduct.itemCount = Math.min(
+               cartproduct.itemCount + count,
+               productdetail?.totalItem
+            );
             cartdetail = cartdetail.filter(
                (item) => item.productId !== productdetail.id
             );
@@ -53,7 +56,7 @@ const ProductDetail = () => {
             cartdetail = [
                {
                   productId: productdetail?.id,
-                  itemCount: count,
+                  itemCount: Math.min(count, productdetail?.totalItem),
                },
                ...cartdetail,
             ];
