@@ -121,6 +121,7 @@ const Header = () => {
                      JSON.stringify(cart) !==
                      JSON.stringify({
                         id: orderAPi?.result?.data?.order?.id,
+                        totalPrice: orderAPi?.result?.data?.order?.totalPrice,
                         detail: orderAPi?.result?.data?.order?.detail,
                      })
                   ) {
