@@ -8,7 +8,7 @@ import {
 } from '../../Axios/web';
 import { reducerCases } from '../../StateProvider/reducer';
 import { Link, useNavigate } from 'react-router-dom';
-import ProductAddedMessage from './ProductAddedMessage';
+//import ProductAddedMessage from './ProductAddedMessage';
 import processApiImagePath from '../../Helper/EditLinkImage';
 import { ToastContainer, toast } from 'react-toastify';
 

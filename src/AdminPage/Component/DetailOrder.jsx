@@ -1,8 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import {
+   //useNavigate,
+   useParams,
+} from 'react-router-dom';
 import styled from 'styled-components';
 import { FaCartPlus } from 'react-icons/fa';
-import { deleteOrder, getOrder, UpdateStatusOrder } from '../../Axios/web';
+import {
+   //deleteOrder,
+   getOrder, //UpdateStatusOrder
+} from '../../Axios/web';
 import processApiImagePath from '../../Helper/EditLinkImage';
 const DetailOrder = () => {
    const { id } = useParams(); // Truy cập ID từ URL
@@ -18,19 +24,19 @@ const DetailOrder = () => {
    const [receiveName, setReceiveName] = useState();
    const [receiveContact, setReceiveContact] = useState();
    const [orderStatus, setOrderStatus] = useState([]);
-   const [selectOrderStatus, setSelectOrderStatus] = useState('');
+   //const [selectOrderStatus, setSelectOrderStatus] = useState('');
 
    const [checkboxes, setCheckboxes] = useState(
       Array(detailData.length).fill(false)
    );
-   const navigate = useNavigate();
-   const handleDeleteOrder = async () => {
-      const data = await deleteOrder(id);
-      console.log(data);
-      if (data?.status) {
-         navigate('/admin/order-list');
-      }
-   };
+   //const navigate = useNavigate();
+   // const handleDeleteOrder = async () => {
+   //    const data = await deleteOrder(id);
+   //    console.log(data);
+   //    if (data?.status) {
+   //       navigate('/admin/order-list');
+   //    }
+   // };
    const toggleSelectAll = () => {
       setSelectAll(!selectAll);
       setCheckboxes(Array(detailData.length).fill(!selectAll));
@@ -41,13 +47,13 @@ const DetailOrder = () => {
       newCheckboxes[index] = !newCheckboxes[index];
       setCheckboxes(newCheckboxes);
    };
-   const handleChangStatus = async () => {
-      const data = await UpdateStatusOrder(id);
-      console.log(data);
-      if (data?.status) {
-         fetchData();
-      }
-   };
+   // const handleChangStatus = async () => {
+   //    const data = await UpdateStatusOrder(id);
+   //    console.log(data);
+   //    if (data?.status) {
+   //       fetchData();
+   //    }
+   // };
    const fetchData = async () => {
       const data = await getOrder(id);
       console.log('dataApi', data);
