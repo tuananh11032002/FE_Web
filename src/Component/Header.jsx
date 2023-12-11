@@ -475,12 +475,12 @@ const Container = styled.header`
             position: absolute;
             top: -10px;
             right: -8px;
-            background-color: red;
+            background-color: #d61c1f;
             color: white;
             border-radius: 50%;
             font-size: 12px;
-            width: 20px;
-            height: 20px;
+            width: 17px;
+            height: 17px;
             text-align: center;
          }
          .cart .cart-count .loading-icon {
@@ -580,9 +580,9 @@ const Container = styled.header`
    .notification {
       .notification-count {
          border-radius: 50%;
-         height: 20px;
-         width: 20px;
-         background-color: red;
+         height: 17px;
+         width: 17px;
+         background-color: #d61c1f;
          color: white;
          display: flex;
          justify-content: center;

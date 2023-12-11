@@ -146,7 +146,9 @@ const OrderPage = () => {
                   }}
                >
                   <div className="header">
-                     <div>Mã số đơn hàng: {da.orderId}</div>
+                     <div style={{ cursor: 'pointer' }}>
+                        Mã số đơn hàng: {da.orderId}
+                     </div>
                      <div>Tình trạng đơn hàng: {da.orderStatus}</div>
                   </div>
                   <div className="footer">

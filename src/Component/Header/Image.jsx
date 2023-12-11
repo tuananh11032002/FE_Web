@@ -2,18 +2,19 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 //import { useNavigate } from 'react-router-dom';
 import processApiImagePath from '../../Helper/EditLinkImage';
+import { useNavigate } from 'react-router-dom';
 const Image = ({ src, message, key_name, id_image }) => {
    const [IsOver, setIsOver] = useState(false);
    const handleMouseOver = () => {
       setIsOver(true);
    };
-   //const navigator = useNavigate();
+   const navigator = useNavigate();
    const handleMouseOut = () => {
       setIsOver(false);
    };
-   // const handlerClick = async (id) => {
-   //    navigator(`/collections/${id}`);
-   // };
+   const handlerClick = async (id) => {
+      navigator(`/collections/${id}`);
+   };
    return (
       <Container>
          <img
@@ -22,9 +23,9 @@ const Image = ({ src, message, key_name, id_image }) => {
             alt={message}
             onMouseOver={handleMouseOver}
             onMouseOut={handleMouseOut}
-            // onClick={() => {
-            //    handlerClick(id_image);
-            // }}
+            onClick={() => {
+               handlerClick(id_image);
+            }}
             style={
                IsOver
                   ? { backgroundColor: '#D3D3D3' }
