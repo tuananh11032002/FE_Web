@@ -13,7 +13,6 @@ const BootstrapStyledCarousel = () => {
 };
 
 const MyCarousel = () => {
-   //console.log('carousel');
    const product = [
       'https://theme.hstatic.net/1000365849/1000614631/14/ms_banner_img4.jpg?v=174',
       'https://theme.hstatic.net/1000365849/1000614631/14/ms_banner_img3.jpg?v=174',
@@ -32,6 +31,7 @@ const MyCarousel = () => {
                         className="d-block w-100 "
                         src={pro}
                         alt="Wild Landscape"
+                        //style={{ objectFit: 'contain', minHeight: '300px', height: "300px" }}
                      />
                   </Carousel.Item>
                );

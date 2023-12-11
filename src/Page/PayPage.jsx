@@ -492,7 +492,7 @@ const PayPage = () => {
                               <div>
                                  <strong>{code?.code}</strong>
                               </div>
-                              <div>{code?.discount} vnđ</div>
+                              <div>{code?.discount.toLocaleString()} vnđ</div>
                            </li>
                         ))}
                      </ul>
@@ -752,6 +752,7 @@ const Container = styled.div`
       justify-content: space-between;
       align-items: center;
    }
+
    .button-container button {
       background-color: #338dbc;
       color: white;
@@ -803,13 +804,16 @@ const Container = styled.div`
          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
          max-height: 150px;
          overflow-y: auto;
-         width: calc(100% - 95px);
+         width: calc(100% - 85px);
          z-index: 1;
          border-radius: 8px;
          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       }
 
       .code-list li {
+         display: flex;
+         flex-direction: row;
+         justify-content: space-between;
          padding: 8px;
          border-bottom: 1px solid #ccc;
          cursor: pointer;
@@ -887,6 +891,9 @@ const Container = styled.div`
       margin: 15vh 0;
       padding: 0 5%;
       box-sizing: border-box;
+      .button-container button {
+         padding: 10px 12px;
+      }
       .select {
          flex: 1;
 
