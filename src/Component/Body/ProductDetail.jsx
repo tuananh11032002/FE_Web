@@ -100,7 +100,7 @@ const ProductDetail = () => {
       if (user) {
          SaveData(productdetail);
       } else {
-         toast.info('Bạn cần đăng nhập', {
+         toast.error('Bạn cần đăng nhập', {
             position: toast.POSITION.TOP_CENTER,
             autoClose: 1000,
          });

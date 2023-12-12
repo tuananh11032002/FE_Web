@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+   useNavigate,
    //useNavigate,
    useParams,
 } from 'react-router-dom';
@@ -10,6 +11,7 @@ import {
    getOrder, //UpdateStatusOrder
 } from '../../Axios/web';
 import processApiImagePath from '../../Helper/EditLinkImage';
+
 const DetailOrder = () => {
    const { id } = useParams(); // Truy cập ID từ URL
    const [selectAll, setSelectAll] = useState(false);
@@ -26,6 +28,11 @@ const DetailOrder = () => {
    const [orderStatus, setOrderStatus] = useState([]);
    //const [selectOrderStatus, setSelectOrderStatus] = useState('');
 
+   const navigate = useNavigate();
+
+   const goBack = () => {
+      navigate(-1);
+   };
    const [checkboxes, setCheckboxes] = useState(
       Array(detailData.length).fill(false)
    );
@@ -100,6 +107,13 @@ const DetailOrder = () => {
                Xóa
             </button>
          </div> */}
+         <div className="header">
+            <button onClick={() => goBack()}>Quay lại</button>
+            <div>
+               <span>Order List </span>
+               <span> &gt; #{customer.id} </span>
+            </div>
+         </div>
          <div className="container-order">
             <div className="col1">
                <div className="wrapper-table">
@@ -220,7 +234,7 @@ const DetailOrder = () => {
                   <div>
                      <div className="flex">
                         <h1>Contact Info</h1>
-                        <span className="edit">Edit</span>
+                        {/* <span className="edit">Edit</span> */}
                      </div>
                      <div>People Receive: {receiveName}</div>
 
@@ -231,14 +245,14 @@ const DetailOrder = () => {
                <div className="shipping">
                   <div className="flex">
                      <h1>Shipping Address</h1>
-                     <span className="edit">Edit</span>
+                     {/* <span className="edit">Edit</span> */}
                   </div>
                   <p>{address}</p>
                </div>
                <div className="billing">
                   <div className="flex">
                      <h1>Payment</h1>
-                     <span className="edit">Edit</span>
+                     {/* <span className="edit">Edit</span> */}
                   </div>
                   <div>
                      <div>
@@ -254,6 +268,42 @@ const DetailOrder = () => {
    );
 };
 const Container = styled.div`
+   .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      background-color: #333;
+      color: white;
+
+      button {
+         background-color: #f00;
+         color: white;
+         padding: 8px 12px;
+         border: none;
+         border-radius: 4px;
+         cursor: pointer;
+      }
+
+      button:hover {
+         background-color: #d00;
+      }
+
+      div {
+         display: flex;
+         align-items: center;
+      }
+
+      span {
+         margin-right: 10px;
+         color: black;
+         font-weight: bold;
+      }
+
+      span:last-child {
+         margin-right: 0;
+      }
+   }
    .delete-button-container {
       text-align: right;
       span {

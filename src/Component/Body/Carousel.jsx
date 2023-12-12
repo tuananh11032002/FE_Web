@@ -28,10 +28,9 @@ const MyCarousel = () => {
                return (
                   <Carousel.Item interval={3000} key={index}>
                      <img
-                        className="d-block w-100 "
+                        className="custom-carousel-image"
                         src={pro}
                         alt="Wild Landscape"
-                        //style={{ objectFit: 'contain', minHeight: '300px', height: "300px" }}
                      />
                   </Carousel.Item>
                );
@@ -44,8 +43,8 @@ const Container = styled.div`
    position: relative; /* Bắt đầu vị trí tương đối để chứa nút */
 
    #carouselExampleInterval {
-      max-width: 90%;
-      margin: 0 auto;
+      max-width: 100%;
+      margin: 10px auto;
    }
 
    /* Cài đặt vị trí cho nút chuyển ảnh */
@@ -55,13 +54,15 @@ const Container = styled.div`
       top: 50%; /* Để căn giữa theo chiều dọc */
       transform: translateY(-50%);
    }
+   .custom-carousel-image {
+      object-fit: contain;
+      max-height: 300px;
+      min-height: 300px;
+      max-width: 100%;
+      min-width: 100%;
+   }
 
    @media screen and (max-width: 756px) {
-      /* Đặt lại chiều cao cho container khi màn hình nhỏ hơn */
-      height: 300px;
-      img {
-         height: 300px;
-      }
    }
 `;
 export default BootstrapStyledCarousel;

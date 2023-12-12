@@ -46,68 +46,75 @@ const CartTablet = ({ onClose }) => {
          <ToastContainer />
          <div>
             {cart?.detail?.length > 0 ? (
-               <ul>
-                  {cart?.detail?.map((detail) => (
-                     <li key={detail?.productId}>
-                        <img
-                           src={
-                              process.env.REACT_APP_URL_IMG + detail?.mainFile
-                           }
-                           alt=""
-                        />
-                        <div>
-                           <div>{detail?.productName}</div>
-                           <div>{detail?.unitPrice.toLocaleString()} vnđ</div>
-                           <div>Số lượng: {detail?.itemCount}</div>
-                        </div>
-                        <button
-                           onClick={() => {
-                              handlerRemove(detail?.productId);
-                           }}
-                        >
-                           Xóa
-                        </button>
-                     </li>
-                  ))}
-               </ul>
-            ) : (
-               <div>Đơn hàng rỗng</div>
-            )}
-
-            <div
-               style={{
-                  textAlign: 'right',
-                  paddingRight: '10px',
-               }}
-            >
-               Tổng tiền:
-               {`${cart?.totalPrice?.toLocaleString()} vnđ`}
-            </div>
-            <div className="direction">
-               {/* <div
-                  onClick={() => {
-                     onClose();
-
-                     navigate('/cart');
-                  }}
-               >
-                  Tuỳ chỉnh
-               </div> */}
-               {cart?.detail?.length > 0 ? (
+               <>
+                  <ul>
+                     {cart?.detail?.map((detail) => (
+                        <li key={detail?.productId}>
+                           <img
+                              src={
+                                 process.env.REACT_APP_URL_IMG +
+                                 detail?.mainFile
+                              }
+                              alt=""
+                           />
+                           <div>
+                              <div>{detail?.productName}</div>
+                              <div>
+                                 {detail?.unitPrice.toLocaleString()} vnđ
+                              </div>
+                              <div>Số lượng: {detail?.itemCount}</div>
+                           </div>
+                           <button
+                              onClick={() => {
+                                 handlerRemove(detail?.productId);
+                              }}
+                           >
+                              Xóa
+                           </button>
+                        </li>
+                     ))}
+                  </ul>
                   <div
-                     onClick={() => {
-                        onClose();
-                        navigate('/pay');
+                     style={{
+                        textAlign: 'right',
+                        paddingRight: '10px',
                      }}
                   >
-                     Thanh toán
+                     Tổng tiền:
+                     {`${cart?.totalPrice?.toLocaleString()} vnđ`}
                   </div>
+               </>
+            ) : (
+               <div className="blank-order">Đơn hàng rỗng</div>
+            )}
+
+            <div className="direction">
+               {cart?.detail?.length > 0 ? (
+                  <>
+                     <div
+                        onClick={() => {
+                           onClose();
+                           navigate('/pay');
+                        }}
+                     >
+                        Thanh toán
+                     </div>
+                     <div
+                        onClick={() => {
+                           onClose();
+
+                           navigate('/cart');
+                        }}
+                     >
+                        Tuỳ chỉnh
+                     </div>
+                  </>
                ) : null}
             </div>
          </div>
          {/* {cart?.length === 0 ? (
             <div>
-               Đơn hàng rỗng.Tiếp tục mua hàng{' '}
+               Đơn hàng rỗng.Tiếp tục mua hàng
                <Link
                   to={'/'}
                   onClick={() => {
@@ -224,5 +231,8 @@ const Container = styled.div`
 
    div.direction > div:hover {
       background-color: #0056b3;
+   }
+   .blank-order {
+      color: red;
    }
 `;

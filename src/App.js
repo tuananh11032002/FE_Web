@@ -34,6 +34,7 @@ import RegistrationPage from './Page/RegistrationPage';
 import PaymentInfo from './Page/PaymentInfo';
 import PasswordAccount from './Page/PasswordAccount';
 import PermissionDenied from './Component/Body/PermissionDenied ';
+import DiscountPage from './AdminPage/Page/DiscountPage';
 
 function App() {
    const [isUserReady, setIsUserReady] = useState(false);
@@ -272,6 +273,14 @@ function App() {
                      element={
                         <AdminRoute>
                            <Slide child={<AccountDetailPage />} />
+                        </AdminRoute>
+                     }
+                  />
+                  <Route
+                     path="/admin/discount"
+                     element={
+                        <AdminRoute>
+                           <Slide child={<DiscountPage />} />
                         </AdminRoute>
                      }
                   />

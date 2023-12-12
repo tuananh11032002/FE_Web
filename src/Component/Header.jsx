@@ -50,7 +50,7 @@ const Header = () => {
       setShowCart(false);
    };
    const CartMouseOver = () => {
-      setShowCart(true);
+      setShowCart(!showCart);
    };
    const handleLogout = async () => {
       dispatch({ type: reducerCases.SET_USER, user: null });
@@ -218,8 +218,8 @@ const Header = () => {
                   </div>
                   <div
                      className="cart container_nobo-item4 details-child"
-                     onMouseOver={CartMouseOver}
-                     onMouseLeave={CartMouseLeave}
+                     onClick={CartMouseOver}
+                     //onMouseLeave={CartMouseLeave}
                      ref={vdRef}
                   >
                      {/* <AiOutlineShoppingCart onClick={() => handlerClick()} /> */}
@@ -236,13 +236,12 @@ const Header = () => {
                         // showCart && (
                         //    <CartTablet onClose={() => setShowCart(false)} />
                         // )
-                        user &&
-                           showCart &&
-                           (isWindow ? (
-                              <CartTablet onClose={() => setShowCart(false)} />
-                           ) : (
-                              <CartPhone onClose={() => setShowCart(false)} />
-                           ))
+                        user && showCart && (
+                           // (isWindow ? (
+                           //    <CartTablet onClose={() => setShowCart(false)} />
+                           // ) : (
+                           <CartPhone onClose={() => setShowCart(false)} />
+                        )
                      }
                   </div>
                   <div

@@ -57,15 +57,26 @@ const CustomerDetail = () => {
       setCheckboxes(newCheckboxes);
    };
    const navigate = useNavigate();
+   const goBack = () => {
+      navigate(-1);
+   };
    const fetchCustomerWithId = async (id) => {
       const dataApi = await getAccountById(id);
 
       console.log('dataApi', dataApi);
       if (dataApi.status) {
-         if (JSON.stringify(dataApi.result.data.user !== JSON.stringify(customerData))) {
+         if (
+            JSON.stringify(
+               dataApi.result.data.user !== JSON.stringify(customerData)
+            )
+         ) {
             setCustomerData(dataApi.result.data.user);
          }
-         const res = await getListOrderByUserId(id,{index:5,page:pageNow,status:null});
+         const res = await getListOrderByUserId(id, {
+            index: 5,
+            page: pageNow,
+            status: null,
+         });
          if (
             JSON.stringify(
                res.result.data.orderList !== JSON.stringify(orderList)
@@ -80,6 +91,7 @@ const CustomerDetail = () => {
    useEffect(() => {
       fetchCustomerWithId(id);
    }, []);
+
    return (
       <>
          <ConfirmationDialog
@@ -111,13 +123,16 @@ const CustomerDetail = () => {
                            </tr>
                            <tr>
                               <td>DateTime</td>
-                              <td>{ProcessDate(contentDetailProduct.createdDate)}</td>
+                              <td>
+                                 {ProcessDate(contentDetailProduct.createdDate)}
+                              </td>
                            </tr>
 
                            <tr>
                               <td>Spent</td>
                               <td>
-                                 {contentDetailProduct.totalPrice?.toLocaleString()}đ
+                                 {contentDetailProduct.totalPrice?.toLocaleString()}
+                                 đ
                               </td>
                            </tr>
 
@@ -168,6 +183,13 @@ const CustomerDetail = () => {
                </div>
             </DetailProduct>
          ) : null}
+         <Header>
+            <button onClick={() => goBack()}>Quay lại</button>
+            <div>
+               <span>Customer List </span>
+               <span> &gt; #{customerData.id} </span>
+            </div>
+         </Header>
          <Container>
             <div className="card">
                <div className="customer-avatar">
@@ -207,9 +229,16 @@ const CustomerDetail = () => {
                   <div className="info">Username: {customerData.userName}</div>
                   <div className="info">Email: {customerData.userName}</div>
                   <div
-                     className={`status ${customerData?.status===true?("Active").toLowerCase():("Inactive").toLowerCase()}`}
+                     className={`status ${
+                        customerData?.status === true
+                           ? 'Active'.toLowerCase()
+                           : 'Inactive'.toLowerCase()
+                     }`}
                   >
-                     Status: <span>{customerData?.status===true?"Active":"Inactive"}</span>
+                     Status:{' '}
+                     <span>
+                        {customerData?.status === true ? 'Active' : 'Inactive'}
+                     </span>
                   </div>
                   <div className="info">Contact: {customerData.contact}</div>
                </div>
@@ -303,6 +332,43 @@ const CustomerDetail = () => {
       </>
    );
 };
+const Header = styled.div`
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   padding: 10px;
+   background-color: white;
+   color: white;
+   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+   button {
+      background-color: #f00;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+   }
+
+   button:hover {
+      background-color: #d00;
+   }
+
+   div {
+      display: flex;
+      align-items: center;
+   }
+
+   span {
+      margin-right: 10px;
+      color: black;
+      font-weight: bold;
+   }
+
+   span:last-child {
+      margin-right: 0;
+   }
+`;
 const DetailProduct = styled.div`
    width: 100%;
    height: 100%;

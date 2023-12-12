@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import Product from './Body/Product';
-import MyCarousel from './Body/Carousel';
 import BootstrapStyledCarousel from './Body/Carousel';
 import { useLocation } from 'react-router-dom';
 const Body = () => {

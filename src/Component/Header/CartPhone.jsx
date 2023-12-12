@@ -28,10 +28,10 @@ const CartPhone = ({ onClose }) => {
                type: reducerCases.SET_CART,
                cart: 1,
             });
-            toast.info('Xóa thành công', {
-               position: toast.POSITION.TOP_CENTER,
-               autoClose: 1000,
-            });
+            // toast.info('Xóa thành công', {
+            //    position: toast.POSITION.TOP_CENTER,
+            //    autoClose: 1000,
+            // });
          } else {
             toast.error(`${response.result}`, {
                position: toast.POSITION.TOP_CENTER,
@@ -45,7 +45,11 @@ const CartPhone = ({ onClose }) => {
    return (
       <Container>
          <ToastContainer />
-         <div className="container-cart">
+         <div
+            className={`container-cart ${
+               cart?.detail.length > 0 ? null : 'subtract'
+            }`}
+         >
             <div className="header">
                <h2>Giỏ hàng</h2>
                <GiReturnArrow onClick={() => onClose(false)} />
@@ -79,40 +83,42 @@ const CartPhone = ({ onClose }) => {
                         </li>
                      ))}
                   </ul>
-                  <h3
+                  <h5
                      style={{
                         textAlign: 'right',
-                        paddingRight: '10px',
+                        fontWeight: 'bold',
+                        color: 'black',
                      }}
                   >
-                     Tổng tiền:
-                     {`${cart?.totalPrice?.toLocaleString()} vnđ`}
-                  </h3>
+                     Tổng tiền: {`${cart?.totalPrice?.toLocaleString()} vnđ`}
+                  </h5>
                   <div className="direction">
-                     {/* <div
-                        onClick={() => {
-                           onClose(false);
-
-                           navigate('/cart');
-                        }}
-                     >
-                        Tuỳ chỉnh
-                     </div> */}
                      {cart?.detail?.length > 0 ? (
-                        <div
-                           onClick={() => {
-                              onClose();
-                              navigate('/pay');
-                           }}
-                        >
-                           Thanh toán
-                        </div>
+                        <>
+                           <div
+                              onClick={() => {
+                                 onClose();
+                                 navigate('/pay');
+                              }}
+                           >
+                              Thanh toán
+                           </div>
+                           <div
+                              onClick={() => {
+                                 onClose(false);
+
+                                 navigate('/cart');
+                              }}
+                           >
+                              Tuỳ chỉnh
+                           </div>
+                        </>
                      ) : null}
                   </div>
                </>
             ) : (
-               <div>
-                  Đơn hàng rỗng.Tiếp tục mua hàng{' '}
+               <div style={{ color: 'black' }}>
+                  Đơn hàng rỗng.Tiếp tục mua hàng &nbsp;
                   <Link
                      to={'/'}
                      onClick={() => {
@@ -140,14 +146,16 @@ const Container = styled.div`
    .header {
       display: flex;
       justify-content: space-between;
-      padding: 10px;
+      padding: 10px 0;
    }
    .container-cart {
+      padding: 0 10px;
+
       background-color: white;
       max-height: 350px;
       max-width: 250px;
       position: absolute;
-      top: 50%;
+      top: 40%;
       right: 20px;
       transform: translate(0, -50%);
       border-radius: 5px;
@@ -158,7 +166,7 @@ const Container = styled.div`
       list-style: none;
       padding: 0;
       overflow-y: auto;
-      width: 250px;
+      width: 100%;
       height: 200px;
    }
 
@@ -169,11 +177,12 @@ const Container = styled.div`
    }
    li:first-child {
       margin-top: 0;
+      object-fit: contain;
    }
 
    li img {
-      max-width: 80px;
-      max-height: 80px;
+      max-width: 70px;
+      max-height: 70px;
       margin-right: 10px;
    }
 
@@ -244,5 +253,23 @@ const Container = styled.div`
 
    div.direction > div:hover {
       background-color: #0056b3;
+   }
+
+   div.direction > div:nth-child(2) {
+      cursor: pointer;
+      font-size: 16px;
+      background-color: #943939;
+      border-radius: 5px;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      transition: background-color 0.3s;
+   }
+
+   div.direction > div:nth-child(2):hover {
+      background-color: #811f1f;
+   }
+   .subtract {
+      min-height: 110px !important;
    }
 `;

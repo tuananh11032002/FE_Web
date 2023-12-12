@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { UpdateAccountForAdmin,getAccountById } from '../../Axios/web';
+import { UpdateAccountForAdmin, getAccountById } from '../../Axios/web';
 import { VscLoading } from 'react-icons/vsc';
 import { ToastContainer, toast } from 'react-toastify';
 import processApiImagePath from '../../Helper/EditLinkImage';
@@ -16,13 +16,23 @@ const AccountDetail = () => {
    const [isOpenEditAccount, setisOpenEditAccount] = useState(false);
    const [loading, setLoading] = useState(false);
    const [isReload, setIsReload] = useState(false);
+   const navigate = useNavigate();
+
+   const goBack = () => {
+      navigate(-1);
+   };
    const fetchData = async (userId) => {
       const dataApi = await getAccountById(userId);
       console.log('dataApi', dataApi);
       if (dataApi?.status) {
-         if (JSON.stringify(dataApi.result.data.user) !== JSON.stringify(customerData)) {
+         if (
+            JSON.stringify(dataApi.result.data.user) !==
+            JSON.stringify(customerData)
+         ) {
             setCustomerData(dataApi.result.data.user);
-            setSelectedStatus(dataApi.result.data.user.status===true?"Active":"Inactive");
+            setSelectedStatus(
+               dataApi.result.data.user.status === true ? 'Active' : 'Inactive'
+            );
          }
       }
    };
@@ -31,8 +41,8 @@ const AccountDetail = () => {
       setLoading(true);
       const data = await UpdateAccountForAdmin({
          id: tempCustomerData.id,
-         role:tempCustomerData.role,
-         status: selectedStatus==="Active"||null?true:false
+         role: tempCustomerData.role,
+         status: selectedStatus === 'Active' || null ? true : false,
       });
       setLoading(false);
       if (data?.status === true) {
@@ -52,6 +62,7 @@ const AccountDetail = () => {
    useEffect(() => {
       fetchData(id);
    }, [isReload]);
+
    return (
       <>
          {isOpenEditAccount ? (
@@ -138,8 +149,8 @@ const AccountDetail = () => {
                                  id="status"
                                  name="status"
                                  value={selectedStatus}
-                                 onChange={(e) =>{
-                                    setSelectedStatus(e.target.value)
+                                 onChange={(e) => {
+                                    setSelectedStatus(e.target.value);
                                  }}
                               >
                                  <option value="Active">Active</option>
@@ -152,11 +163,11 @@ const AccountDetail = () => {
                                  id="role"
                                  name="role"
                                  value={tempCustomerData.role}
-                                 onChange={(e) =>{
+                                 onChange={(e) => {
                                     setTempCustomerData({
                                        ...tempCustomerData,
                                        role: e.target.value,
-                                    })
+                                    });
                                  }}
                               >
                                  <option value="Admin">Admin</option>
@@ -192,6 +203,13 @@ const AccountDetail = () => {
                </div>
             </Overlay>
          ) : null}
+         <Header>
+            <button onClick={() => goBack()}>Quay lại</button>
+            <div>
+               <span>Account List </span>
+               <span> &gt; #{customerData.id} </span>
+            </div>
+         </Header>
          <Container>
             <div className="card">
                <div className="customer-avatar">
@@ -212,13 +230,20 @@ const AccountDetail = () => {
                      {customerData.userName}
                   </div>
                   <div className="info">
-                     <span className="bold">Email:</span> {customerData.userName}
+                     <span className="bold">Email:</span>{' '}
+                     {customerData.userName}
                   </div>
                   <div
-                     className={`status ${customerData?.status===true?("Active").toLowerCase():("Inactive").toLowerCase()}`}
+                     className={`status ${
+                        customerData?.status === true
+                           ? 'Active'.toLowerCase()
+                           : 'Inactive'.toLowerCase()
+                     }`}
                   >
                      <small className="bold">Status:</small>
-                     <span>{customerData?.status===true?"Active":"Inactive"}</span>
+                     <span>
+                        {customerData?.status === true ? 'Active' : 'Inactive'}
+                     </span>
                   </div>
                   <div className="info">
                      <span className="bold">Contact:</span>{' '}
@@ -270,6 +295,43 @@ const AccountDetail = () => {
       </>
    );
 };
+const Header = styled.div`
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   padding: 10px;
+   background-color: white;
+   color: white;
+   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+   button {
+      background-color: #f00;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+   }
+
+   button:hover {
+      background-color: #d00;
+   }
+
+   div {
+      display: flex;
+      align-items: center;
+   }
+
+   span {
+      margin-right: 10px;
+      color: black;
+      font-weight: bold;
+   }
+
+   span:last-child {
+      margin-right: 0;
+   }
+`;
 const Overlay = styled.div`
    background-color: rgba(137, 134, 141, 0.9);
    width: 100%;
@@ -380,7 +442,6 @@ const Overlay = styled.div`
 const Container = styled.div`
    display: flex;
    justify-content: center;
-   flex-wrap: wrap;
    font-size: 16px;
    background-color: white;
    min-height: 80vh;

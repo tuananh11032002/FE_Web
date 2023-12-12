@@ -888,9 +888,10 @@ const Container = styled.div`
    }
    @media (max-width: 768px) {
       flex-direction: column-reverse;
-      margin: 15vh 0;
-      padding: 0 5%;
+      padding: 0 10px;
       box-sizing: border-box;
+      margin: 10px 0;
+
       .button-container button {
          padding: 10px 12px;
       }

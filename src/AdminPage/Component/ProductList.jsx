@@ -15,7 +15,10 @@ import Pagination from './Pagination';
 import { useNavigate } from 'react-router-dom';
 import { AdminContext } from '../Admin';
 import {
-   deleteProduct, getListCategory, getListProduct,getListProductForAdmin
+   deleteProduct,
+   getListCategory,
+   getListProduct,
+   getListProductForAdmin,
 } from '../../Axios/web';
 import processApiImagePath from '../../Helper/EditLinkImage';
 
@@ -25,14 +28,16 @@ const ProductList = () => {
    const [data, setData] = useState([]);
    const [selectAll, setSelectAll] = useState(false);
 
-   const [checkboxes, setCheckboxes] = useState(Array(data?.length).fill(false));
+   const [checkboxes, setCheckboxes] = useState(
+      Array(data?.length).fill(false)
+   );
    const [valueSearch, setValueSearch] = useState('');
    const [selectedValue, setSelectedValue] = useState('7');
    const [openDetailProduct, setOpenDetailProduct] = useState(false);
    const [contentDetailProduct, setContentDetailProduct] = useState(null);
    const [currentIndex, setCurrentIndex] = useState(null);
    const [selectCategory, setSelectCategory] = useState(null);
-   const [selectStatus, setSelectStatus] = useState("null");
+   const [selectStatus, setSelectStatus] = useState('null');
    const [pageNow, setPageNow] = useState(1);
 
    const [totalProduct, setTotalProduct] = useState(100);
@@ -62,16 +67,20 @@ const ProductList = () => {
 
    useEffect(() => {
       const fetchProduct = async () => {
-         const dataProduct = await getListProductForAdmin(
-            {index: parseInt(selectedValue),
+         const dataProduct = await getListProductForAdmin({
+            index: parseInt(selectedValue),
             page: pageNow,
             sortBy: null,
             desc: true,
             search: valueSearch,
-            category:selectCategory==="null"?null:selectCategory,
-            active: selectStatus==="null"?null:selectStatus==="Active"?true:false
-            }
-         );
+            category: selectCategory === 'null' ? null : selectCategory,
+            active:
+               selectStatus === 'null'
+                  ? null
+                  : selectStatus === 'Active'
+                  ? true
+                  : false,
+         });
 
          if (dataProduct?.status === true) {
             const { productList, totalItemCount } = dataProduct.result.data;
@@ -109,8 +118,9 @@ const ProductList = () => {
       },
    });
    useEffect(() => {
-      const fetchCategory = async () => {//combobox
-         const data = await getListCategory({index:4,page:1});
+      const fetchCategory = async () => {
+         //combobox
+         const data = await getListCategory({ index: 4, page: 1 });
          if (data?.status === true) {
             setCategory(data.result.productCategory);
          }
@@ -162,7 +172,11 @@ const ProductList = () => {
                            </tr>
                            <tr>
                               <td>Category</td>
-                              <td>{contentDetailProduct.category?.map((cate)=>(cate.name+","))}</td>
+                              <td>
+                                 {contentDetailProduct.category?.map(
+                                    (cate) => cate.name + ','
+                                 )}
+                              </td>
                            </tr>
                            <tr>
                               <td>Price</td>
@@ -175,9 +189,18 @@ const ProductList = () => {
                            <tr>
                               <td>Status</td>
                               <td
-                                 className={contentDetailProduct.active===true?("Active-ic").toLowerCase():("Inactive").toLowerCase()}
+                                 className={
+                                    contentDetailProduct.active === true
+                                       ? 'Active-ic'.toLowerCase()
+                                       : 'Inactive'.toLowerCase()
+                                 }
                               >
-                                 <span> {contentDetailProduct.active===true?"Active":"Inactive"}</span>
+                                 <span>
+                                    {' '}
+                                    {contentDetailProduct.active === true
+                                       ? 'Active'
+                                       : 'Inactive'}
+                                 </span>
                               </td>
                            </tr>
                            <tr>
@@ -390,11 +413,25 @@ const ProductList = () => {
                                     </div>
                                  </div>
                               </td>
-                              <td>{product.category?.map((cate)=>(cate.name+","))}</td>
+                              <td>
+                                 {product.category?.map(
+                                    (cate) => cate.name + ','
+                                 )}
+                              </td>
                               <td>{product.unitPrice?.toLocaleString()}đ</td>
                               <td>{product.totalItem}</td>
-                              <td className={product.active===true?("Active-ic").toLowerCase():("Inactive").toLowerCase()}>
-                                 <span>{product.active===true?"Active":"Inactive"}</span>
+                              <td
+                                 className={
+                                    product.active === true
+                                       ? 'Active-ic'.toLowerCase()
+                                       : 'Inactive'.toLowerCase()
+                                 }
+                              >
+                                 <span>
+                                    {product.active === true
+                                       ? 'Active'
+                                       : 'Inactive'}
+                                 </span>
                               </td>
                            </tr>
                         ))}
@@ -675,9 +712,6 @@ const Container = styled.div`
          border: 2px solid #9055fd; /* Hiệu ứng border khi được chọn */
       }
 
-      /* Điều chỉnh màu nền và các kiểu khác cho các select phù hợp với mục tiêu của bạn */
-
-      /* Đặt kiểu cho bảng */
       .datatable-product {
          width: 100%;
          border-collapse: collapse;

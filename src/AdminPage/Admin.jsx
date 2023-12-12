@@ -13,6 +13,7 @@ import { RiCustomerService2Line } from 'react-icons/ri';
 import { BsChatDots, BsSearch } from 'react-icons/bs';
 import { GrUnorderedList } from 'react-icons/gr';
 import { BiSolidCategoryAlt } from 'react-icons/bi';
+import { CiDiscount1 } from 'react-icons/ci';
 
 import { FaProductHunt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
@@ -94,7 +95,7 @@ const Admin = ({ Child, indexActive = 0, ...props }) => {
          navigate('/admin/customer-list');
       }
       if (index === 8) {
-         navigate('/admin/add-product/add');
+         navigate('/admin/discount');
       }
       if (index == 8 && !isPhone) {
          setIsPhone(true);
@@ -162,6 +163,7 @@ const Admin = ({ Child, indexActive = 0, ...props }) => {
          value={{
             closeMenu,
             occupy: bodyHeight,
+            zIndex: 2,
          }}
       >
          <Container>
@@ -265,8 +267,8 @@ const Admin = ({ Child, indexActive = 0, ...props }) => {
                            handleLiClick(8);
                         }}
                      >
-                        <FaProductHunt />
-                        Add Product
+                        <CiDiscount1 />
+                        Discount
                      </li>
                   </ul>
                </div>
@@ -403,7 +405,7 @@ const Container = styled.div`
    li {
       cursor: pointer;
       padding: 15px;
-      color: white;
+
       white-space: nowrap;
       display: flex;
       align-items: center;
