@@ -131,11 +131,44 @@ function App() {
                ></Route>
 
                <Route
-                  path="login"
+                  path="/account/address"
+                  element={
+                     <UserRoute>
+                        <AddressAccount />
+                     </UserRoute>
+                  }
+               />
+               <Route
+                  path="/account/profile"
+                  element={
+                     <UserRoute>
+                        <ProfileAccount />
+                     </UserRoute>
+                  }
+               />
+               <Route
+                  path="/account/order"
+                  exact
+                  element={
+                     <UserRoute>
+                        <OrderAccount />
+                     </UserRoute>
+                  }
+               />
+               <Route
+                  path="/account/order/:id"
+                  element={
+                     <UserRoute>
+                        <OrderDetail />
+                     </UserRoute>
+                  }
+               />
+               <Route
+                  path="/login"
                   element={<>{user ? <Navigate to="/" /> : <LoginPage />}</>}
                />
                <Route
-                  path="register"
+                  path="/register"
                   element={
                      <>{user ? <Navigate to="/" /> : <RegistrationPage />}</>
                   }
