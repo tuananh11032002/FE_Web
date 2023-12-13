@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { login } from '../Axios/web';
 import ProductAddedMessage from '../Component/Body/ProductAddedMessage';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useStateProvider } from '../StateProvider/StateProvider';
 import { reducerCases } from '../StateProvider/reducer';
 
@@ -140,8 +140,17 @@ const LoginPage = () => {
                <Button onClick={(e) => handleLogin(e)}>Login</Button>
                {errol ? <div className="errol">{errol}</div> : null}
                <P>
-                  Tôi chưa có tài khoản?{' '}
-                  <a onClick={() => navigate('/register')}>Tạo tài khoản</a>
+                  Tôi chưa có tài khoản?
+                  <span
+                     onClick={() => navigate('/register')}
+                     style={{
+                        color: 'blue',
+                        fontStyle: 'italic',
+                        cursor: 'pointer',
+                     }}
+                  >
+                     Tạo tài khoản
+                  </span>
                </P>
             </LoginForm>
          </LoginContainer>

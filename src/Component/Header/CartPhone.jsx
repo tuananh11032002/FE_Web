@@ -119,14 +119,16 @@ const CartPhone = ({ onClose }) => {
             ) : (
                <div style={{ color: 'black' }}>
                   Đơn hàng rỗng.Tiếp tục mua hàng &nbsp;
-                  <Link
-                     to={'/'}
-                     onClick={() => {
-                        onClose(false);
+                  <div
+                     onClick={() => navigate('/')}
+                     style={{
+                        color: 'blue',
+                        fontStyle: 'italic',
+                        cursor: 'pointer',
                      }}
                   >
                      tại đây
-                  </Link>
+                  </div>
                </div>
             )}
          </div>

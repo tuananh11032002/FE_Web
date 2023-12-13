@@ -3,7 +3,7 @@ import { AiOutlineEyeInvisible } from 'react-icons/ai';
 import { BiShow } from 'react-icons/bi';
 import styled from 'styled-components';
 import { register } from '../Axios/web';
-import { useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { uniqueId } from 'lodash';
 import { ToastContainer, toast } from 'react-toastify';
 
@@ -106,7 +106,11 @@ function RegistrationPage() {
       }
       console.log(errolTemp);
       if (errolTemp.length === 0) {
-         const response = await register({ userName:userName, password:password, name: name });
+         const response = await register({
+            userName: userName,
+            password: password,
+            name: name,
+         });
          if (response?.status === true) {
             navigate('/login');
          } else {
@@ -182,11 +186,7 @@ function RegistrationPage() {
             </div>
             <div className="form-group">
                <label>Tên</label>
-               <input
-                  type="text"
-                  value={name}
-                  onChange={handleInputChange1}
-               />
+               <input type="text" value={name} onChange={handleInputChange1} />
                {showLabel1 ? (
                   <div style={{ color: 'red' }}>Phải nhập tên</div>
                ) : null}
@@ -194,7 +194,17 @@ function RegistrationPage() {
             <button onClick={handleRegistration}>Đăng ký</button>
             <div className="errol">{errol.map((p) => p)}</div>
             <p className="login-link">
-               Tôi đã có tài khoản? <a href="/login">Đăng nhập</a>
+               Tôi đã có tài khoản?
+               <span
+                  onClick={() => navigate('/login')}
+                  style={{
+                     color: 'blue',
+                     fontStyle: 'italic',
+                     cursor: 'pointer',
+                  }}
+               >
+                  Đăng nhập
+               </span>
             </p>
          </Container>
       </>
