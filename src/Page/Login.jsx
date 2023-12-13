@@ -140,7 +140,8 @@ const LoginPage = () => {
                <Button onClick={(e) => handleLogin(e)}>Login</Button>
                {errol ? <div className="errol">{errol}</div> : null}
                <P>
-                  Tôi chưa có tài khoản? <a href="/register">Tạo tài khoản</a>
+                  Tôi chưa có tài khoản?{' '}
+                  <a onClick={() => navigate('/register')}>Tạo tài khoản</a>
                </P>
             </LoginForm>
          </LoginContainer>
