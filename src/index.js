@@ -12,10 +12,11 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
    <React.StrictMode>
       <StateProvider initial={initialValues} reducer={reducer}>
-         <BrowserRouter>
-            <App />
-            {/* <AppTem /> */}
-         </BrowserRouter>
+         <App />
+         {/* <BrowserRouter>
+           
+            <AppTem />
+         </BrowserRouter> */}
       </StateProvider>
    </React.StrictMode>
 );
