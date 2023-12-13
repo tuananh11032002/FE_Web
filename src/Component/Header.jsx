@@ -219,7 +219,7 @@ const Header = () => {
                   <div
                      className="cart container_nobo-item4 details-child"
                      onClick={CartMouseOver}
-                     //onMouseLeave={CartMouseLeave}
+                     onMouseLeave={CartMouseLeave}
                      ref={vdRef}
                   >
                      {/* <AiOutlineShoppingCart onClick={() => handlerClick()} /> */}
@@ -236,12 +236,13 @@ const Header = () => {
                         // showCart && (
                         //    <CartTablet onClose={() => setShowCart(false)} />
                         // )
-                        user && showCart && (
-                           // (isWindow ? (
-                           //    <CartTablet onClose={() => setShowCart(false)} />
-                           // ) : (
-                           <CartPhone onClose={() => setShowCart(false)} />
-                        )
+                        user &&
+                           showCart &&
+                           (isWindow ? (
+                              <CartTablet onClose={() => setShowCart(false)} />
+                           ) : (
+                              <CartPhone onClose={() => setShowCart(false)} />
+                           ))
                      }
                   </div>
                   <div

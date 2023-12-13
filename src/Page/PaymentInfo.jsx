@@ -44,6 +44,17 @@ function PaymentInfo({ customerInfor, orderId }) {
                   autoClose: 3000,
                });
             }
+            setLoading(false);
+         });
+         connection.on('Fail', async () => {
+            toast.error(
+               `Thanh toán thất bại! Vui lòng thử lại hoặc chọn thanh toán tiền mặt`,
+               {
+                  position: toast.POSITION.TOP_CENTER,
+                  autoClose: 4000,
+               }
+            );
+            setLoading(false);
          });
          connection.invoke('Join', orderId);
       }
@@ -51,6 +62,7 @@ function PaymentInfo({ customerInfor, orderId }) {
       return () => {
          if (connection) {
             connection.off('PaySuccess');
+            connection.off('Fail');
             connection.invoke('Leave', orderId);
          }
       };

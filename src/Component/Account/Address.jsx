@@ -20,10 +20,14 @@ const Address = () => {
       name: '',
       phone: '',
       address: '',
+      tinh: '',
+      huyen: '',
+      xa: '',
    });
    const [provinces, setProvinces] = useState([]);
    const [districts, setDistricts] = useState([]);
    const [wards, setWards] = useState([]);
+
    useEffect(() => {
       //api province
       const fetchData = async () => {
@@ -68,25 +72,48 @@ const Address = () => {
    };
 
    useEffect(() => {
-      const temp = async () => {
-         if (user) {
-            setData(
-               user.addressList.map((i) => ({
-                  id: i.id,
-                  name: i.name,
-                  phone: i.contact,
-                  address: i.description,
-               }))
-            );
-         }
-      };
-      temp();
+      if (user) {
+         setData(
+            user.addressList.map((i) => ({
+               id: i?.id,
+               name: i?.name,
+               phone: i?.contact,
+               address: i?.description,
+               tinh: i?.tinh,
+               huyen: i?.huyen,
+               xa: i?.xa,
+            }))
+         );
+      }
    }, [user]);
 
    const handleEdit = async (id) => {
-      const selectedData = data.find((item) => item.id === id);
+      const selectedData = data?.find((item) => item.id === id);
       setIsEditing(true);
       setEditedData(selectedData);
+      {
+         try {
+            const district = ProvinceList?.find(
+               (i) => i?.name === selectedData?.tinh
+            ).districts.map((item, index) => {
+               return {
+                  name: item.name,
+                  index: index,
+                  wards: item.wards,
+               };
+            });
+
+            setDistricts(district);
+
+            const wards = district?.find(
+               (i) => i?.name === selectedData?.huyen
+            ).wards;
+
+            setWards(wards);
+         } catch (error) {
+            console.error(error);
+         }
+      }
    };
    const handleDelete = async (id) => {
       const res = await deleteAddress(id);
@@ -111,6 +138,9 @@ const Address = () => {
                name: editedData.name,
                contact: editedData.phone,
                decription: editedData.address,
+               tinh: editedData.tinh,
+               huyen: editedData.huyen,
+               xa: editedData.xa,
             })
          );
          if (res?.status) {
@@ -122,6 +152,9 @@ const Address = () => {
                name: editedData.name,
                contact: editedData.phone,
                address: editedData.address,
+               tinh: editedData.tinh,
+               huyen: editedData.huyen,
+               xa: editedData.xa,
             })
          );
          if (res?.status) {
@@ -129,7 +162,18 @@ const Address = () => {
          }
       }
       setIsEditing(false);
-      setEditedData({ id: null, name: '', phone: '', address: '' });
+      setEditedData({
+         id: null,
+         name: '',
+         phone: '',
+         address: '',
+         provinces: '',
+         districts: '',
+         wards: '',
+      });
+
+      setDistricts([]);
+      setWards([]);
    };
    return (
       <Container>
@@ -185,7 +229,14 @@ const Address = () => {
 
                         <select
                            className="custom-select"
+                           value={editedData?.tinh}
                            onChange={(e) => {
+                              setEditedData({
+                                 ...editedData,
+                                 tinh: e.target.value,
+                                 huyen: '',
+                                 xa: '',
+                              });
                               const code =
                                  e.target.selectedOptions[0].getAttribute(
                                     'data-key'
@@ -211,7 +262,13 @@ const Address = () => {
 
                         <select
                            className="custom-select"
+                           value={editedData?.huyen}
                            onChange={(e) => {
+                              setEditedData({
+                                 ...editedData,
+                                 huyen: e.target.value,
+                                 xa: '',
+                              });
                               const code =
                                  e.target.selectedOptions[0].getAttribute(
                                     'data-key'
@@ -234,7 +291,16 @@ const Address = () => {
                      <div className="row">
                         <div htmlFor="">Chọn xã</div>
 
-                        <select className="custom-select">
+                        <select
+                           className="custom-select"
+                           value={editedData?.xa}
+                           onChange={(e) =>
+                              setEditedData({
+                                 ...editedData,
+                                 xa: e.target.value,
+                              })
+                           }
+                        >
                            <option value="">Chọn Xã</option>
                            {wards.map((ward, index) => (
                               <option key={index} value={ward.name}>
@@ -250,6 +316,17 @@ const Address = () => {
                         className="close-button"
                         onClick={() => {
                            setIsEditing(false);
+                           setEditedData({
+                              id: null,
+                              name: '',
+                              phone: '',
+                              address: '',
+                              provinces: '',
+                              districts: '',
+                              wards: '',
+                           });
+                           setDistricts([]);
+                           setWards([]);
                         }}
                      />
                   </div>
@@ -272,7 +349,9 @@ const Address = () => {
                               <b>{da.name}</b> | &nbsp; {da.phone}
                            </div>
 
-                           <div>{da.address}</div>
+                           <div>
+                              {da.address} {da.xa} {da.huyen} {da.tinh}
+                           </div>
                         </div>
                         <div>
                            <i

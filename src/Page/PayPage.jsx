@@ -41,6 +41,9 @@ const PayPage = () => {
          address: item?.description,
          name: item?.name,
          contact: item?.contact,
+         tinh: item?.tinh,
+         huyen: item?.huyen,
+         xa: item?.xa,
       }))
    );
 
@@ -75,7 +78,33 @@ const PayPage = () => {
                customerName: data?.name,
                customerPhone: data?.contact,
                address: data?.address,
+               customerProvince: data?.tinh,
+               customerDistrict: data?.huyen,
+               customerWard: data?.xa,
             });
+            {
+               try {
+                  const district = ProvinceList?.find(
+                     (i) => i?.name === data?.tinh
+                  ).districts.map((item, index) => {
+                     return {
+                        name: item.name,
+                        index: index,
+                        wards: item.wards,
+                     };
+                  });
+
+                  setDistricts(district);
+
+                  const wards = district?.find(
+                     (i) => i?.name === data?.huyen
+                  ).wards;
+
+                  setWards(wards);
+               } catch (error) {
+                  console.error(error);
+               }
+            }
             break;
          case 'Coupon':
             setCustomerInfo({
@@ -141,7 +170,6 @@ const PayPage = () => {
    const fetchDataWard = (code) => {
       try {
          const wards = districts[code].wards;
-         console.log('ward', districts.wards);
          setWards(wards);
       } catch (error) {
          console.error(error);
@@ -281,8 +309,10 @@ const PayPage = () => {
                                        }
                                     >
                                        <strong>
-                                          {address?.name} - {address?.contact} -{' '}
-                                          {address?.address}
+                                          {address?.name} - {address?.contact}
+                                          <br />
+                                          {address?.address} {address?.xa}{' '}
+                                          {address?.huyen} {address?.tinh}
                                        </strong>
                                     </li>
                                  ))}
@@ -291,114 +321,111 @@ const PayPage = () => {
                         </div>
                      </div>
                   </div>
-                  <div>
-                     <div>Thông tin thêm: </div>
-                     <div className="select">
-                        <div>
-                           <div htmlFor="">Chọn tỉnh</div>
+                  <div className="select">
+                     <div>
+                        <div htmlFor="">Chọn tỉnh</div>
 
-                           <select
-                              className="custom-select"
-                              value={customerInfor?.customerProvince}
-                              onChange={(e) => {
-                                 setCustomerInfo({
-                                    ...customerInfor,
-                                    customerProvince: e.target.value,
-                                    customerDistrict: '',
-                                    customerWard: '',
-                                 });
+                        <select
+                           className="custom-select"
+                           value={customerInfor?.customerProvince}
+                           onChange={(e) => {
+                              setCustomerInfo({
+                                 ...customerInfor,
+                                 customerProvince: e.target.value,
+                                 customerDistrict: '',
+                                 customerWard: '',
+                              });
 
-                                 const code =
-                                    e.target.selectedOptions[0].getAttribute(
-                                       'data-key'
-                                    );
-                                 fetchDataDistrict(code);
-                              }}
-                           >
-                              <option value="">Chọn Tỉnh</option>
-                              {provinces?.map((province, index) => (
-                                 <option
-                                    key={index}
-                                    value={province.name}
-                                    data-key={province.index}
-                                 >
-                                    {province.name}
-                                 </option>
-                              ))}
-                           </select>
+                              const code =
+                                 e.target.selectedOptions[0].getAttribute(
+                                    'data-key'
+                                 );
+                              fetchDataDistrict(code);
+                           }}
+                        >
+                           <option value="">Chọn Tỉnh</option>
+                           {provinces?.map((province, index) => (
+                              <option
+                                 key={index}
+                                 value={province.name}
+                                 data-key={province.index}
+                              >
+                                 {province.name}
+                              </option>
+                           ))}
+                        </select>
 
-                           {/* {customerInfor.customerProvince === '' ? (
+                        {customerInfor.customerProvince === '' ? (
                            <p className="red">Chọn tỉnh đi bạn yêu</p>
                         ) : (
                            <p className="green">Đã chọn tỉnh</p>
-                        )} */}
-                        </div>
+                        )}
+                     </div>
 
-                        <div>
-                           <div htmlFor="">Chọn huyện</div>
+                     <div>
+                        <div htmlFor="">Chọn huyện</div>
 
-                           <select
-                              className="custom-select"
-                              value={customerInfor?.customerDistrict}
-                              onChange={(e) => {
-                                 setCustomerInfo({
-                                    ...customerInfor,
-                                    customerDistrict: e.target.value,
-                                    customerWard: '',
-                                 });
+                        <select
+                           className="custom-select"
+                           value={customerInfor?.customerDistrict}
+                           onChange={(e) => {
+                              setCustomerInfo({
+                                 ...customerInfor,
+                                 customerDistrict: e.target.value,
+                                 customerWard: '',
+                              });
 
-                                 const code =
-                                    e.target.selectedOptions[0].getAttribute(
-                                       'data-key'
-                                    );
-                                 fetchDataWard(code);
-                              }}
-                           >
-                              <option value="">Chọn Huyện</option>
-                              {districts.map((district, index) => (
-                                 <option
-                                    key={index}
-                                    value={district.name}
-                                    data-key={district.index}
-                                 >
-                                    {district.name}
-                                 </option>
-                              ))}
-                           </select>
+                              const code =
+                                 e.target.selectedOptions[0].getAttribute(
+                                    'data-key'
+                                 );
+                              fetchDataWard(code);
+                           }}
+                        >
+                           <option value="">Chọn Huyện</option>
+                           {districts.map((district, index) => (
+                              <option
+                                 key={index}
+                                 value={district.name}
+                                 data-key={district.index}
+                              >
+                                 {district.name}
+                              </option>
+                           ))}
+                        </select>
 
-                           {/* {customerInfor.customerDistrict === '' ? (
+                        {customerInfor.customerDistrict === '' ? (
                            <p className="red">Chọn huyện đi bạn yêu </p>
                         ) : (
                            <p className="green">Đã chọn huyện </p>
-                        )} */}
-                        </div>
-                        <div>
-                           <div htmlFor="">Chọn xã</div>
+                        )}
+                     </div>
+                     <div>
+                        <div htmlFor="">Chọn xã</div>
 
-                           <select
-                              className="custom-select"
-                              value={customerInfor.customerWard}
-                              onChange={(e) => {
-                                 setCustomerInfo({
-                                    ...customerInfor,
-                                    customerWard: e.target.value,
-                                 });
-                              }}
-                           >
-                              <option value="">Chọn Xã</option>
-                              {wards.map((ward, index) => (
-                                 <option key={index} value={ward.name}>
-                                    {ward.name}
-                                 </option>
-                              ))}
-                           </select>
+                        <select
+                           className="custom-select"
+                           value={customerInfor.customerWard}
+                           onChange={(e) => {
+                              setCustomerInfo({
+                                 ...customerInfor,
+                                 customerWard: e.target.value,
+                              });
+                           }}
+                        >
+                           <option value="">Chọn Xã</option>
+                           {wards.map((ward, index) => (
+                              <option key={index} value={ward.name}>
+                                 {ward.name}
+                              </option>
+                           ))}
+                        </select>
 
-                           {/* {customerInfor.customerWard === '' ? (
+                        {customerInfor.customerWard === '' ? (
                            <p className="red">Chọn xã đi bạn yêu</p>
                         ) : (
                            <p className="green">Đã chọn xã</p>
-                        )} */}
-                        </div>
+                        )}
                      </div>
                   </div>
 
