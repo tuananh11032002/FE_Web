@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AiOutlineHome, AiOutlinePlus } from 'react-icons/ai';
+import { AiOutlinePlus } from 'react-icons/ai';
 import Pagination from './Pagination';
 import { BiSolidDiscount } from 'react-icons/bi';
 import { MdOutlineDiscount, MdWeb } from 'react-icons/md';
@@ -8,8 +8,6 @@ import DiscountEditForm from './DiscountEditForm';
 import DetailDiscount from './DetailDiscount';
 
 const DiscountList = () => {
-   const [selectedDateFrom, setSelectedDateFrom] = useState(null);
-   const [selectedDateTo, setSelectedDateTo] = useState(null);
    const [isOpenEditForm, setIsOpenEditForm] = useState(false);
    const [isOpenDetailDiscount, setIsOpenDeatilDiscount] = useState(false);
    const [dataEdit, setDataEdit] = useState(null);

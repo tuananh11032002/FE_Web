@@ -132,11 +132,11 @@ function App() {
                   ></Route>
 
                   <Route
-                     path="login"
+                     path="/login"
                      element={<>{user ? <Navigate to="/" /> : <LoginPage />}</>}
                   />
                   <Route
-                     path="register"
+                     path="/register"
                      element={
                         <>{user ? <Navigate to="/" /> : <RegistrationPage />}</>
                      }
