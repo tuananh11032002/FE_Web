@@ -33,14 +33,15 @@ const Product = () => {
             desc = parseInt(sortValue[1]) === 1? true : false;
          }
          let data = [];
-         await category.forEach(async (item)=>{
-            if(item.id === id){
-               const d = {id: item.id, name: item.name};            
-               const resP = await getListProduct({ index: 10, page: 1, sortBy: sortBy, desc: desc, category: id, active:true});
+         await Promise.all(category.map(async (item)=>{
+            if(item.id===id){
+               const d = { id: id, name: item.name};
+               const resP = await getListProduct({ index: 10, page: 1, sortBy: sortBy, desc: desc, category: id, active: true });
                d.products = resP.result.productList;
                data.push(d);
             }
-         });
+         }));
+         console.log("dataPro",data);
          if (data !== product) {
             dispatch({
                type: reducerCases.SET_PRODUCT,
@@ -80,7 +81,7 @@ const Product = () => {
 
    return (
       <Container>
-         {product?.map((product, index) => (
+         {product.map((product, index) => (
             <div key={index}>
                <div
                   className="category-title"
