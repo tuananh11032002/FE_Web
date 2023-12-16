@@ -1,69 +1,129 @@
-import React, { useState } from 'react';
-import { AiOutlinePlus } from 'react-icons/ai';
-import Pagination from './Pagination';
+import React, { useState, useEffect } from 'react';
+import { AiOutlineCloseCircle } from 'react-icons/ai';
 import { BiSolidDiscount } from 'react-icons/bi';
 import { MdOutlineDiscount, MdWeb } from 'react-icons/md';
 import styled from 'styled-components';
 import DiscountEditForm from './DiscountEditForm';
 import DetailDiscount from './DetailDiscount';
+import moment from 'moment';
+import { getAllDiscountAdmin, deleteDiscount } from '../../Axios/web';
 
 const DiscountList = () => {
    const [isOpenEditForm, setIsOpenEditForm] = useState(false);
-   const [isOpenDetailDiscount, setIsOpenDeatilDiscount] = useState(false);
-   const [dataEdit, setDataEdit] = useState(null);
-   const openDetailDiscount = () => {
-      setIsOpenDeatilDiscount(true);
-   };
-   const closeDetailDiscount = () => {
-      setIsOpenDeatilDiscount(false);
-   };
+   // const [isOpenDetailDiscount, setIsOpenDeatilDiscount] = useState(false);
+   // const [dataEdit, setDataEdit] = useState(null);
+   const [DiscountData, setDiscountData] = useState([]);
+   const [imformation, setImformation] = useState({
+      total: 0,
+      used: 0,
+      unused: 0,
+   });
+   const [Filter, setFilter] = useState({
+      status: null,
+      from: null,
+      to: null,
+      search: '',
+   });
+
+   // const openDetailDiscount = () => {
+   //    setIsOpenDeatilDiscount(true);
+   // };
+   // const closeDetailDiscount = () => {
+   //    setIsOpenDeatilDiscount(false);
+   // };
    const openDiscountEdit = () => {
       setIsOpenEditForm(true);
    };
    const closwDiscountEdit = () => {
       setIsOpenEditForm(false);
    };
-   const fakeDiscountData = [
-      {
-         id: 1,
-         discountCode: 'DISCOUNT123',
-         discountAmount: 10,
-         quantity: 50,
-         expirationDate: '2023-12-31',
-         status: 'active',
-      },
-      {
-         id: 2,
-         discountCode: 'DISCOUNT123',
 
-         discountAmount: 50,
-         quantity: 100,
-         expirationDate: '2023-08-15',
-         status: 'inactive',
-      },
-   ];
+   const FilterChange = (data) => {
+      setFilter(data);
+   };
+
+   const fetchData = async () => {
+      const res = await getAllDiscountAdmin(Filter);
+      if (res?.status) {
+         const datalist = res?.result?.data?.discountList;
+         const total = res?.result?.data?.totalItemCount;
+         const used = datalist?.filter(
+            (i) => i?.status === true && new Date(i?.stopDate) > new Date()
+         ).length;
+         setDiscountData(
+            datalist?.map((item) => ({
+               id: item?.id,
+               discountCode: item?.code,
+               discountAmount: item?.value,
+               expirationDate: item?.stopDate,
+               usedBy: item?.totalOrder,
+               status: item?.status ? 'active' : 'inactive',
+            }))
+         );
+         setImformation({
+            total: total,
+            used: used,
+            unused: total - used,
+         });
+      }
+   };
+
+   const handleDelete = async (data) => {
+      const res = await deleteDiscount(data?.id);
+      if (res?.status) {
+         fetchData();
+      }
+   };
+
+   useEffect(() => {
+      fetchData();
+   }, [Filter]);
+   // const DiscountData = [
+   //    {
+   //       id: 1,
+   //       discountCode: 'DISCOUNT123',
+   //       discountAmount: 10,
+   //       quantity: 50,
+   //       expirationDate: '2023-12-31',
+   //       status: 'active',
+   //    },
+   //    {
+   //       id: 2,
+   //       discountCode: 'DISCOUNT123',
+
+   //       discountAmount: 50,
+   //       quantity: 100,
+   //       expirationDate: '2023-08-15',
+   //       status: 'inactive',
+   //    },
+   // ];
 
    return (
       <>
          {isOpenEditForm ? (
-            <DiscountEditForm closeForm={closwDiscountEdit} />
+            <DiscountEditForm
+               closeForm={() => {
+                  closwDiscountEdit();
+                  fetchData();
+               }}
+            />
          ) : null}
-         {isOpenDetailDiscount ? (
+         {/* {isOpenDetailDiscount ? (
             <DetailDiscount
                discount={dataEdit}
                openFormEdit={openDiscountEdit}
                closeForm={closeDetailDiscount}
             />
-         ) : null}
+         ) : null} */}
          <Container>
             <h1>eCommerce / Discount List</h1>
             <div className="card-widget-saparater-wrapper">
                <div className="card">
                   <div>
-                     <h3>Total number of discount codes</h3>
-                     <h1>{0} Mã giảm giá</h1>
+                     {/* <h3>Mã giảm giá đã tạo</h3> */}
+                     <h3>{imformation?.total} Mã giảm giá đã tạo</h3>
                      <p>
-                        <span className="card-widget-rate-increase">+5.7%</span>
+                        {/* <span className="card-widget-rate-increase">+5.7%</span> */}
                      </p>
                   </div>
                   <div>
@@ -72,11 +132,11 @@ const DiscountList = () => {
                </div>
                <div className="card">
                   <div>
-                     <h3> Total number of discount codes used</h3>
-                     <h1>{0} Mã giảm giá</h1>
+                     {/* <h3> Mã giảm giá </h3> */}
+                     <h3>{imformation?.used} Mã giảm giá đang sử dụng</h3>
                      <p>
                         <span className="card-widget-rate-increase">
-                           +12.4%
+                           +{(imformation?.used / imformation?.total) * 100}%
                         </span>
                      </p>
                   </div>
@@ -86,10 +146,12 @@ const DiscountList = () => {
                </div>
                <div className="card">
                   <div>
-                     <h3>Total number of unused discount codes</h3>
-                     <h1>{0} Mã giảm giá </h1>
+                     {/* <h3>Mã giảm giá </h3> */}
+                     <h3>{imformation?.unused} Mã giảm giá không sử dụng</h3>
                      <p>
-                        <span className="card-widget-rate-increase">+5.7%</span>
+                        <span className="card-widget-rate-increase">
+                           +{(imformation?.unused / imformation?.total) * 100}%
+                        </span>
                      </p>
                   </div>
                   <div>
@@ -100,20 +162,69 @@ const DiscountList = () => {
             <div className="datatable">
                <div className="datatable-filter">
                   <div className=" product_status">
-                     <select>
+                     <select
+                        onChange={(e) => {
+                           switch (e.target.value) {
+                              case 'active':
+                                 FilterChange({
+                                    ...Filter,
+                                    status: true,
+                                 });
+                                 break;
+                              case 'inactive':
+                                 FilterChange({
+                                    ...Filter,
+                                    status: false,
+                                 });
+                                 break;
+                              default:
+                                 FilterChange({
+                                    ...Filter,
+                                    status: null,
+                                 });
+                                 break;
+                           }
+                        }}
+                     >
                         <option value="null">Status</option>
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
                      </select>
                   </div>
                   <div className="product_category">
                      <div className="datetime-wrapper">
                         <span>Từ: &nbsp;</span>
-                        <input type="date" name="" id="" />
+                        <input
+                           type="date"
+                           name=""
+                           id=""
+                           onChange={(e) =>
+                              FilterChange({
+                                 ...Filter,
+                                 from:
+                                    e.target.value === ''
+                                       ? null
+                                       : e.target.value,
+                              })
+                           }
+                        />
                      </div>
                      <div className="datetime-wrapper">
                         <span>&nbsp;Đến: &nbsp;</span>
-                        <input type="date" name="" id="" />
+                        <input
+                           type="date"
+                           name=""
+                           id=""
+                           onChange={(e) =>
+                              FilterChange({
+                                 ...Filter,
+                                 to:
+                                    e.target.value === ''
+                                       ? null
+                                       : e.target.value,
+                              })
+                           }
+                        />
                      </div>
                   </div>
                </div>
@@ -122,19 +233,24 @@ const DiscountList = () => {
                      className="search-input"
                      type="text"
                      placeholder="Search"
+                     onChange={(e) =>
+                        FilterChange({
+                           ...Filter,
+                           search: e.target.value,
+                        })
+                     }
                   />
                   <div className="dttable-action-button">
-                     <select className="action-select" name="" id="">
+                     {/* <select className="action-select" name="" id="">
                         <option value="7">7</option>
                         <option value="10">10</option>
                         <option value="20">20</option>
                         <option value="50">50</option>
-                     </select>
+                     </select> */}
                      <div
                         className="action-button"
                         onClick={() => openDiscountEdit()}
                      >
-                        <AiOutlinePlus />
                         <span>ADD DISCOUNT</span>
                      </div>
                   </div>
@@ -149,37 +265,37 @@ const DiscountList = () => {
                            </th>
                            <th>Mã của giảm giá</th>
                            <th>Giá trị của mã</th>
-
                            <th>Số tiền giảm</th>
-                           <th>Số lượng</th>
                            <th>Hạn sử dụng</th>
+                           <th>Được sử dụng bởi</th>
                            <th>Trạng thái</th>
                         </tr>
                      </thead>
                      <tbody>
-                        {fakeDiscountData.map((data, index) => {
+                        {DiscountData.map((data, index) => {
                            return (
                               <tr key={index}>
                                  <td className="td-action">
-                                    <span
-                                       onClick={() => {
-                                          openDetailDiscount();
-                                          setDataEdit(data);
-                                       }}
-                                    >
-                                       <AiOutlinePlus />
-                                    </span>
+                                    <button onClick={() => handleDelete(data)}>
+                                       <span>
+                                          <AiOutlineCloseCircle />
+                                       </span>
+                                    </button>
                                  </td>
                                  <td>
                                     <input type="checkbox" />
                                  </td>
-                                 <td>#{data.id}</td>
-                                 <td>{data.discountCode}</td>
-                                 <td>{data.discountAmount}</td>
-                                 <td>{data.quantity}</td>
-                                 <td>{data.expirationDate}</td>
-                                 <td className={`${data.status}-ic`}>
-                                    <span>{data.status}</span>
+                                 <td>{data?.id}</td>
+                                 <td>{data?.discountCode}</td>
+                                 <td>{data?.discountAmount}</td>
+                                 <td>
+                                    {moment(data?.expirationDate).format(
+                                       'DD/MM/YYYY'
+                                    )}
+                                 </td>
+                                 <td>{data?.usedBy} Hóa đơn</td>
+                                 <td className={`${data?.status}-ic`}>
+                                    <span>{data?.status}</span>
                                  </td>
                               </tr>
                            );
@@ -188,14 +304,14 @@ const DiscountList = () => {
                   </table>
                </div>
             </div>
-            <Pagination
+            {/* <Pagination
                setPageNow={1}
                obj={{
                   pageNow: 1,
                   size: 1,
                   totalProduct: 100,
                }}
-            />
+            /> */}
          </Container>
       </>
    );

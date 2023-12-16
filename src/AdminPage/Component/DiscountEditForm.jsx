@@ -1,9 +1,27 @@
 import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
+import { addDiscount } from '../../Axios/web';
+import { ToastContainer, toast } from 'react-toastify';
 
 const DiscountEditForm = ({ closeForm }) => {
    const formRef = useRef(null);
    const [formOpen, setFormOpen] = useState(false);
+   const [submitData, setSubmitData] = useState({
+      stopDate: null,
+      value: 0,
+   });
+
+   const handleSubmit = async () => {
+      if (submitData?.stopDate !== null && submitData?.value > 0) {
+         await addDiscount(submitData);
+         closeForm();
+      } else {
+         toast.error('Dữ liệu không hợp lệ', {
+            position: toast.POSITION.TOP_CENTER,
+            autoClose: 3000,
+         });
+      }
+   };
 
    useEffect(() => {
       const handleClickOutside = (event) => {
@@ -12,8 +30,6 @@ const DiscountEditForm = ({ closeForm }) => {
             !formRef.current.contains(event.target) &&
             formOpen
          ) {
-            console.log('helloi');
-
             closeForm();
          }
          setFormOpen(true);
@@ -27,36 +43,58 @@ const DiscountEditForm = ({ closeForm }) => {
    }, []);
    return (
       <Container>
+         <ToastContainer />
          <div className="discount-form" ref={formRef}>
-            <label>
+            <label>Thêm mã giảm giá</label>
+            {/* <label>
                <span>Giá trị của mã</span>
                <input type="text" name="codeValue" />
-            </label>
+            </label> */}
 
             <label>
                <span>Số tiền giảm</span>
-               <input type="number" name="discountAmount" />
+               <input
+                  type="number"
+                  name="discountAmount"
+                  value={submitData?.value}
+                  onChange={(e) => {
+                     setSubmitData({
+                        ...submitData,
+                        value: e.target.value < 0 ? 0 : e.target.value,
+                     });
+                  }}
+               />
             </label>
 
-            <label>
+            {/* <label>
                <span>Số lượng</span>
                <input type="number" name="quantity" />
-            </label>
+            </label> */}
 
             <label>
                <span>Hạn sử dụng</span>
-               <input type="date" name="expirationDate" />
+               <input
+                  type="date"
+                  name="expirationDate"
+                  value={submitData?.stopDate}
+                  onChange={(e) => {
+                     setSubmitData({
+                        ...submitData,
+                        stopDate: e.target.value === '' ? null : e.target.value,
+                     });
+                  }}
+               />
             </label>
 
-            <label>
+            {/* <label>
                <span>Trạng thái</span>
                <select name="status">
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
                </select>
-            </label>
+            </label> */}
             <div className="button-container">
-               <button>Submit</button>
+               <button onClick={handleSubmit}>Submit</button>
                <button onClick={closeForm}>Cancel</button>
             </div>
          </div>

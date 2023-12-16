@@ -195,7 +195,7 @@ export const addDiscount = async (data) => {
 export const deleteDiscount = async (id) => {
    //require author
    const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
-   const res = await axiosClient.post(`${END_POINT.DISCOUNT}/${id}`, {
+   const res = await axiosClient.delete(`${END_POINT.DISCOUNT}/${id}`, {
       headers: {
          Authorization: token,
       },
@@ -209,6 +209,19 @@ export const getAllDiscount = async () => {
    //require author
    const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
    const res = await axiosClient.post(`${END_POINT.DISCOUNT}/list`, null, {
+      headers: {
+         Authorization: token,
+      },
+   });
+   await checkAndRenewToken(res);
+   return res;
+};
+
+//Get all Discount for admin
+export const getAllDiscountAdmin = async (data) => {
+   //require author
+   const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
+   const res = await axiosClient.post(`${END_POINT.DISCOUNT}/la`, data, {
       headers: {
          Authorization: token,
       },
@@ -239,7 +252,7 @@ export const getPaymentLink = async (id, discount) => {
    const { token } = JSON.parse(localStorage.getItem('webbanbalo_user'));
    return axiosClient.post(
       `${END_POINT.PAYMENT}/${id}${
-         discount === null ? '' : '?Discount=' + discount
+         discount === undefined ? '' : '?Discount=' + discount
       }`,
       null,
       {
