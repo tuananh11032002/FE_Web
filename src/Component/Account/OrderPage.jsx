@@ -45,9 +45,7 @@ const OrderPage = () => {
             })
          );
          if (dataApi?.status) {
-            const Index = dataApi?.result?.data?.orderList?.filter(
-               (i) => i.status !== 0
-            );
+            const Index = dataApi?.result?.data?.orderList;
             setData(
                Index.map((i) => ({
                   orderId: i.id,
@@ -79,7 +77,16 @@ const OrderPage = () => {
    };
    useEffect(() => {
       fetchData();
-   }, [pageNow, status]);
+   }, [pageNow]);
+
+   useEffect(() => {
+      if (pageNow === 1) {
+         fetchData();
+      } else {
+         setPageNow(1);
+      }
+   }, [status]);
+
    return (
       <Container>
          <ConfirmationDialog
@@ -123,6 +130,7 @@ const OrderPage = () => {
             <div
                className={`nav-item ${status === 4 ? 'active' : ''}`}
                onClick={() => {
+                  setPageNow(1);
                   setStatus(4);
                }}
             >
